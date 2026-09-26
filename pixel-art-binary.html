@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pixel Art in Binary</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700;800;900&family=Barlow+Condensed:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+    :root { --navy: #1b1f45; --pink: #ea008a; --grey: #9a9a9a; --soft: #c9ccd6; --faint: #e3e5ea; --ink: #111; }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; }
+    body { font-family: 'Barlow', Helvetica Neue, Helvetica, Arial, sans-serif; color: var(--navy); background: #fff; border-top: 6px solid var(--navy); min-height: 100vh; display: flex; flex-direction: column; }
+    header { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap; margin: 32px 48px 0; padding-bottom: 12px; border-bottom: 4px solid var(--navy); }
+    h1 { font-family: 'Barlow Condensed', sans-serif; font-size: 44px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.01em; margin: 0; line-height: 1; }
+    h1 span { color: var(--pink); }
+    .tools { display: flex; gap: 8px; flex-wrap: wrap; }
+    button { font-family: 'Barlow Condensed', sans-serif; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; border: none; border-radius: 8px; cursor: pointer; font-size: 18px; padding: 10px 18px; background: #fff; color: var(--navy); border: 3px solid var(--navy); }
+    button:focus-visible { outline: 3px solid var(--pink); outline-offset: 3px; }
+    button.pk { background: var(--pink); border-color: var(--pink); color: #fff; }
+    button[aria-pressed="true"] { background: var(--navy); color: #fff; }
+    .seg { display: flex; }
+    .seg button { border-radius: 0; margin-left: -3px; }
+    .seg button:first-child { border-radius: 8px 0 0 8px; margin-left: 0; }
+    .seg button:last-child { border-radius: 0 8px 8px 0; }
+
+    main { flex: 1; display: flex; align-items: center; justify-content: center; gap: 56px; padding: 32px 24px 48px; flex-wrap: wrap; }
+    .left { display: flex; flex-direction: column; align-items: center; gap: 16px; }
+    .grid { --n: 8; width: min(62vh, 88vw, 540px); aspect-ratio: 1; display: grid; grid-template-columns: repeat(var(--n), 1fr); border: 3px solid var(--navy); touch-action: none; user-select: none; }
+    .px { background: #fff; border-right: 1px solid var(--faint); border-bottom: 1px solid var(--faint); display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-weight: 800; color: transparent; cursor: pointer; transition: background-color .08s; }
+    .px.on { background: var(--ink); }
+    .grid.nums .px { color: var(--soft); }
+    .grid.nums .px.on { color: #fff; }
+    .key { display: flex; gap: 22px; font-family: 'Barlow Condensed', sans-serif; font-size: 20px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: var(--grey); }
+    .key span { display: flex; align-items: center; gap: 8px; }
+    .key i { width: 20px; height: 20px; border: 2px solid var(--navy); }
+
+    .bin { display: none; flex-direction: column; gap: 18px; max-width: 520px; }
+    .bin.show { display: flex; }
+    .lbl { font-family: 'Barlow Condensed', sans-serif; font-size: 20px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: var(--grey); }
+    .rows { font-family: 'Barlow Condensed', sans-serif; font-weight: 800; letter-spacing: 0.18em; line-height: 1.25; font-variant-numeric: tabular-nums; }
+    .rows div span.o { color: var(--pink); }
+    .seq { font-family: 'Barlow Condensed', sans-serif; font-size: 20px; font-weight: 700; letter-spacing: 0.08em; line-height: 1.4; word-break: break-all; color: var(--navy); border: 3px solid var(--faint); border-radius: 8px; padding: 12px 16px; max-height: 190px; overflow-y: auto; }
+    .seq .o { color: var(--pink); }
+    .total { font-size: 22px; font-weight: 600; }
+    .total b { color: var(--pink); font-weight: 800; }
+
+    @media (max-width: 700px) { header { margin: 24px 20px 0; } h1 { font-size: 32px; } }
+</style>
+</head>
+<body>
+<header>
+    <h1>Pixel art in <span>binary</span></h1>
+    <div class="tools">
+        <div class="seg" role="group" aria-label="Grid size">
+            <button id="s8" aria-pressed="true">8 × 8</button>
+            <button id="s16" aria-pressed="false">16 × 16</button>
+        </div>
+        <button id="invert">Invert</button>
+        <button id="clear">Clear</button>
+        <button class="pk" id="binary" aria-pressed="false">Show binary</button>
+    </div>
+</header>
+<main>
+    <div class="left">
+        <div class="grid" id="grid" aria-label="Pixel grid"></div>
+        <div class="key"><span><i style="background:#111"></i>Black = 1</span><span><i></i>White = 0</span></div>
+    </div>
+    <div class="bin" id="bin" aria-live="polite">
+        <div>
+            <div class="lbl">Row by row</div>
+            <div class="rows" id="rows"></div>
+        </div>
+        <div>
+            <div class="lbl" style="margin-bottom:8px">As one binary sequence</div>
+            <div class="seq" id="seq"></div>
+        </div>
+        <div class="total" id="total"></div>
+    </div>
+</main>
+
+<script>
+const $ = s => document.querySelector(s);
+const grid = $('#grid'), bin = $('#bin');
+let n = 8, px = [], painting = false, paintVal = 1, showBin = false;
+
+function build(size) {
+    n = size; grid.style.setProperty('--n', n); grid.innerHTML = ''; px = [];
+    for (let i = 0; i < n * n; i++) {
+        const c = document.createElement('div');
+        c.className = 'px'; c.dataset.i = i; c.textContent = '0';
+        grid.appendChild(c); px.push(c);
+    }
+    sizeText(); update();
+    $('#s8').setAttribute('aria-pressed', n === 8); $('#s16').setAttribute('aria-pressed', n === 16);
+}
+function sizeText() {
+    const w = grid.clientWidth / n;
+    px.forEach(c => c.style.fontSize = Math.round(w * 0.45) + 'px');
+    $('#rows').style.fontSize = (n === 8 ? 34 : 20) + 'px';
+}
+function set(c, v) { c.classList.toggle('on', !!v); c.textContent = v ? '1' : '0'; }
+function update() {
+    const bits = px.map(c => c.classList.contains('on') ? '1' : '0');
+    const wrap = s => s.replace(/1/g, '<span class="o">1</span>');
+    let rows = '';
+    for (let r = 0; r < n; r++) rows += `<div>${wrap(bits.slice(r * n, r * n + n).join(''))}</div>`;
+    $('#rows').innerHTML = rows;
+    $('#seq').innerHTML = wrap(bits.join(''));
+    $('#total').innerHTML = `<b>${n * n}</b> pixels = <b>${n * n}</b> bits`;
+}
+
+const cellAt = e => { const el = document.elementFromPoint(e.clientX, e.clientY); return el && el.classList.contains('px') ? el : null; };
+grid.addEventListener('pointerdown', e => {
+    const c = cellAt(e); if (!c) return;
+    painting = true; paintVal = c.classList.contains('on') ? 0 : 1;
+    grid.setPointerCapture(e.pointerId); set(c, paintVal); update();
+});
+grid.addEventListener('pointermove', e => {
+    if (!painting) return;
+    const c = cellAt(e); if (c && c.classList.contains('on') !== !!paintVal) { set(c, paintVal); update(); }
+});
+['pointerup', 'pointercancel'].forEach(t => grid.addEventListener(t, () => painting = false));
+
+$('#invert').onclick = () => { px.forEach(c => set(c, !c.classList.contains('on'))); update(); };
+$('#clear').onclick = () => { px.forEach(c => set(c, 0)); update(); };
+$('#binary').onclick = () => {
+    showBin = !showBin;
+    grid.classList.toggle('nums', showBin); bin.classList.toggle('show', showBin);
+    $('#binary').setAttribute('aria-pressed', showBin);
+    $('#binary').textContent = showBin ? 'Hide binary' : 'Show binary';
+};
+$('#s8').onclick = () => build(8);
+$('#s16').onclick = () => build(16);
+window.addEventListener('resize', sizeText);
+
+build(8);
+[18, 21, 26, 29, 41, 46, 50, 51, 52, 53].forEach(i => set(px[i], 1));
+update();
+</script>
+</body>
+</html>
