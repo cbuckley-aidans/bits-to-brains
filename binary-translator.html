@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Binary Translator</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700;800;900&family=Barlow+Condensed:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+    :root { --navy: #1b1f45; --pink: #ea008a; --grey: #9a9a9a; --soft: #c3c6d0; }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; height: 100%; }
+    body {
+        font-family: 'Barlow', Helvetica Neue, Helvetica, Arial, sans-serif; color: var(--navy); background: #fff;
+        border-top: 6px solid var(--navy); display: flex; flex-direction: column; min-height: 100vh;
+    }
+    header { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; margin: 32px 48px 0; padding-bottom: 12px; border-bottom: 4px solid var(--navy); }
+    h1 { font-family: 'Barlow Condensed', sans-serif; font-size: 44px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.01em; margin: 0; line-height: 1; }
+    h1 span { color: var(--pink); }
+    button {
+        font-family: 'Barlow Condensed', sans-serif; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase;
+        border: none; border-radius: 8px; cursor: pointer;
+    }
+    button:focus-visible { outline: 3px solid var(--pink); outline-offset: 3px; }
+    .toggle { font-size: 18px; padding: 10px 18px; background: #fff; color: var(--navy); border: 3px solid var(--navy); }
+    .toggle[aria-expanded="true"] { background: var(--navy); color: #fff; }
+
+    main { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 32px 24px 48px; gap: 36px; }
+    .lamps { display: flex; gap: 14px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+    .lamp { width: 70px; }
+    .lamp:nth-child(4) { margin-right: 14px; }
+    .lamp svg { display: block; width: 100%; height: auto; overflow: visible; transition: filter .12s; }
+    .glass { fill: #fff; stroke: var(--navy); stroke-width: 6; stroke-linejoin: round; transition: fill .1s, stroke .1s; }
+    .fil { fill: none; stroke: var(--navy); stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; transition: stroke .1s; }
+    .base { fill: var(--navy); }
+    .rays line { stroke: var(--pink); stroke-width: 7; stroke-linecap: round; opacity: 0; transition: opacity .1s; }
+    .lamp.on .glass { fill: var(--pink); stroke: var(--pink); }
+    .lamp.on .fil { stroke: #fff; }
+    .lamp.on .rays line { opacity: 1; }
+    .lamp.on svg { filter: drop-shadow(0 0 14px rgba(234,0,138,.35)); }
+    .lampbits { display: flex; gap: 14px; margin-top: -24px; }
+    .lampbits span { width: 70px; text-align: center; font-family: 'Barlow Condensed', sans-serif; font-size: 34px; font-weight: 800; color: var(--soft); transition: color .1s; }
+    .lampbits span:nth-child(4) { margin-right: 14px; }
+    .lampbits span.on { color: var(--pink); }
+
+    .row { display: flex; gap: 12px; width: 100%; max-width: 560px; }
+    input {
+        flex: 1; min-width: 0; font-family: 'Barlow Condensed', sans-serif; font-size: 40px; font-weight: 800; letter-spacing: 0.06em;
+        color: var(--navy); border: 3px solid var(--navy); border-radius: 8px; padding: 6px 18px; outline: none;
+    }
+    input:focus { border-color: var(--pink); }
+    input::placeholder { color: var(--soft); }
+    .send { font-size: 26px; padding: 0 30px; background: var(--pink); color: #fff; }
+
+    .out { display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-start; gap: 24px 34px; max-width: 1100px; min-height: 70px; }
+    .grp { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+    .sqs { display: flex; gap: 3px; }
+    .sq { width: 24px; height: 30px; border: 2px solid var(--navy); border-radius: 4px; font-family: 'Barlow Condensed', sans-serif; font-size: 19px; font-weight: 800; display: flex; align-items: center; justify-content: center; transition: background-color .1s, color .1s, border-color .1s; }
+    .sq:nth-child(4) { margin-right: 4px; }
+    .sq.on { background: var(--navy); color: #fff; }
+    .grp.cur .sq { border-color: var(--pink); }
+    .grp.cur .sq.on { background: var(--pink); }
+    .ch { font-family: 'Barlow Condensed', sans-serif; font-size: 30px; font-weight: 900; line-height: 1; transition: color .1s; }
+    .ch.sp { font-size: 16px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--grey); padding-top: 8px; }
+    .grp.cur .ch { color: var(--pink); }
+
+    .sheet { position: fixed; inset: 0; background: rgba(255,255,255,.97); display: none; align-items: center; justify-content: center; padding: 80px 24px 24px; z-index: 10; overflow-y: auto; }
+    .sheet.open { display: flex; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 8px; width: 100%; max-width: 1100px; margin: auto; }
+    .cell { border: 3px solid var(--navy); border-radius: 8px; height: 76px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; }
+    .cell .l { font-family: 'Barlow Condensed', sans-serif; font-size: 30px; font-weight: 900; line-height: 1; }
+    .cell .l.sp { font-size: 16px; letter-spacing: 0.12em; text-transform: uppercase; padding: 7px 0; }
+    .cell .b { font-family: 'Barlow Condensed', sans-serif; font-size: 20px; font-weight: 800; letter-spacing: 0.08em; color: var(--pink); }
+    .close { position: fixed; top: 24px; right: 24px; font-size: 18px; padding: 10px 18px; background: var(--navy); color: #fff; }
+
+    @media (max-width: 700px) {
+        header { margin: 24px 20px 0; }
+        h1 { font-size: 32px; }
+        .send { padding: 0 18px; }
+        .lamps, .lampbits { gap: 6px; }
+        .lamp, .lampbits span { width: 36px; }
+        .lampbits { margin-top: -16px; }
+        .lampbits span { font-size: 24px; }
+        .lamp:nth-child(4), .lampbits span:nth-child(4) { margin-right: 6px; }
+    }
+</style>
+</head>
+<body>
+
+<header>
+    <h1>Binary <span>translator</span></h1>
+    <button class="toggle" id="toggle" aria-expanded="false" aria-controls="sheet">Show alphabet</button>
+</header>
+
+<main>
+    <div class="lamps" id="lamps" role="button" aria-label="Send message"></div>
+    <div class="lampbits" id="lampbits" aria-hidden="true"></div>
+    <div class="row">
+        <input id="word" maxlength="12" placeholder="Type a word" spellcheck="false" autocomplete="off" aria-label="Text to translate">
+        <button class="send" id="send">Send</button>
+    </div>
+    <div class="out" id="out" aria-live="polite"></div>
+</main>
+
+<div class="sheet" id="sheet" role="dialog" aria-label="ASCII alphabet in binary">
+    <button class="close" id="close">Hide alphabet</button>
+    <div class="grid" id="grid"></div>
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+const CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz' + " .,!?'\":;-()";
+const HOLD = 1100, GAP = 250;
+const lampsEl = $('#lamps'), lampBits = $('#lampbits'), input = $('#word'), out = $('#out'), sheet = $('#sheet'), toggle = $('#toggle');
+let timers = [], groups = [];
+
+const rays = [-180, -150, -120, -90, -60, -30, 0].map(a => {
+    const r = a * Math.PI / 180;
+    return `<line x1="${80 + Math.cos(r) * 60}" y1="${78 + Math.sin(r) * 60}" x2="${80 + Math.cos(r) * 76}" y2="${78 + Math.sin(r) * 76}"/>`;
+}).join('');
+const lampSVG = `<svg viewBox="0 0 160 200" aria-hidden="true"><g class="rays">${rays}</g>
+    <path class="glass" d="M80 30 C53 30 32 51 32 78 C32 96 42 107 51 118 C57 125 59 131 59 140 L101 140 C101 131 103 125 109 118 C118 107 128 96 128 78 C128 51 107 30 80 30 Z"/>
+    <path class="fil" d="M68 140 L68 104 Q74 90 80 104 Q86 90 92 104 L92 140"/>
+    <rect class="base" x="58" y="146" width="44" height="10" rx="3"/>
+    <rect class="base" x="60" y="160" width="40" height="10" rx="3"/>
+    <rect class="base" x="67" y="174" width="26" height="9" rx="4.5"/></svg>`;
+const lamps = [], lbits = [];
+for (let i = 0; i < 8; i++) {
+    const l = document.createElement('div'); l.className = 'lamp'; l.innerHTML = lampSVG; lampsEl.appendChild(l); lamps.push(l);
+    const s = document.createElement('span'); s.textContent = '0'; lampBits.appendChild(s); lbits.push(s);
+}
+
+const bin = ch => ch.charCodeAt(0).toString(2).padStart(8, '0');
+function setLamps(b) { for (let i = 0; i < 8; i++) { const on = b[i] === '1'; lamps[i].classList.toggle('on', on); lbits[i].textContent = b[i]; lbits[i].classList.toggle('on', on); } }
+
+function render() {
+    timers.forEach(clearTimeout); timers = []; setLamps('00000000');
+    input.value = [...input.value].filter(c => CHARS.includes(c)).join('');
+    out.innerHTML = ''; groups = [];
+    [...input.value].forEach(ch => {
+        const b = bin(ch), g = document.createElement('div');
+        g.className = 'grp';
+        g.innerHTML = `<div class="sqs">${[...b].map(d => `<div class="sq${d === '1' ? ' on' : ''}">${d}</div>`).join('')}</div>` +
+            `<div class="ch${ch === ' ' ? ' sp' : ''}">${ch === ' ' ? 'Space' : ch.replace('<', '&lt;')}</div>`;
+        g.setAttribute('aria-label', (ch === ' ' ? 'Space' : ch) + ' is ' + b);
+        out.appendChild(g); groups.push({ g, b });
+    });
+}
+
+function send() {
+    render();
+    groups.forEach((gr, i) => {
+        const t = i * (HOLD + GAP);
+        timers.push(setTimeout(() => { setLamps(gr.b); groups.forEach(x => x.g.classList.toggle('cur', x === gr)); }, t));
+        timers.push(setTimeout(() => setLamps('00000000'), t + HOLD));
+    });
+    timers.push(setTimeout(() => groups.forEach(x => x.g.classList.remove('cur')), groups.length * (HOLD + GAP)));
+}
+
+$('#grid').innerHTML = [...CHARS].map(ch => `<div class="cell"><div class="l${ch === ' ' ? ' sp' : ''}">${ch === ' ' ? 'Space' : ch}</div><div class="b">${bin(ch)}</div></div>`).join('');
+
+function setSheet(open) {
+    sheet.classList.toggle('open', open);
+    toggle.setAttribute('aria-expanded', open);
+    toggle.textContent = open ? 'Hide alphabet' : 'Show alphabet';
+    (open ? $('#close') : toggle).focus();
+}
+
+input.addEventListener('input', render);
+input.addEventListener('keydown', e => { if (e.key === 'Enter') send(); });
+$('#send').onclick = send;
+lampsEl.onclick = send;
+toggle.onclick = () => setSheet(!sheet.classList.contains('open'));
+$('#close').onclick = () => setSheet(false);
+sheet.addEventListener('click', e => { if (e.target === sheet) setSheet(false); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && sheet.classList.contains('open')) setSheet(false); });
+</script>
+</body>
+</html>

@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ASCII Alphabet</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700;800;900&family=Barlow+Condensed:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+    :root { --navy: #1b1f45; --pink: #ea008a; --grey: #9a9a9a; --soft: #c3c6d0; }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; }
+    body {
+        font-family: 'Barlow', Helvetica Neue, Helvetica, Arial, sans-serif; color: var(--navy); background: #fff;
+        border-top: 6px solid var(--navy); min-height: 100vh;
+    }
+    header { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; margin: 32px 48px 0; padding-bottom: 12px; border-bottom: 4px solid var(--navy); }
+    h1 { font-family: 'Barlow Condensed', sans-serif; font-size: 44px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.01em; margin: 0; line-height: 1; }
+    h1 span { color: var(--pink); }
+    .hint { font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: var(--grey); }
+
+    main { max-width: 1100px; margin: 0 auto; padding: 40px 24px 56px; }
+    .view { display: flex; align-items: center; justify-content: center; gap: 44px; flex-wrap: wrap; margin-bottom: 48px; }
+    .big {
+        width: 150px; height: 150px; border: 5px solid var(--pink); border-radius: 12px; color: var(--pink);
+        font-family: 'Barlow Condensed', sans-serif; font-size: 104px; font-weight: 900; line-height: 1;
+        display: flex; align-items: center; justify-content: center;
+    }
+    .big.word { font-size: 40px; letter-spacing: 0.08em; text-transform: uppercase; }
+    .eq { font-family: 'Barlow Condensed', sans-serif; font-size: 56px; font-weight: 900; color: var(--soft); }
+    .bits { display: flex; gap: 10px; }
+    .bit {
+        width: 64px; height: 84px; border: 4px solid var(--navy); border-radius: 8px; background: #fff; color: var(--navy);
+        font-family: 'Barlow Condensed', sans-serif; font-size: 52px; font-weight: 800;
+        display: flex; align-items: center; justify-content: center;
+        transition: background-color .15s, color .15s, border-color .15s;
+    }
+    .bit.on { background: var(--pink); border-color: var(--pink); color: #fff; }
+    .bit:nth-child(4) { margin-right: 10px; }
+
+    section { margin-bottom: 30px; }
+    h2 { font-family: 'Barlow Condensed', sans-serif; font-size: 20px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: var(--grey); margin: 0 0 12px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(64px, 1fr)); gap: 8px; }
+    .key {
+        height: 64px; border: 3px solid var(--navy); border-radius: 8px; background: #fff; color: var(--navy); cursor: pointer;
+        font-family: 'Barlow Condensed', sans-serif; font-size: 34px; font-weight: 900; line-height: 1;
+        transition: background-color .12s, color .12s, border-color .12s;
+    }
+    .key.sp { grid-column: span 2; font-size: 18px; letter-spacing: 0.1em; text-transform: uppercase; }
+    .key:hover { border-color: var(--pink); color: var(--pink); }
+    .key.cur { background: var(--pink); border-color: var(--pink); color: #fff; }
+    .key:focus-visible { outline: 3px solid var(--pink); outline-offset: 3px; }
+
+    @media (max-width: 700px) {
+        header { margin: 24px 20px 0; }
+        h1 { font-size: 32px; }
+        .bits { gap: 5px; }
+        .bit { width: 36px; height: 52px; font-size: 32px; border-width: 3px; }
+        .bit:nth-child(4) { margin-right: 6px; }
+        .big { width: 110px; height: 110px; font-size: 76px; }
+        .eq { display: none; }
+    }
+</style>
+</head>
+<body>
+
+<header>
+    <h1>ASCII <span>alphabet</span></h1>
+    <div class="hint">Click a character</div>
+</header>
+
+<main>
+    <div class="view" aria-live="polite">
+        <div class="big" id="big">A</div>
+        <div class="eq">=</div>
+        <div class="bits" id="bits"></div>
+    </div>
+    <section><h2>Uppercase</h2><div class="grid" id="upper"></div></section>
+    <section><h2>Lowercase</h2><div class="grid" id="lower"></div></section>
+    <section><h2>Punctuation</h2><div class="grid" id="punct"></div></section>
+</main>
+
+<script>
+const $ = s => document.querySelector(s);
+const big = $('#big'), bitsEl = $('#bits');
+const sets = {
+    upper: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split(''),
+    lower: 'abcdefghijklmnopqrstuvwxyz'.split(''),
+    punct: [' ', '.', ',', '!', '?', "'", '"', ':', ';', '-', '(', ')']
+};
+const keys = {};
+for (let i = 0; i < 8; i++) bitsEl.appendChild(Object.assign(document.createElement('div'), { className: 'bit', textContent: '0' }));
+
+Object.entries(sets).forEach(([id, chars]) => {
+    const grid = $('#' + id);
+    chars.forEach(ch => {
+        const b = document.createElement('button');
+        b.className = 'key' + (ch === ' ' ? ' sp' : '');
+        b.textContent = ch === ' ' ? 'Space' : ch;
+        b.setAttribute('aria-label', ch === ' ' ? 'Space' : ch);
+        b.onclick = () => pick(ch);
+        grid.appendChild(b); keys[ch] = b;
+    });
+});
+
+function pick(ch) {
+    const bin = ch.charCodeAt(0).toString(2).padStart(8, '0');
+    big.textContent = ch === ' ' ? 'Space' : ch;
+    big.classList.toggle('word', ch === ' ');
+    [...bitsEl.children].forEach((b, i) => { b.textContent = bin[i]; b.classList.toggle('on', bin[i] === '1'); });
+    Object.entries(keys).forEach(([c, k]) => k.classList.toggle('cur', c === ch));
+    bitsEl.setAttribute('aria-label', (ch === ' ' ? 'Space' : ch) + ' is ' + bin);
+}
+
+document.addEventListener('keydown', e => {
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    if (keys[e.key] && !(e.key === ' ' && document.activeElement.classList.contains('key'))) { e.preventDefault(); pick(e.key); }
+});
+
+pick('A');
+</script>
+</body>
+</html>
