@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RGB Mixer</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@500;600;700;800;900&family=Barlow+Condensed:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+    :root { --navy: #1b1f45; --pink: #ea008a; --grey: #9a9a9a; --soft: #c9ccd6; --faint: #e3e5ea; }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; }
+    body { font-family: 'Barlow', Helvetica Neue, Helvetica, Arial, sans-serif; color: var(--navy); background: #fff; border-top: 6px solid var(--navy); min-height: 100vh; display: flex; flex-direction: column; }
+    header { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap; margin: 32px 48px 0; padding-bottom: 12px; border-bottom: 4px solid var(--navy); }
+    h1 { font-family: 'Barlow Condensed', sans-serif; font-size: 44px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.01em; margin: 0; line-height: 1; }
+    h1 span { color: var(--pink); }
+    button.tool { font-family: 'Barlow Condensed', sans-serif; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; font-size: 18px; padding: 10px 18px; border-radius: 8px; cursor: pointer; background: #fff; color: var(--navy); border: 3px solid var(--navy); }
+    button:focus-visible, input:focus-visible { outline: 3px solid var(--pink); outline-offset: 3px; }
+
+    main { flex: 1; display: flex; align-items: center; justify-content: center; gap: 64px; padding: 36px 24px 48px; flex-wrap: wrap; }
+    .swatchcol { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+    .swatch { width: min(360px, 80vw); aspect-ratio: 1; border-radius: 12px; border: 3px solid var(--faint); transition: background-color .08s; }
+    .hex { font-family: 'Barlow Condensed', sans-serif; font-size: 22px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: var(--grey); }
+    .hex b { color: var(--navy); }
+
+    .chans { display: flex; flex-direction: column; gap: 26px; }
+    .ch { display: grid; grid-template-columns: 34px 1fr 86px; grid-template-rows: auto auto; align-items: center; column-gap: 16px; row-gap: 10px; }
+    .k { grid-row: 1 / 3; align-self: center; font-family: 'Barlow Condensed', sans-serif; font-size: 48px; font-weight: 900; line-height: 1; }
+    .name { font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: var(--grey); }
+    input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 22px; border-radius: 11px; background: var(--track, #ccc); cursor: pointer; margin: 0; }
+    input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 32px; height: 32px; border-radius: 50%; background: #fff; border: 4px solid var(--navy); box-shadow: 0 2px 6px rgba(0,0,0,.2); }
+    input[type=range]::-moz-range-thumb { width: 26px; height: 26px; border-radius: 50%; background: #fff; border: 4px solid var(--navy); }
+    input[type=number] { width: 86px; font-family: 'Barlow Condensed', sans-serif; font-size: 36px; font-weight: 900; text-align: center; color: var(--navy); border: 3px solid var(--navy); border-radius: 8px; padding: 2px 4px; -moz-appearance: textfield; }
+    input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
+    input[type=number]:focus { border-color: var(--pink); outline: none; }
+    .bits { grid-column: 2 / 4; display: flex; gap: 5px; }
+    .b { width: 40px; height: 46px; border: 3px solid var(--navy); border-radius: 6px; background: #fff; color: var(--navy); font-family: 'Barlow Condensed', sans-serif; font-size: 26px; font-weight: 800; cursor: pointer; padding: 0; transition: background-color .08s, border-color .08s, color .08s; }
+    .b.one { background: var(--pink); border-color: var(--pink); color: #fff; }
+    .b:hover { border-color: var(--pink); }
+
+    .seq { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 0 24px 40px; }
+    .lbl { font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: var(--grey); }
+    .all { font-family: 'Barlow Condensed', sans-serif; font-size: 30px; font-weight: 800; letter-spacing: 0.12em; display: flex; gap: 22px; flex-wrap: wrap; justify-content: center; }
+    .all .o { color: var(--pink); }
+    .all em { font-style: normal; color: var(--soft); }
+    .fact { font-size: 20px; font-weight: 600; color: var(--grey); }
+    .fact b { color: var(--navy); }
+
+    @media (max-width: 700px) {
+        header { margin: 24px 20px 0; } h1 { font-size: 32px; }
+        .b { width: 30px; height: 36px; font-size: 20px; }
+        .all { font-size: 20px; gap: 12px; }
+    }
+</style>
+</head>
+<body>
+<header>
+    <h1>RGB <span>mixer</span></h1>
+    <button class="tool" id="random">Random colour</button>
+</header>
+<main>
+    <div class="swatchcol">
+        <div class="swatch" id="swatch" role="img" aria-label="Mixed colour"></div>
+        <div class="hex">Hex code <b id="hex"></b></div>
+    </div>
+    <div class="chans" id="chans"></div>
+</main>
+<div class="seq">
+    <div class="lbl">This colour as 24 bits</div>
+    <div class="all" id="all" aria-live="polite"></div>
+    <div class="fact"><b>24</b> bits can make <b>16,777,216</b> different colours</div>
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+const C = [
+    { k: 'R', name: 'Red', col: '#e0243a', v: 234 },
+    { k: 'G', name: 'Green', col: '#12a150', v: 0 },
+    { k: 'B', name: 'Blue', col: '#0a6bd6', v: 138 }
+];
+const chans = $('#chans');
+C.forEach((c, ci) => {
+    const row = document.createElement('div');
+    row.className = 'ch';
+    row.innerHTML = `<div class="k" style="color:${c.col}">${c.k}</div>
+        <input type="range" min="0" max="255" step="1" aria-label="${c.name}">
+        <input type="number" min="0" max="255" aria-label="${c.name} value">
+        <div class="bits">${[...Array(8)].map((_, i) => `<button class="b" aria-label="${c.name} bit ${i + 1}">0</button>`).join('')}</div>`;
+    chans.appendChild(row);
+    c.range = row.querySelector('input[type=range]');
+    c.num = row.querySelector('input[type=number]');
+    c.bits = [...row.querySelectorAll('.b')];
+    c.range.addEventListener('input', () => { c.v = +c.range.value; render(); });
+    c.num.addEventListener('input', () => { const v = parseInt(c.num.value, 10); if (!isNaN(v)) { c.v = Math.max(0, Math.min(255, v)); render(ci); } });
+    c.num.addEventListener('blur', () => render());
+    c.bits.forEach((b, i) => b.onclick = () => { c.v ^= (1 << (7 - i)); render(); });
+});
+
+function render(typing = -1) {
+    const [r, g, b] = C.map(c => c.v);
+    $('#swatch').style.background = `rgb(${r}, ${g}, ${b})`;
+    $('#hex').textContent = '#' + C.map(c => c.v.toString(16).padStart(2, '0')).join('').toUpperCase();
+    C.forEach((c, ci) => {
+        const bin = c.v.toString(2).padStart(8, '0');
+        c.range.value = c.v;
+        if (ci !== typing) c.num.value = c.v;
+        c.bits.forEach((el, i) => { el.textContent = bin[i]; el.classList.toggle('one', bin[i] === '1'); });
+        const lo = C.map((x, j) => j === ci ? 0 : x.v), hi = C.map((x, j) => j === ci ? 255 : x.v);
+        c.range.style.setProperty('--track', `linear-gradient(90deg, rgb(${lo}), rgb(${hi}))`);
+    });
+    $('#all').innerHTML = C.map(c => `<span>${c.v.toString(2).padStart(8, '0').replace(/1/g, '<span class="o">1</span>')}</span>`).join('<em>|</em>');
+}
+
+$('#random').onclick = () => { C.forEach(c => c.v = Math.floor(Math.random() * 256)); render(); };
+render();
+</script>
+</body>
+</html>
