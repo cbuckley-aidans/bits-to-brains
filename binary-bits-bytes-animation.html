@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bits, Bytes and Binary</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700;800;900&family=Barlow+Condensed:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --navy: #1b1f45;
+        --pink: #ea008a;
+        --white: #ffffff;
+        --off-white: #f5f5f5;
+        --light-grey: #e8e8e8;
+        --mid-grey: #9a9a9a;
+        --blank: #f0f3f6;
+        --ease: cubic-bezier(.2,.8,.2,1);
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body { height: 100%; }
+
+    body {
+        font-family: 'Barlow', Helvetica Neue, Helvetica, Arial, sans-serif;
+        margin: 0;
+        background: #eaeaea;
+        color: var(--navy);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+    }
+
+    .viewport { flex: 1; width: 100%; display: flex; align-items: center; justify-content: center; min-height: 0; }
+
+    .stage {
+        width: 1280px;
+        height: 720px;
+        background: var(--white);
+        border-top: 6px solid var(--navy);
+        position: relative;
+        padding: 36px 64px 0 64px;
+        transform-origin: center center;
+        flex-shrink: 0;
+        overflow: hidden;
+    }
+
+    .top { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 4px solid var(--navy); padding-bottom: 12px; }
+
+    .sheet-label {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 17px; font-weight: 700; letter-spacing: 0.18em;
+        text-transform: uppercase; color: var(--mid-grey); margin: 0 0 4px 0;
+    }
+
+    .sheet-title {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 44px; font-weight: 900; text-transform: uppercase;
+        letter-spacing: 0.01em; margin: 0; line-height: 1;
+    }
+    .sheet-title span { color: var(--pink); }
+
+    .counter {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 22px; font-weight: 800; letter-spacing: 0.08em; color: var(--mid-grey);
+    }
+    .counter b { color: var(--navy); }
+
+    .content { position: absolute; left: 64px; right: 64px; top: 130px; bottom: 110px; }
+
+    .caption {
+        position: absolute; left: 64px; right: 64px; bottom: 30px;
+        font-size: 27px; font-weight: 500; line-height: 1.35;
+        display: flex; align-items: center; gap: 16px; min-height: 60px;
+    }
+    .caption::before { content: ''; width: 10px; height: 10px; background: var(--pink); flex-shrink: 0; }
+    .caption b { font-weight: 800; color: var(--pink); }
+    .caption.in { animation: capIn .45s var(--ease); }
+    @keyframes capIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+
+    .progress { position: absolute; left: 0; bottom: 0; height: 6px; background: var(--pink); width: 0; }
+
+    /* generic reveal */
+    .hide { opacity: 0; transform: translateY(14px); }
+    .rev { transition: opacity .45s var(--ease), transform .45s var(--ease), background-color .35s, color .35s, border-color .35s; }
+
+    .center { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; }
+
+    /* scene 1: single bit */
+    .bit-big {
+        width: 190px; height: 190px; border-radius: 12px;
+        border: 5px solid var(--navy); background: var(--white); color: var(--navy);
+        font-family: 'Barlow Condensed', sans-serif; font-size: 130px; font-weight: 800;
+        display: flex; align-items: center; justify-content: center;
+        transition: background-color .25s, color .25s, border-color .25s, box-shadow .25s, opacity .45s var(--ease), transform .45s var(--ease);
+    }
+    .bit-big.on { background: var(--pink); border-color: var(--pink); color: var(--white); box-shadow: 0 0 0 14px rgba(234,0,138,.14); }
+    .state {
+        margin-top: 26px; font-family: 'Barlow Condensed', sans-serif; font-size: 30px; font-weight: 900;
+        letter-spacing: 0.12em; text-transform: uppercase;
+    }
+    .state span { color: var(--mid-grey); }
+    .state .lit { color: var(--pink); }
+
+    /* scene 2: grouping */
+    .bits-row { display: flex; gap: 14px; flex-direction: row-reverse; }
+    .bit {
+        width: 104px; height: 104px; border-radius: 9px;
+        border: 4px solid var(--navy); background: var(--white);
+        font-family: 'Barlow Condensed', sans-serif; font-size: 66px; font-weight: 800;
+        display: flex; align-items: center; justify-content: center;
+    }
+    .bit.on { background: var(--pink); border-color: var(--pink); color: var(--white); }
+    .stat { display: flex; gap: 60px; margin-top: 34px; }
+    .stat div { text-align: center; }
+    .stat .num { font-family: 'Barlow Condensed', sans-serif; font-size: 64px; font-weight: 900; line-height: 1; font-variant-numeric: tabular-nums; }
+    .stat .lbl { font-family: 'Barlow Condensed', sans-serif; font-size: 20px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: var(--mid-grey); margin-top: 6px; }
+    .stat .pop { animation: pop .35s var(--ease); }
+    @keyframes pop { 0% { transform: scale(1.18); color: var(--pink); } 100% { transform: scale(1); } }
+    .bracket-wrap { width: 944px; margin-top: 18px; }
+    .bracket { height: 22px; border: 4px solid var(--pink); border-top: none; }
+    .bracket-lbl {
+        text-align: center; margin-top: 10px; font-family: 'Barlow Condensed', sans-serif;
+        font-size: 34px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.04em; color: var(--pink);
+    }
+
+    /* place value tables */
+    .pv {
+        display: grid; width: max-content; border: 3px solid var(--navy);
+        font-variant-numeric: tabular-nums; margin: 0 auto;
+    }
+    .pv .cell {
+        display: flex; align-items: center; justify-content: center;
+        border-right: 2px solid var(--navy); border-bottom: 2px solid var(--navy);
+        font-size: 30px; font-weight: 600; background: var(--white);
+    }
+    .pv .cell.last-row { border-bottom: none; }
+    .pv .head { background: var(--navy); color: var(--white); font-weight: 800; border-color: #3a3f6b; }
+    .pv .rowlbl { background: var(--off-white); font-weight: 800; font-size: 26px; }
+    .pv .head.rowlbl { background: var(--navy); }
+    .pv sup { font-size: .6em; margin-left: 1px; }
+    .pv .digit { font-family: 'Barlow Condensed', sans-serif; font-size: 40px; font-weight: 800; }
+    .pv .cell.on { background: var(--pink); color: var(--white); }
+    .pv .cell.dim { color: #c9ccd6; }
+
+    .sum {
+        display: flex; justify-content: center; align-items: baseline; gap: 14px; flex-wrap: wrap;
+        font-family: 'Barlow Condensed', sans-serif; font-size: 50px; font-weight: 800;
+        font-variant-numeric: tabular-nums;
+    }
+    .sum .op { color: var(--mid-grey); }
+    .sum .zero { color: #c3c6d0; }
+    .sum .total { color: var(--white); background: var(--pink); padding: 0 18px; border-radius: 7px; }
+
+    .x2 {
+        display: grid; margin: 8px auto 0 auto; height: 34px;
+        font-family: 'Barlow Condensed', sans-serif; font-size: 26px; font-weight: 800; color: var(--pink);
+    }
+    .x2 span { display: flex; align-items: center; justify-content: center; }
+
+    .steps { display: flex; gap: 14px; justify-content: center; margin: 30px 0 26px 0; }
+    .step {
+        display: flex; align-items: center; gap: 12px; padding: 10px 18px 10px 10px;
+        background: var(--off-white); font-size: 20px; font-weight: 600; white-space: nowrap; color: var(--mid-grey);
+        border-radius: 7px; transition: background-color .35s, color .35s;
+    }
+    .step i {
+        font-style: normal; width: 34px; height: 34px; border-radius: 5px; background: var(--light-grey); color: var(--white);
+        display: flex; align-items: center; justify-content: center;
+        font-family: 'Barlow Condensed', sans-serif; font-size: 22px; font-weight: 900; transition: background-color .35s;
+    }
+    .step.active { background: var(--navy); color: var(--white); }
+    .step.active i { background: var(--pink); }
+    .step.done { color: var(--navy); }
+    .step.done i { background: var(--navy); }
+
+    .timer { width: 520px; height: 8px; background: var(--light-grey); margin: 26px auto 0 auto; }
+    .timer div { height: 100%; width: 100%; background: var(--navy); transform-origin: left; }
+
+    /* controls (outside the stage so screenshots stay clean) */
+    .controls {
+        display: flex; align-items: center; gap: 10px; padding: 14px 0 18px 0;
+        font-family: 'Barlow Condensed', sans-serif;
+    }
+    .controls button {
+        font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 800;
+        letter-spacing: 0.08em; text-transform: uppercase;
+        background: var(--navy); color: var(--white); border: none; border-radius: 6px;
+        padding: 9px 16px; cursor: pointer;
+    }
+    .controls button.alt { background: var(--white); color: var(--navy); }
+    .controls button:focus-visible { outline: 3px solid var(--pink); outline-offset: 2px; }
+    .dots { display: flex; gap: 8px; margin: 0 10px; }
+    .dots button { width: 14px; height: 14px; padding: 0; border-radius: 50%; background: #c9ccd6; }
+    .dots button.cur { background: var(--pink); }
+
+    .steplbl { font-size: 18px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--mid-grey); margin-left: 6px; min-width: 110px; }
+    .ink { position: absolute; inset: 0; width: 1280px; height: 720px; pointer-events: none; z-index: 5; touch-action: none; }
+    .ink.active { pointer-events: auto; cursor: crosshair; }
+    .controls button#pen.on { background: var(--pink); color: var(--white); }
+    .controls .swatch { width: 26px; height: 26px; padding: 0; border-radius: 50%; border: 3px solid var(--white); box-shadow: 0 0 0 1px #c9ccd6; }
+    .controls .swatch.cur { box-shadow: 0 0 0 3px var(--navy); }
+    .sep { width: 1.5px; height: 28px; background: #c9ccd6; margin: 0 6px; }
+    .stage.instant *, .stage.instant *::before { transition: none !important; animation: none !important; }
+
+    @media (prefers-reduced-motion: reduce) {
+        .rev, .bit-big, .step { transition: none !important; }
+        .caption.in, .stat .pop { animation: none !important; }
+    }
+</style>
+</head>
+<body>
+
+<div class="viewport">
+    <div class="stage" id="stage">
+        <div class="top">
+            <div>
+                <h1 class="sheet-title" id="title"></h1>
+            </div>
+            <div class="counter" id="counter"></div>
+        </div>
+        <div class="content" id="content"></div>
+        <div class="caption" id="caption"></div>
+        <div class="progress" id="progress"></div>
+        <canvas class="ink" id="ink" width="2560" height="1440"></canvas>
+    </div>
+</div>
+
+<div class="controls">
+    <button class="alt" id="back" aria-label="Previous scene">Back</button>
+    <button class="alt" id="replay" aria-label="Replay scene">Replay</button>
+    <button id="next" aria-label="Next scene">Next</button>
+    <div class="dots" id="dots"></div>
+    <button class="alt" id="auto">Autoplay: On</button>
+    <span class="steplbl" id="steplbl"></span>
+    <span class="sep"></span>
+    <button class="alt" id="pen" aria-pressed="false">Pen</button>
+    <button class="swatch cur" data-c="#ea008a" style="background:#ea008a" aria-label="Pink pen"></button>
+    <button class="swatch" data-c="#1b1f45" style="background:#1b1f45" aria-label="Navy pen"></button>
+    <button class="alt" id="clear">Clear</button>
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+const content = $('#content'), caption = $('#caption'), titleEl = $('#title'), counter = $('#counter'), progress = $('#progress');
+let timers = [], events = [], beats = [], idx = 0, beat = 0, autoplay = true;
+let segFrom = 0, segTo = 0, segStart = 0;
+const stage = document.getElementById('stage');
+
+function at(ms, fn) { events.push({ t: ms, fn, done: false }); }
+function beatAt(ms, html) { beats.push(ms); at(ms, () => say(html)); }
+function clearTimers() { timers.forEach(clearTimeout); timers = []; }
+function el(tag, cls, html) { const e = document.createElement(tag); if (cls) e.className = cls; if (html !== undefined) e.innerHTML = html; return e; }
+function show(e) { e.classList.remove('hide'); }
+function say(html) { caption.innerHTML = '<span>' + html + '</span>'; caption.classList.remove('in'); void caption.offsetWidth; caption.classList.add('in'); }
+
+/* ---------- place value table ---------- */
+function table(cfg) {
+    // cfg: { base, powers, rows: ['head','value','ex'], labels, colW, lblW }
+    const n = cfg.powers.length;
+    const t = el('div', 'pv');
+    t.style.gridTemplateColumns = `${cfg.lblW}px repeat(${n}, ${cfg.colW}px)`;
+    const refs = { head: [], value: [], ex: [] };
+    cfg.rows.forEach((r, ri) => {
+        const lastRow = ri === cfg.rows.length - 1;
+        const lbl = el('div', 'cell rowlbl' + (r === 'head' ? ' head' : ''), cfg.labels[r]);
+        lbl.style.height = r === 'head' ? '62px' : '64px';
+        if (lastRow) lbl.classList.add('last-row');
+        t.appendChild(lbl);
+        cfg.powers.forEach((p, i) => {
+            let html = '';
+            if (r === 'head') html = `${cfg.base}<sup>${p}</sup>`;
+            if (r === 'value') html = Math.pow(cfg.base, p);
+            const c = el('div', 'cell rev hide' + (r === 'head' ? ' head' : '') + (r === 'ex' ? ' digit' : ''), html);
+            if (i === n - 1) c.style.borderRight = 'none';
+            if (lastRow) c.classList.add('last-row');
+            refs[r].push(c);
+            t.appendChild(c);
+        });
+    });
+    t.refs = refs;
+    return t;
+}
+const BIN = [7,6,5,4,3,2,1,0];
+const binCfg = rows => ({ base: 2, powers: BIN, rows, labels: { head: 'Position', value: 'Value', ex: 'Example' }, colW: 104, lblW: 176 });
+
+function revealAll(list, start, gap) { list.forEach((c, i) => at(start + i * gap, () => show(c))); }
+
+function sumLine(bits, values) {
+    const s = el('div', 'sum');
+    const parts = [];
+    bits.split('').forEach((b, i) => {
+        if (i) { const op = el('span', 'op rev hide', '+'); s.appendChild(op); parts.push(op); }
+        const v = el('span', 'rev hide' + (b === '0' ? ' zero' : ''), b === '1' ? values[i] : '0');
+        s.appendChild(v); parts.push(v);
+    });
+    const eq = el('span', 'op rev hide', '=');
+    const total = el('span', 'total rev hide', bits.split('').reduce((a, b, i) => a + (b === '1' ? values[i] : 0), 0));
+    s.appendChild(eq); s.appendChild(total);
+    s.parts = parts; s.eq = eq; s.total = total;
+    return s;
+}
+
+/* ---------- conversion walkthrough (used by scenes 5 and 6) ---------- */
+function convert(bits, startMs, withSteps, steps) {
+    const t = table(binCfg(['head', 'value', 'ex']));
+    [...t.refs.head, ...t.refs.value].forEach(show);
+    content.appendChild(t);
+    const values = BIN.map(p => 2 ** p);
+    const s = sumLine(bits, values);
+    s.style.marginTop = withSteps ? '0' : '40px';
+    if (steps) content.appendChild(steps);
+    content.appendChild(s);
+    return { t, s, values };
+}
+
+function makeSteps() {
+    const wrap = el('div', 'steps');
+    const txt = ['Check each position with a 1 in it', 'Add up the values of those positions', 'The sum is your decimal number'];
+    const list = txt.map((x, i) => { const st = el('div', 'step', `<i>${i + 1}</i>${x}`); wrap.appendChild(st); return st; });
+    wrap.list = list;
+    return wrap;
+}
+function activate(steps, i) { steps.list.forEach((s, j) => { s.classList.toggle('active', j === i); s.classList.toggle('done', j < i); }); }
+
+function runConversion(t, s, bits, start) {
+    // highlight columns
+    bits.split('').forEach((b, i) => at(start + i * 280, () => {
+        if (b === '1') { t.refs.value[i].classList.add('on'); t.refs.ex[i].classList.add('on'); }
+        else { t.refs.value[i].classList.add('dim'); t.refs.ex[i].classList.add('dim'); }
+    }));
+    const addStart = start + 8 * 280 + 900;
+    s.parts.forEach((p, i) => at(addStart + i * 190, () => show(p)));
+    const end = addStart + s.parts.length * 190 + 700;
+    at(end, () => show(s.eq));
+    at(end + 450, () => show(s.total));
+    return { addStart, totalAt: end + 450 };
+}
+
+/* ---------- scenes ---------- */
+const scenes = [
+{
+    title: 'Computers count with <span>1s and 0s</span>',
+    dur: 11000,
+    run() {
+        const c = el('div', 'center');
+        const bit = el('div', 'bit-big hide', '0');
+        const state = el('div', 'state hide', '<span class="s-off lit">Off</span> <span>/</span> <span class="s-on">On</span>');
+        c.append(bit, state); content.appendChild(c);
+        beatAt(0, 'Inside a computer, electrical signals are either on or off.');
+        at(500, () => { show(bit); show(state); });
+        const setBit = v => {
+            bit.textContent = v; bit.classList.toggle('on', v === 1);
+            state.querySelector('.s-on').classList.toggle('lit', v === 1);
+            state.querySelector('.s-off').classList.toggle('lit', v === 0);
+        };
+        [1, 0, 1, 0, 1].forEach((v, i) => at(1700 + i * 900, () => setBit(v)));
+        beatAt(5600, 'Each on or off value is called a <b>bit</b>. On is 1 and off is 0.');
+        beatAt(8200, 'On its own, one bit can only show two values: 0 or 1.');
+    }
+},
+{
+    title: 'Grouping <span>bits</span>',
+    dur: 16500,
+    run() {
+        const c = el('div', 'center');
+        const row = el('div', 'bits-row');
+        const bits = [];
+        for (let i = 0; i < 8; i++) { const b = el('div', 'bit rev hide', '0'); bits.push(b); row.appendChild(b); }
+        const stat = el('div', 'stat');
+        const nBits = el('div', '', '<div class="num">0</div><div class="lbl">Bits</div>');
+        const nVals = el('div', '', '<div class="num">1</div><div class="lbl">Possible values</div>');
+        stat.append(nBits, nVals);
+        const bw = el('div', 'bracket-wrap rev hide');
+        bw.append(el('div', 'bracket'), el('div', 'bracket-lbl', '8 bits = 1 byte'));
+        c.append(row, bw, stat); content.appendChild(c);
+
+        beatAt(0, 'One bit cannot count very high, so computers group bits together.');
+        const bump = (node, v) => { const n = node.querySelector('.num'); n.textContent = v; n.classList.remove('pop'); void n.offsetWidth; n.classList.add('pop'); };
+        bits.forEach((b, i) => at(1200 + i * 750, () => { show(b); bump(nBits, i + 1); bump(nVals, 2 ** (i + 1)); }));
+        beatAt(3600, 'Every extra bit <b>doubles</b> the number of values the group can store.');
+        at(7600, () => { show(bw); }); beatAt(7600, 'A group of eight bits is called a <b>byte</b>. It is one of the most common ways to group bits together.');
+        // flicker through a few combinations
+        const combos = ['00000000', '00000001', '00000010', '00000011', '10110100', '11111111'];
+        combos.forEach((cmb, k) => at(11200 + k * 500, () => {
+            cmb.split('').reverse().forEach((d, i) => { bits[i].textContent = d; bits[i].classList.toggle('on', d === '1'); });
+        }));
+        beatAt(11200, 'One byte can store <b>256</b> different values, from 0 to 255.');
+    }
+},
+{
+    title: 'Decimal: <span>place value</span>',
+    dur: 13000,
+    run() {
+        const c = el('div', 'center');
+        const t = table({ base: 10, powers: [2, 1, 0], rows: ['head', 'ex', 'value'], labels: { head: 'Place', value: 'Worth', ex: 'Digit' }, colW: 170, lblW: 150 });
+        ['Hundreds', 'Tens', 'Ones'].forEach((h, i) => t.refs.head[i].textContent = h);
+        [300, 40, 7].forEach((v, i) => t.refs.value[i].textContent = v);
+        const s = sumLine('111', [300, 40, 7]);
+        s.style.marginTop = '44px';
+        c.append(t, s); content.appendChild(c);
+        beatAt(0, 'You already use place value every day. Look at the number <b>347</b>.');
+        revealAll(t.refs.head, 600, 250);
+        ['3', '4', '7'].forEach((d, i) => at(1700 + i * 300, () => { t.refs.ex[i].textContent = d; show(t.refs.ex[i]); }));
+        beatAt(3500, 'Each digit is worth a different amount, depending on its place.');
+        [0, 1, 2].forEach(i => at(4200 + i * 1100, () => {
+            [t.refs.ex, t.refs.value].forEach(r => r.forEach((c, j) => c.classList.toggle('on', j === i)));
+            show(t.refs.value[i]);
+        }));
+        at(7600, () => [...t.refs.ex, ...t.refs.value].forEach(c => c.classList.remove('on')));
+        beatAt(7600, 'Add them up: 300 + 40 + 7 = <b>347</b>. Each place is worth 10 times the place to its right.');
+        s.parts.forEach((p, i) => at(8000 + i * 300, () => show(p)));
+        at(9600, () => show(s.eq));
+        at(10000, () => show(s.total));
+    }
+},
+{
+    title: 'Binary: powers of <span>2</span>',
+    dur: 13000,
+    run() {
+        const c = el('div', 'center');
+        const t = table(binCfg(['head', 'value']));
+        const x2 = el('div', 'x2');
+        x2.style.gridTemplateColumns = `176px repeat(8, 104px)`;
+        x2.appendChild(el('span'));
+        const hints = [];
+        for (let i = 0; i < 8; i++) { const h = el('span', 'rev hide', i < 7 ? '&times;2' : ''); h.style.transform = 'translateX(52px)'; hints.push(h); x2.appendChild(h); }
+        c.append(t, x2); content.appendChild(c);
+        beatAt(0, 'In binary, each position represents a power of 2.');
+        revealAll(t.refs.head, 600, 160);
+        beatAt(2600, 'Start with 1 on the right. Moving left, each value <b>doubles</b>.');
+        for (let k = 0; k < 8; k++) {
+            const i = 7 - k;
+            at(3400 + k * 650, () => { show(t.refs.value[i]); if (i < 7) { hints[i].classList.remove('hide'); hints[i].style.opacity = 1; } });
+        }
+        beatAt(9200, 'Eight positions means eight bits: exactly <b>one byte</b>.');
+        at(9200, () => t.refs.value.forEach(v => v.classList.add('on')));
+        at(11000, () => t.refs.value.forEach(v => v.classList.remove('on')));
+    }
+},
+{
+    title: 'Example: <span>10101001</span> in binary',
+    dur: 17000,
+    run() {
+        const bits = '10101001';
+        const steps = makeSteps();
+        const { t, s } = convert(bits, 0, true, steps);
+        beatAt(0, 'Let\'s convert the byte 10101001 from binary to decimal.');
+        bits.split('').forEach((d, i) => at(900 + i * 220, () => { t.refs.ex[i].textContent = d; show(t.refs.ex[i]); }));
+        at(3200, () => { activate(steps, 0); }); beatAt(3200, 'Check each position with a <b>1</b> in it.');
+        const r = runConversion(t, s, bits, 3700);
+        at(r.addStart - 300, () => { activate(steps, 1); }); beatAt(r.addStart - 300, 'Add up the values of those positions. The zeros add nothing.');
+        at(r.totalAt, () => { activate(steps, 2); }); beatAt(r.totalAt, 'The sum is your decimal number: 10101001 in binary is <b>169</b>.');
+    }
+},
+{
+    title: 'Your turn: <span>01000110</span>',
+    dur: 24000,
+    run() {
+        const bits = '01000110';
+        const { t, s } = convert(bits, 0, false);
+        const timer = el('div', 'timer', '<div></div>');
+        content.insertBefore(timer, s);
+        s.style.marginTop = '28px';
+        bits.split('').forEach((d, i) => at(500 + i * 150, () => { t.refs.ex[i].textContent = d; show(t.refs.ex[i]); }));
+        beatAt(0, 'Convert 01000110 to decimal before the timer runs out.');
+        const bar = timer.firstChild;
+        at(1800, () => { bar.style.transition = 'transform 10s linear'; bar.style.transform = 'scaleX(0)'; });
+        at(11800, () => { timer.style.opacity = 0; }); beatAt(11800, 'Check your answer. Which positions have a 1?');
+        const r = runConversion(t, s, bits, 12400);
+        beatAt(r.totalAt, '01000110 in binary is <b>70</b>. Did you get it?');
+    }
+}
+];
+
+/* ---------- player ---------- */
+const dots = $('#dots');
+scenes.forEach((_, i) => { const d = el('button'); d.setAttribute('aria-label', 'Scene ' + (i + 1)); d.onclick = () => go(i); dots.appendChild(d); });
+
+const stepLbl = $('#steplbl');
+const dur = () => scenes[idx].dur;
+const beatEnd = b => (b + 1 < beats.length ? beats[b + 1] : dur());
+function label() { stepLbl.textContent = `Step ${beat + 1} of ${beats.length}`; }
+
+function build(i) {
+    clearTimers();
+    const ni = Math.max(0, Math.min(scenes.length - 1, i));
+    if (ni !== idx) clearInk();
+    idx = ni;
+    events = []; beats = [];
+    const sc = scenes[idx];
+    content.innerHTML = ''; caption.innerHTML = '';
+    titleEl.innerHTML = sc.title;
+    counter.innerHTML = `<b>${idx + 1}</b> / ${scenes.length}`;
+    [...dots.children].forEach((d, j) => d.classList.toggle('cur', j === idx));
+    sc.run();
+    beats = [...new Set(beats)].sort((a, b) => a - b);
+}
+
+// run every pending event before time `to` immediately, with no transitions
+function jumpTo(to) {
+    stage.classList.add('instant');
+    events.filter(e => !e.done && e.t < to).sort((a, b) => a.t - b.t).forEach(e => { e.done = true; e.fn(); });
+    void stage.offsetWidth;
+    requestAnimationFrame(() => requestAnimationFrame(() => stage.classList.remove('instant')));
+}
+
+function setProgress(from, to) {
+    progress.style.transition = 'none';
+    progress.style.width = (from / dur() * 100) + '%';
+    void progress.offsetWidth;
+    progress.style.transition = `width ${Math.max(0, to - from)}ms linear`;
+    progress.style.width = (to / dur() * 100) + '%';
+}
+
+function play(from, to, onEnd) {
+    clearTimers();
+    segFrom = from; segTo = to; segStart = performance.now();
+    events.filter(e => !e.done && e.t >= from && e.t < to)
+        .forEach(e => timers.push(setTimeout(() => { e.done = true; e.fn(); }, e.t - from)));
+    beats.forEach((bt, k) => { if (bt > from && bt < to) timers.push(setTimeout(() => { beat = k; label(); }, bt - from)); });
+    if (onEnd) timers.push(setTimeout(onEnd, to - from));
+    setProgress(from, to);
+}
+
+function now() { return Math.min(segTo, segFrom + performance.now() - segStart); }
+
+function startBeat(b) {
+    beat = b; label();
+    jumpTo(beats[b]);
+    if (autoplay) play(beats[b], dur(), () => { if (idx < scenes.length - 1) go(idx + 1); });
+    else play(beats[b], beatEnd(b));
+}
+
+function go(i, b = 0) {
+    build(i);
+    startBeat(b === 'last' ? beats.length - 1 : b);
+}
+
+function next() {
+    if (autoplay) { if (idx < scenes.length - 1) go(idx + 1); return; }
+    clearTimers();
+    if (beat < beats.length - 1) { jumpTo(beatEnd(beat)); startBeat(beat + 1); }
+    else if (idx < scenes.length - 1) go(idx + 1);
+    else { jumpTo(dur()); setProgress(dur(), dur()); }
+}
+
+function back() {
+    if (autoplay) { go(idx - 1); return; }
+    if (beat > 0) go(idx, beat - 1);
+    else if (idx > 0) go(idx - 1, 'last');
+    else go(0);
+}
+
+function toggleAuto() {
+    autoplay = !autoplay;
+    autoBtn.textContent = 'Autoplay: ' + (autoplay ? 'On' : 'Off');
+    const cur = now();
+    clearTimers();
+    if (autoplay) {
+        play(cur, dur(), () => { if (idx < scenes.length - 1) go(idx + 1); });
+    } else {
+        // settle at the end of the current step
+        let b = 0; beats.forEach((bt, k) => { if (bt <= cur) b = k; });
+        beat = b; label();
+        jumpTo(beatEnd(b));
+        setProgress(beatEnd(b), beatEnd(b));
+    }
+}
+
+const autoBtn = $('#auto');
+$('#next').onclick = next;
+$('#back').onclick = back;
+$('#replay').onclick = () => go(idx);
+autoBtn.onclick = toggleAuto;
+document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight') next();
+    if (e.key === 'ArrowLeft') back();
+    if (e.key === 'r' || e.key === 'R') go(idx);
+    if (e.key === ' ') { e.preventDefault(); toggleAuto(); }
+});
+
+/* ---------- pen ---------- */
+const ink = $('#ink'), ctx = ink.getContext('2d'), penBtn = $('#pen');
+let penOn = false, penColour = '#ea008a', drawing = false, last = null;
+ctx.scale(2, 2); ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.lineWidth = 5;
+function setPen(v) { penOn = v; ink.classList.toggle('active', v); penBtn.classList.toggle('on', v); penBtn.setAttribute('aria-pressed', v); }
+function clearInk() { ctx.clearRect(0, 0, 1280, 720); }
+function pt(e) { const r = ink.getBoundingClientRect(); return { x: (e.clientX - r.left) / r.width * 1280, y: (e.clientY - r.top) / r.height * 720 }; }
+ink.addEventListener('pointerdown', e => { drawing = true; last = pt(e); ink.setPointerCapture(e.pointerId); ctx.strokeStyle = penColour; ctx.beginPath(); ctx.arc(last.x, last.y, 2.5, 0, Math.PI * 2); ctx.fillStyle = penColour; ctx.fill(); });
+ink.addEventListener('pointermove', e => {
+    if (!drawing) return;
+    const p = pt(e), mid = { x: (last.x + p.x) / 2, y: (last.y + p.y) / 2 };
+    ctx.beginPath(); ctx.moveTo(last.midX ?? last.x, last.midY ?? last.y); ctx.quadraticCurveTo(last.x, last.y, mid.x, mid.y); ctx.stroke();
+    last = { x: p.x, y: p.y, midX: mid.x, midY: mid.y };
+});
+['pointerup', 'pointercancel'].forEach(t => ink.addEventListener(t, () => { drawing = false; }));
+penBtn.onclick = () => setPen(!penOn);
+$('#clear').onclick = clearInk;
+document.querySelectorAll('.swatch').forEach(b => b.onclick = () => {
+    penColour = b.dataset.c; setPen(true);
+    document.querySelectorAll('.swatch').forEach(x => x.classList.toggle('cur', x === b));
+});
+document.addEventListener('keydown', e => {
+    if (e.key === 'p' || e.key === 'P') setPen(!penOn);
+    if (e.key === 'c' || e.key === 'C') clearInk();
+    if (e.key === 'Escape') setPen(false);
+});
+
+function fit() {
+    const st = $('#stage');
+    const vw = window.innerWidth - 40, vh = window.innerHeight - 90;
+    const k = Math.min(vw / 1280, vh / 720);
+    st.style.transform = `scale(${k})`;
+    st.style.margin = `${(720 * k - 720) / 2}px ${(1280 * k - 1280) / 2}px`;
+}
+window.addEventListener('resize', fit);
+fit();
+(document.fonts ? document.fonts.ready : Promise.resolve()).then(() => go(0));
+</script>
+
+</body>
+</html>
