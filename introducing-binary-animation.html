@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Introducing Binary</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700;800;900&family=Barlow+Condensed:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --navy: #1b1f45;
+        --pink: #ea008a;
+        --white: #ffffff;
+        --off-white: #f5f5f5;
+        --light-grey: #e8e8e8;
+        --mid-grey: #9a9a9a;
+        --blank: #f0f3f6;
+        --ease: cubic-bezier(.2,.8,.2,1);
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+        font-family: 'Barlow', Helvetica Neue, Helvetica, Arial, sans-serif;
+        margin: 0; background: #eaeaea; color: var(--navy);
+        display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden;
+    }
+    .viewport { flex: 1; width: 100%; display: flex; align-items: center; justify-content: center; min-height: 0; }
+    .stage {
+        width: 1280px; height: 720px; background: var(--white); border-top: 6px solid var(--navy);
+        position: relative; padding: 36px 64px 0 64px; transform-origin: center center; flex-shrink: 0; overflow: hidden;
+    }
+    .top { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 4px solid var(--navy); padding-bottom: 12px; }
+    .sheet-title { font-family: 'Barlow Condensed', sans-serif; font-size: 44px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.01em; margin: 0; line-height: 1; }
+    .sheet-title span { color: var(--pink); }
+    .counter { font-family: 'Barlow Condensed', sans-serif; font-size: 22px; font-weight: 800; letter-spacing: 0.08em; color: var(--mid-grey); }
+    .counter b { color: var(--navy); }
+    .content { position: absolute; left: 64px; right: 64px; top: 130px; bottom: 110px; }
+    .caption {
+        position: absolute; left: 64px; right: 64px; bottom: 30px;
+        font-size: 27px; font-weight: 500; line-height: 1.35;
+        display: flex; align-items: center; gap: 16px; min-height: 60px;
+    }
+    .caption::before { content: ''; width: 10px; height: 10px; background: var(--pink); flex-shrink: 0; }
+    .caption b { font-weight: 800; color: var(--pink); }
+    .caption.in { animation: capIn .45s var(--ease); }
+    @keyframes capIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+    .progress { position: absolute; left: 0; bottom: 0; height: 6px; background: var(--pink); width: 0; }
+
+    .hide { opacity: 0; transform: translateY(14px); }
+    .rev { transition: opacity .45s var(--ease), transform .45s var(--ease), background-color .35s, color .35s, border-color .35s; }
+    .center { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; }
+    .hint { margin-top: 22px; font-family: 'Barlow Condensed', sans-serif; font-size: 20px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: var(--mid-grey); }
+    .dlbl { font-family: 'Barlow Condensed', sans-serif; font-size: 22px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: var(--mid-grey); }
+
+    /* bulb */
+    .bulb { cursor: pointer; user-select: none; -webkit-tap-highlight-color: transparent; }
+    .bulb svg { display: block; width: 100%; height: auto; overflow: visible; transition: filter .2s; }
+    .bulb .glass { fill: #fff; stroke: var(--navy); stroke-width: 5; stroke-linejoin: round; transition: fill .12s, stroke .12s; }
+    .bulb .fil { fill: none; stroke: var(--navy); stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; transition: stroke .12s; }
+    .bulb .base { fill: var(--navy); }
+    .bulb .rays line { stroke: var(--pink); stroke-width: 6; stroke-linecap: round; opacity: 0; transition: opacity .12s; }
+    .bulb.on .glass { fill: var(--pink); stroke: var(--pink); }
+    .bulb.on .fil { stroke: #fff; }
+    .bulb.on .rays line { opacity: 1; }
+    .bulb.on svg { filter: drop-shadow(0 0 22px rgba(234,0,138,.35)); }
+
+    .state { margin-top: 22px; font-family: 'Barlow Condensed', sans-serif; font-size: 34px; font-weight: 900; letter-spacing: 0.12em; text-transform: uppercase; color: #c3c6d0; }
+    .state span { color: #c3c6d0; transition: color .15s; }
+    .state .lit { color: var(--navy); }
+    .state .s1.lit { color: var(--pink); }
+
+    /* cards */
+    .cards { display: flex; gap: 32px; }
+    .dcard { width: 460px; border: 3px solid var(--navy); border-radius: 8px; padding: 26px 30px; }
+    .dcard.pink { border-color: var(--pink); }
+    .dex { font-family: 'Barlow Condensed', sans-serif; font-size: 58px; font-weight: 900; margin: 8px 0; }
+    .dhow { font-size: 24px; font-weight: 700; }
+    .dcard.pink .dhow { color: var(--pink); }
+    .sym { height: 96px; display: flex; align-items: center; }
+    .dcard.pink .mk { background: var(--pink); }
+    .fact { font-family: 'Barlow Condensed', sans-serif; font-size: 30px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: var(--mid-grey); margin-bottom: 40px; }
+
+    /* morse */
+    .mk { display: block; background: var(--navy); flex-shrink: 0; transition: background-color .08s, opacity .2s; }
+    .mk.live { background: var(--pink); }
+    .mk.gone { opacity: 0; }
+    .mword { display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-start; gap: 30px 56px; max-width: 1100px; }
+    .mgroup { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+    .mmarks { display: flex; align-items: center; }
+    .ml { font-family: 'Barlow Condensed', sans-serif; font-weight: 900; line-height: 1; transition: color .15s, opacity .45s var(--ease), transform .45s var(--ease); }
+    .mgroup.cur .ml { color: var(--pink); }
+    .mspace { width: 30px; }
+    .mgrid { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px 9px; width: 1134px; }
+    .mcell { width: 118px; height: 124px; border: 3px solid var(--navy); border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; }
+    .mcell .mlet { font-family: 'Barlow Condensed', sans-serif; font-size: 46px; font-weight: 900; line-height: 1; }
+    .mcell .mmarks { gap: 4px; height: 9px; }
+    .mcell.on { background: var(--pink); border-color: var(--pink); color: var(--white); }
+    .mcell.on .mk { background: var(--white); }
+
+    .tryrow { display: flex; align-items: center; gap: 56px; margin-bottom: 44px; }
+    .trybox { display: flex; gap: 14px; }
+    .word {
+        font-family: 'Barlow Condensed', sans-serif; font-size: 46px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase;
+        color: var(--navy); border: 3px solid var(--navy); border-radius: 8px; padding: 6px 20px; width: 420px; outline: none;
+    }
+    .word:focus { border-color: var(--pink); }
+    .send {
+        font-family: 'Barlow Condensed', sans-serif; font-size: 28px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase;
+        background: var(--pink); color: var(--white); border: none; border-radius: 8px; padding: 0 34px; cursor: pointer;
+    }
+    .send:focus-visible { outline: 3px solid var(--navy); outline-offset: 2px; }
+    .mout { min-height: 150px; display: flex; justify-content: center; align-items: flex-start; }
+
+    /* bit */
+    .bitword { font-family: 'Barlow Condensed', sans-serif; font-size: 60px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.02em; color: #c3c6d0; margin-bottom: 30px; line-height: 1; }
+    .bitword span { color: var(--pink); }
+    .bitrow { display: flex; align-items: center; gap: 90px; }
+    .bitcol { display: flex; flex-direction: column; align-items: center; }
+    .bit-big {
+        width: 180px; height: 180px; border-radius: 12px; border: 5px solid var(--navy); background: var(--white); color: var(--navy);
+        font-family: 'Barlow Condensed', sans-serif; font-size: 124px; font-weight: 800;
+        display: flex; align-items: center; justify-content: center;
+        transition: background-color .15s, color .15s, border-color .15s;
+    }
+    .bit-big.on { background: var(--pink); border-color: var(--pink); color: var(--white); }
+
+    /* patterns */
+    .pats { display: flex; align-items: center; gap: 30px; }
+    .pcol { display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 140px; }
+    .pcol .dlbl { margin-bottom: 8px; }
+    .prow { display: flex; gap: 5px; }
+    .sq { width: 34px; height: 34px; border: 3px solid var(--navy); border-radius: 5px; font-family: 'Barlow Condensed', sans-serif; font-size: 21px; font-weight: 800; display: flex; align-items: center; justify-content: center; background: #fff; }
+    .sq.on { background: var(--pink); border-color: var(--pink); color: var(--white); }
+    .pcnt { margin-top: 10px; font-size: 24px; font-weight: 600; }
+    .pcnt b { color: var(--pink); font-weight: 800; }
+    .px2 { font-family: 'Barlow Condensed', sans-serif; font-size: 36px; font-weight: 900; color: var(--pink); }
+    .pbig { border: 3px solid var(--pink); border-radius: 8px; padding: 22px 38px; text-align: center; margin-left: 6px; }
+    .pbig .n { font-family: 'Barlow Condensed', sans-serif; font-size: 112px; font-weight: 900; color: var(--pink); line-height: 1; margin: 6px 0; }
+
+    /* byte */
+    .byterow { display: flex; gap: 30px; }
+    .bcol { display: flex; flex-direction: column; align-items: center; width: 92px; }
+    .bdig { font-family: 'Barlow Condensed', sans-serif; font-size: 40px; font-weight: 800; color: #c3c6d0; margin-top: 6px; line-height: 1.1; }
+    .bdig.on { color: var(--pink); }
+    .bracket-wrap { margin-top: 12px; }
+    .bracket { height: 22px; border: 4px solid var(--navy); border-top: none; }
+    .bracket-lbl { text-align: center; margin-top: 10px; font-family: 'Barlow Condensed', sans-serif; font-size: 32px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.04em; }
+    .readout { display: flex; gap: 28px; margin-top: 24px; }
+    .rbox { border: 3px solid var(--navy); border-radius: 8px; padding: 12px 34px; min-width: 320px; text-align: center; }
+    .rbox .lbl { font-family: 'Barlow Condensed', sans-serif; font-size: 20px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: var(--mid-grey); }
+    .rbox .num { font-family: 'Barlow Condensed', sans-serif; font-size: 58px; font-weight: 900; line-height: 1.1; letter-spacing: 0.04em; font-variant-numeric: tabular-nums; }
+    .rbox.pink { border-color: var(--pink); }
+    .rbox.pink .num { color: var(--pink); }
+
+    /* light */
+    .lightrow { display: flex; align-items: center; justify-content: center; gap: 80px; height: 100%; }
+    .orbit { fill: none; stroke: #d7dae2; stroke-width: 3; stroke-dasharray: 6 8; }
+    .earth { fill: var(--blank); stroke: var(--navy); stroke-width: 4; }
+    .lat { fill: none; stroke: #c9ccd6; stroke-width: 2; }
+    .photon { fill: var(--pink); }
+    .halo { fill: var(--pink); opacity: .18; }
+    .elbl { font-family: 'Barlow Condensed', sans-serif; font-size: 30px; font-weight: 900; letter-spacing: 0.1em; text-transform: uppercase; fill: var(--navy); }
+    .lstats { display: flex; flex-direction: column; gap: 40px; width: 540px; }
+    .lstat .big { font-family: 'Barlow Condensed', sans-serif; font-size: 86px; font-weight: 900; line-height: 1; font-variant-numeric: tabular-nums; }
+    .lstat .big .pk { color: var(--pink); }
+    .lstat .lbl { font-size: 25px; font-weight: 600; margin-top: 8px; }
+    .lstat .note { margin-top: 6px; font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: var(--mid-grey); }
+
+    /* tick */
+    .clock { width: 1000px; height: 90px; overflow: hidden; }
+    .clock svg { display: block; animation: tick 0.9s linear infinite; }
+    .clock path { fill: none; stroke: var(--navy); stroke-width: 4; stroke-linejoin: miter; }
+    @keyframes tick { to { transform: translateX(-80px); } }
+    .tstat { text-align: center; margin: 22px 0 34px 0; }
+    .tstat .big { font-family: 'Barlow Condensed', sans-serif; font-size: 96px; font-weight: 900; line-height: 1; letter-spacing: 0.02em; }
+    .tstat .lbl { font-size: 25px; font-weight: 600; margin-top: 6px; }
+    .ruler { display: flex; align-items: center; gap: 30px; }
+    .rwrap { width: 600px; }
+    .rbar { height: 18px; width: 0; background: var(--pink); border-radius: 3px; margin-bottom: 8px; transition: width 1.6s var(--ease); }
+    .rbar.go { width: 600px; }
+    .rwrap svg { display: block; overflow: visible; }
+    .rwrap line { stroke: var(--navy); stroke-width: 2; }
+    .rwrap text { font-family: 'Barlow Condensed', sans-serif; font-size: 20px; font-weight: 800; fill: var(--navy); text-anchor: middle; }
+    .rlab { font-family: 'Barlow Condensed', sans-serif; font-size: 52px; font-weight: 900; color: var(--pink); }
+
+    /* signals */
+    .spanels { display: flex; gap: 24px; }
+    .spanel { border: 3px solid var(--navy); border-radius: 8px; padding: 16px 22px 18px; }
+    .spanel.pink { border-color: var(--pink); }
+    .spanel .dlbl { margin-bottom: 6px; }
+    .spanel svg { display: block; }
+    .guide { stroke: #d7dae2; stroke-width: 2; stroke-dasharray: 5 6; }
+    .sig { fill: none; stroke: var(--navy); stroke-width: 3.5; stroke-linejoin: round; stroke-dasharray: 1; stroke-dashoffset: 1; transition: stroke-dashoffset 2.6s linear; }
+    .sig.go { stroke-dashoffset: 0; }
+    .dec { display: flex; height: 40px; }
+    .dec span { display: flex; justify-content: center; align-items: center; font-family: 'Barlow Condensed', sans-serif; font-size: 30px; font-weight: 800; }
+    .dec span.bad { color: var(--pink); }
+    .stag { margin-top: 6px; font-size: 24px; font-weight: 700; }
+    .stag.bad { color: var(--pink); }
+
+    /* summary */
+    .sumgrid { display: grid; grid-template-columns: repeat(2, 540px); gap: 26px 32px; }
+    .sumgrid .dcard { width: auto; padding: 22px 30px; }
+    .sumgrid .dex { font-size: 48px; margin: 4px 0 6px 0; line-height: 1; }
+    .sumgrid .dhow { font-size: 24px; font-weight: 600; }
+
+    /* controls */
+    .controls { display: flex; align-items: center; gap: 10px; padding: 14px 0 18px 0; font-family: 'Barlow Condensed', sans-serif; }
+    .controls button {
+        font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase;
+        background: var(--navy); color: var(--white); border: none; border-radius: 6px; padding: 9px 16px; cursor: pointer;
+    }
+    .controls button.alt { background: var(--white); color: var(--navy); }
+    .controls button:focus-visible { outline: 3px solid var(--pink); outline-offset: 2px; }
+    .dots { display: flex; gap: 8px; margin: 0 10px; }
+    .dots button { width: 14px; height: 14px; padding: 0; border-radius: 50%; background: #c9ccd6; }
+    .dots button.cur { background: var(--pink); }
+    .steplbl { font-size: 18px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--mid-grey); margin-left: 6px; min-width: 110px; }
+    .ink { position: absolute; inset: 0; width: 1280px; height: 720px; pointer-events: none; z-index: 5; touch-action: none; }
+    .ink.active { pointer-events: auto; cursor: crosshair; }
+    .controls button#pen.on { background: var(--pink); color: var(--white); }
+    .controls .swatch { width: 26px; height: 26px; padding: 0; border-radius: 50%; border: 3px solid var(--white); box-shadow: 0 0 0 1px #c9ccd6; }
+    .controls .swatch.cur { box-shadow: 0 0 0 3px var(--navy); }
+    .sep { width: 1.5px; height: 28px; background: #c9ccd6; margin: 0 6px; }
+    .stage.instant *, .stage.instant *::before { transition: none !important; animation: none !important; }
+
+    @media (prefers-reduced-motion: reduce) {
+        .rev, .bit-big { transition: none !important; }
+        .caption.in, .clock svg { animation: none !important; }
+    }
+</style>
+</head>
+<body>
+
+<div class="viewport">
+    <div class="stage" id="stage">
+        <div class="top">
+            <div><h1 class="sheet-title" id="title"></h1></div>
+            <div class="counter" id="counter"></div>
+        </div>
+        <div class="content" id="content"></div>
+        <div class="caption" id="caption"></div>
+        <div class="progress" id="progress"></div>
+        <canvas class="ink" id="ink" width="2560" height="1440"></canvas>
+    </div>
+</div>
+
+<div class="controls">
+    <button class="alt" id="back" aria-label="Previous scene">Back</button>
+    <button class="alt" id="replay" aria-label="Replay scene">Replay</button>
+    <button id="next" aria-label="Next scene">Next</button>
+    <div class="dots" id="dots"></div>
+    <button class="alt" id="auto">Autoplay: On</button>
+    <span class="steplbl" id="steplbl"></span>
+    <span class="sep"></span>
+    <button class="alt" id="pen" aria-pressed="false">Pen</button>
+    <button class="swatch cur" data-c="#ea008a" style="background:#ea008a" aria-label="Pink pen"></button>
+    <button class="swatch" data-c="#1b1f45" style="background:#1b1f45" aria-label="Navy pen"></button>
+    <button class="alt" id="clear">Clear</button>
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+const content = $('#content'), caption = $('#caption'), titleEl = $('#title'), counter = $('#counter'), progress = $('#progress');
+let timers = [], events = [], beats = [], idx = 0, beat = 0, autoplay = true;
+let segFrom = 0, segTo = 0, segStart = 0;
+let ptimers = [], cleanups = [];
+const stage = document.getElementById('stage');
+
+function at(ms, fn) { events.push({ t: ms, fn, done: false }); }
+function beatAt(ms, html) { beats.push(ms); at(ms, () => say(html)); }
+function clearTimers() { timers.forEach(clearTimeout); timers = []; }
+function el(tag, cls, html) { const e = document.createElement(tag); if (cls) e.className = cls; if (html !== undefined) e.innerHTML = html; return e; }
+function show(e) { e.classList.remove('hide'); }
+function say(html) { caption.innerHTML = '<span>' + html + '</span>'; caption.classList.remove('in'); void caption.offsetWidth; caption.classList.add('in'); }
+function stopInteractive() { ptimers.forEach(clearTimeout); ptimers = []; cleanups.forEach(f => f()); cleanups = []; }
+
+/* ---------- light bulb ---------- */
+function bulb(w, cls = '') {
+    const b = el('div', 'bulb' + (cls ? ' ' + cls : ''));
+    const rays = [-180, -150, -120, -90, -60, -30, 0].map(a => {
+        const r = a * Math.PI / 180;
+        return `<line x1="${(80 + Math.cos(r) * 60).toFixed(1)}" y1="${(78 + Math.sin(r) * 60).toFixed(1)}" x2="${(80 + Math.cos(r) * 76).toFixed(1)}" y2="${(78 + Math.sin(r) * 76).toFixed(1)}"/>`;
+    }).join('');
+    b.innerHTML = `<svg viewBox="0 0 160 200" aria-hidden="true"><g class="rays">${rays}</g>
+        <path class="glass" d="M80 30 C53 30 32 51 32 78 C32 96 42 107 51 118 C57 125 59 131 59 140 L101 140 C101 131 103 125 109 118 C118 107 128 96 128 78 C128 51 107 30 80 30 Z"/>
+        <path class="fil" d="M68 140 L68 104 Q74 90 80 104 Q86 90 92 104 L92 140"/>
+        <rect class="base" x="58" y="146" width="44" height="10" rx="3"/>
+        <rect class="base" x="60" y="160" width="40" height="10" rx="3"/>
+        <rect class="base" x="67" y="174" width="26" height="9" rx="4.5"/></svg>`;
+    b.style.width = w + 'px';
+    b.on = false;
+    b.set = v => { b.on = v; b.classList.toggle('on', v); if (b.cb) b.cb(v); };
+    b.onclick = () => b.set(!b.on);
+    return b;
+}
+
+/* ---------- morse ---------- */
+const MORSE = { A:'.-', B:'-...', C:'-.-.', D:'-..', E:'.', F:'..-.', G:'--.', H:'....', I:'..', J:'.---', K:'-.-', L:'.-..', M:'--', N:'-.', O:'---', P:'.--.', Q:'--.-', R:'.-.', S:'...', T:'-', U:'..-', V:'...-', W:'.--', X:'-..-', Y:'-.--', Z:'--..' };
+
+function markEl(s, size, extra = '') {
+    const m = el('span', 'mk ' + (s === '.' ? 'd' : 'h') + extra);
+    m.style.width = (s === '.' ? size : size * 3) + 'px'; m.style.height = size + 'px'; m.style.borderRadius = size / 2 + 'px';
+    return m;
+}
+
+function morseRow(word, size, gone) {
+    const row = el('div', 'mword');
+    const groups = [];
+    word.toUpperCase().split('').forEach(ch => {
+        if (ch === ' ') { row.appendChild(el('div', 'mspace')); groups.push(null); return; }
+        const code = MORSE[ch]; if (!code) return;
+        const g = el('div', 'mgroup'), mm = el('div', 'mmarks');
+        mm.style.gap = Math.round(size * 0.5) + 'px'; mm.style.height = size + 'px';
+        const marks = code.split('').map(s => { const m = markEl(s, size, gone ? ' gone' : ''); mm.appendChild(m); return m; });
+        const lab = el('div', 'ml' + (gone ? ' rev hide' : ''), ch);
+        lab.style.fontSize = Math.max(28, Math.round(size * 1.4)) + 'px';
+        g.append(mm, lab); row.appendChild(g);
+        groups.push({ g, marks, lab, code });
+    });
+    row.groups = groups;
+    return row;
+}
+
+function morseSeq(groups, u) {
+    let t = 0; const seq = [];
+    groups.forEach(gr => {
+        if (!gr) { t += 4 * u; return; }
+        gr.code.split('').forEach((s, si) => { const len = s === '.' ? u : 3 * u; seq.push({ t, len, m: gr.marks[si], gr }); t += len + u; });
+        t += 2 * u;
+    });
+    return { seq, total: t };
+}
+
+function playMorse(lamp, groups, u) {
+    ptimers.forEach(clearTimeout); ptimers = [];
+    lamp.set(false);
+    groups.forEach(g => { if (!g) return; g.g.classList.remove('cur'); show(g.lab); g.marks.forEach(m => m.classList.remove('live', 'gone')); });
+    const { seq, total } = morseSeq(groups, u);
+    seq.forEach(s => {
+        ptimers.push(setTimeout(() => { lamp.set(true); s.m.classList.add('live'); groups.forEach(g => g && g.g.classList.toggle('cur', g === s.gr)); }, s.t));
+        ptimers.push(setTimeout(() => { lamp.set(false); s.m.classList.remove('live'); }, s.t + s.len));
+    });
+    ptimers.push(setTimeout(() => groups.forEach(g => g && g.g.classList.remove('cur')), total));
+}
+
+function schedGroup(gr, start, u, lamp) {
+    let t = start;
+    at(start, () => { show(gr.lab); gr.g.classList.add('cur'); });
+    gr.code.split('').forEach((s, si) => {
+        const len = s === '.' ? u : 3 * u, m = gr.marks[si], t0 = t;
+        at(t0, () => { lamp.set(true); m.classList.remove('gone'); m.classList.add('live'); });
+        at(t0 + len, () => { lamp.set(false); m.classList.remove('live'); });
+        t += len + u;
+    });
+    at(t, () => gr.g.classList.remove('cur'));
+    return t;
+}
+
+/* ---------- noisy signals ---------- */
+function rng(seed) {
+    return () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+}
+function signal(levels, seq, seed, W = 500, H = 220) {
+    const r = rng(seed), pad = 18, padL = 10, span = H - pad * 2;
+    const y = v => pad + (1 - v / (levels - 1)) * span;
+    const sw = (W - padL * 2) / seq.length, amp = 0.085 * span;
+    let d = '', guides = '';
+    const reads = [];
+    for (let l = 0; l < levels; l++) guides += `<line class="guide" x1="${padL}" x2="${W - padL}" y1="${y(l).toFixed(1)}" y2="${y(l).toFixed(1)}"/>`;
+    seq.forEach((v, i) => {
+        let read = v;
+        const n = Math.floor(sw / 6);
+        for (let k = 0; k <= n; k++) {
+            const yy = y(v) + (r() - 0.5) * 2 * amp;
+            const px = padL + i * sw + Math.min(k * 6, sw - 1);
+            d += (d ? ' L' : 'M') + px.toFixed(1) + ' ' + yy.toFixed(1);
+            if (k === Math.floor(n / 2)) read = Math.max(0, Math.min(levels - 1, Math.round((1 - (yy - pad) / span) * (levels - 1))));
+        }
+        reads.push(read);
+    });
+    return { svg: `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}">${guides}<path class="sig" pathLength="1" d="${d}"/></svg>`, reads, sw, padL };
+}
+
+/* ---------- scenes ---------- */
+const scenes = [
+{
+    title: 'Introducing <span>binary</span>',
+    dur: 14500,
+    run() {
+        const c = el('div', 'center');
+        const b = bulb(200, 'rev hide');
+        const st = el('div', 'state rev hide', '<span class="s0 lit">Off</span> / <span class="s1">On</span>');
+        b.cb = v => { st.children[0].classList.toggle('lit', !v); st.children[1].classList.toggle('lit', v); };
+        c.append(b, st); content.appendChild(c);
+        beatAt(0, 'Every computer, phone and games console is built on one very simple idea.');
+        at(500, () => show(b)); at(800, () => show(st));
+        beatAt(4000, 'A switch can only be in one of two states: <b>on</b> or <b>off</b>.');
+        [4800, 5800, 6800, 7800].forEach((t, i) => at(t, () => b.set(i % 2 === 0)));
+        beatAt(9500, 'In this lesson, we will see how just <b>two states</b> can be used to represent almost anything.');
+    }
+},
+{
+    title: 'What is <span>Morse code</span>?',
+    dur: 17000,
+    run() {
+        const c = el('div', 'center');
+        const fact = el('div', 'fact rev hide', 'Electric telegraph, 1830s to 1840s');
+        const cards = el('div', 'cards');
+        const a = el('div', 'dcard rev hide', '<div class="dlbl">Dot</div><div class="sym"></div><div class="dhow">A short signal</div>');
+        const b = el('div', 'dcard pink rev hide', '<div class="dlbl">Dash</div><div class="sym"></div><div class="dhow">A long signal, three times as long</div>');
+        a.querySelector('.sym').appendChild(markEl('.', 44));
+        b.querySelector('.sym').appendChild(markEl('-', 44));
+        cards.append(a, b);
+        c.append(fact, cards); content.appendChild(c);
+        beatAt(0, 'Morse code is a way of sending messages using just <b>two signals</b>.');
+        beatAt(3800, 'It was developed in the 1830s and 1840s to send messages along electric telegraph wires.');
+        at(4200, () => show(fact));
+        beatAt(8500, 'The first signal is a <b>dot</b>: a short beep or flash of light.');
+        at(9000, () => show(a));
+        beatAt(12000, 'The second is a <b>dash</b>: a long signal, about three times as long as a dot.');
+        at(12500, () => show(b));
+    }
+},
+{
+    title: 'Example: <span>SOS</span>',
+    dur: 23500,
+    run() {
+        const c = el('div', 'center');
+        const lamp = bulb(150);
+        const row = morseRow('SOS', 34, true); row.style.marginTop = '40px'; row.style.gap = '64px';
+        c.append(lamp, row); content.appendChild(c);
+        const g = row.groups, u = 260;
+        lamp.onclick = () => playMorse(lamp, g, u);
+        beatAt(0, 'The most famous Morse code message is <b>SOS</b>, the international distress signal.');
+        beatAt(3600, '<b>S</b> is three dots.');
+        schedGroup(g[0], 4300, u, lamp);
+        beatAt(6800, '<b>O</b> is three dashes.');
+        schedGroup(g[1], 7500, u, lamp);
+        beatAt(11200, 'Then <b>S</b> again: three more dots.');
+        schedGroup(g[2], 11900, u, lamp);
+        beatAt(14600, 'Watch the lamp as the whole message is sent again, from start to finish.');
+        at(15400, () => playMorse(lamp, g, u));
+        beatAt(19500, 'Two signals, arranged into patterns, can spell out a whole message.');
+    }
+},
+{
+    title: 'Two symbols, <span>26 letters</span>',
+    dur: 19500,
+    run() {
+        const c = el('div', 'center');
+        const grid = el('div', 'mgrid');
+        const cells = {};
+        Object.keys(MORSE).forEach(ch => {
+            const cell = el('div', 'mcell rev hide', `<div class="mlet">${ch}</div>`);
+            const mm = el('div', 'mmarks');
+            MORSE[ch].split('').forEach(s => mm.appendChild(markEl(s, 9)));
+            cell.appendChild(mm); grid.appendChild(cell); cells[ch] = cell;
+        });
+        c.appendChild(grid); content.appendChild(c);
+        beatAt(0, 'Every letter of the alphabet has its own pattern of dots and dashes.');
+        Object.values(cells).forEach((cell, i) => at(400 + i * 110, () => show(cell)));
+        beatAt(5000, 'Common letters like <b>E</b> and <b>T</b> have the shortest patterns, which makes messages quicker to send.');
+        at(5600, () => { cells.E.classList.add('on'); cells.T.classList.add('on'); });
+        beatAt(10500, 'With just <b>two symbols</b>, Morse code can represent the whole alphabet.');
+        at(10500, () => { cells.E.classList.remove('on'); cells.T.classList.remove('on'); });
+        beatAt(14800, 'Computers use the same idea. Everything they store is made from just <b>two states</b>.');
+    }
+},
+{
+    title: 'Sending a <span>message</span>',
+    dur: 26000,
+    run() {
+        const c = el('div', 'center');
+        const top = el('div', 'tryrow');
+        const lamp = bulb(120);
+        const box = el('div', 'trybox');
+        const input = el('input', 'word');
+        input.value = 'HI'; input.maxLength = 10; input.spellcheck = false; input.autocomplete = 'off';
+        input.setAttribute('aria-label', 'Word to send');
+        const send = el('button', 'send', 'Send');
+        box.append(input, send); top.append(lamp, box);
+        const out = el('div', 'mout');
+        c.append(top, out); content.appendChild(c);
+        let groups = [];
+        const render = () => {
+            ptimers.forEach(clearTimeout); ptimers = []; lamp.set(false);
+            input.value = input.value.toUpperCase().replace(/[^A-Z ]/g, '');
+            out.innerHTML = '';
+            const r = morseRow(input.value.trim(), 20);
+            out.appendChild(r); groups = r.groups;
+        };
+        const sendIt = () => { render(); playMorse(lamp, groups, 200); };
+        input.addEventListener('input', render);
+        input.addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Enter') sendIt(); });
+        send.onclick = sendIt;
+        lamp.onclick = sendIt;
+        render();
+        beatAt(0, 'Observe what happens when I type a word and press <b>Send</b>. The lamp flashes it in Morse code.');
+        at(2600, sendIt);
+        beatAt(7000, 'Now watch a longer word. Notice how each letter is highlighted as it is sent.');
+        at(7800, () => { input.value = 'BINARY'; sendIt(); });
+    }
+},
+{
+    title: 'What is a <span>bit</span>?',
+    dur: 18000,
+    run() {
+        const c = el('div', 'center');
+        const word = el('div', 'bitword rev hide', '<span>Bi</span>nary digi<span>t</span>');
+        const row = el('div', 'bitrow');
+        const b = bulb(160, 'rev hide');
+        const col = el('div', 'bitcol rev hide');
+        const dig = el('div', 'bit-big', '0');
+        const st = el('div', 'state', '<span class="s0 lit">Off</span> / <span class="s1">On</span>');
+        col.append(dig, st);
+        b.cb = v => { dig.textContent = v ? '1' : '0'; dig.classList.toggle('on', v); st.children[0].classList.toggle('lit', !v); st.children[1].classList.toggle('lit', v); };
+        row.append(b, col);
+        c.append(word, row); content.appendChild(c);
+        beatAt(0, 'Computers store all of their information using <b>bits</b>.');
+        at(500, () => show(b)); at(800, () => show(col));
+        beatAt(3500, 'The word bit is short for <b>binary digit</b>.');
+        at(4000, () => show(word));
+        beatAt(7500, 'A bit can only ever be one of two values: <b>0</b> or <b>1</b>.');
+        [8300, 9300, 10300, 11300].forEach((t, i) => at(t, () => b.set(i % 2 === 0)));
+        beatAt(12800, 'Just like the light bulb: <b>1</b> means on and <b>0</b> means off.');
+    }
+},
+{
+    title: 'More bits, <span>more patterns</span>',
+    dur: 18500,
+    run() {
+        const c = el('div', 'center');
+        const row = el('div', 'pats');
+        const col = n => {
+            const cc = el('div', 'pcol');
+            const head = el('div', 'dlbl rev hide', n + (n === 1 ? ' bit' : ' bits'));
+            cc.appendChild(head);
+            const items = [];
+            for (let v = 0; v < 2 ** n; v++) {
+                const p = el('div', 'prow rev hide');
+                v.toString(2).padStart(n, '0').split('').forEach(d => p.appendChild(el('div', 'sq' + (d === '1' ? ' on' : ''), d)));
+                cc.appendChild(p); items.push(p);
+            }
+            const cnt = el('div', 'pcnt rev hide', `<b>${2 ** n}</b> patterns`);
+            cc.appendChild(cnt);
+            return { cc, all: [head, ...items, cnt] };
+        };
+        const cols = [1, 2, 3].map(col);
+        const x1 = el('div', 'px2 rev hide', '&times;2'), x2 = el('div', 'px2 rev hide', '&times;2'), x3 = el('div', 'px2 rev hide', '&rarr;');
+        const big = el('div', 'pbig rev hide', '<div class="dlbl">8 bits</div><div class="n">256</div><div class="dlbl">patterns</div>');
+        row.append(cols[0].cc, x1, cols[1].cc, x2, cols[2].cc, x3, big);
+        c.appendChild(row); content.appendChild(c);
+        const reveal = (list, start) => list.forEach((e, i) => at(start + i * 140, () => show(e)));
+        beatAt(0, 'One bit on its own can only make <b>two</b> patterns: 0 or 1.');
+        reveal(cols[0].all, 500);
+        beatAt(4000, 'Add a second bit and there are <b>four</b> patterns.');
+        at(4300, () => show(x1)); reveal(cols[1].all, 4600);
+        beatAt(8000, 'Three bits make <b>eight</b> patterns. Every extra bit doubles the number of patterns.');
+        at(8300, () => show(x2)); reveal(cols[2].all, 8600);
+        beatAt(13500, 'Keep doubling up to eight bits and you get <b>256</b> different patterns.');
+        at(14000, () => show(x3)); at(14400, () => show(big));
+    }
+},
+{
+    title: 'What is a <span>byte</span>?',
+    dur: 24000,
+    run() {
+        const c = el('div', 'center');
+        const row = el('div', 'byterow');
+        const bulbs = [], digs = [], cols = [];
+        const br = el('div', 'bracket-wrap rev hide', '<div class="bracket"></div><div class="bracket-lbl">1 byte = 8 bits</div>');
+        br.style.width = (8 * 92 + 7 * 30) + 'px';
+        const ro = el('div', 'readout');
+        const r1 = el('div', 'rbox rev hide', '<div class="lbl">Pattern</div><div class="num">00000000</div>');
+        const r2 = el('div', 'rbox pink rev hide', '<div class="lbl">Stores the character</div><div class="num">none</div>');
+        ro.append(r1, r2);
+        function update() {
+            const bits = bulbs.map(b => b.on ? '1' : '0').join('');
+            bits.split('').forEach((d, i) => { digs[i].textContent = d; digs[i].classList.toggle('on', d === '1'); });
+            r1.querySelector('.num').textContent = bits;
+            const v = parseInt(bits, 2);
+            r2.querySelector('.num').textContent = v > 32 && v < 127 ? String.fromCharCode(v) : (v === 32 ? 'space' : 'none');
+        }
+        for (let i = 0; i < 8; i++) {
+            const w = el('div', 'bcol rev hide'), b = bulb(92), d = el('div', 'bdig', '0');
+            b.cb = update; w.append(b, d); row.appendChild(w);
+            bulbs.push(b); digs.push(d); cols.push(w);
+        }
+        const setBits = s => s.split('').forEach((d, i) => bulbs[i].set(d === '1'));
+        c.append(row, br, ro); content.appendChild(c);
+        beatAt(0, 'When we group <b>8 bits</b> together, we call it a <b>byte</b>.');
+        cols.forEach((w, i) => at(400 + i * 150, () => show(w)));
+        at(1800, () => show(br));
+        beatAt(4200, 'One byte can make <b>256</b> different patterns of on and off.');
+        at(4600, () => show(r1));
+        ['10110010', '01101101', '11100111', '00011000', '00000000'].forEach((p, i) => at(5200 + i * 650, () => setBits(p)));
+        beatAt(9000, 'Computers give each pattern a meaning. The pattern <b>01000001</b> stores the capital letter <b>A</b>.');
+        at(9800, () => setBits('01000001'));
+        at(10400, () => show(r2));
+        beatAt(15000, 'Observe what happens as I change the pattern. Each new pattern stores a different character.');
+        ['01000010', '01000011', '01100001', '00111111'].forEach((p, i) => at(15800 + i * 900, () => setBits(p)));
+        beatAt(19500, 'Every photo, song and video on a computer is stored as millions of bytes.');
+    }
+},
+{
+    title: 'The speed of <span>light</span>',
+    dur: 20500,
+    run() {
+        const row = el('div', 'lightrow');
+        const earth = el('div', 'rev hide', `<svg viewBox="0 0 400 400" width="380" height="380" aria-hidden="true">
+            <circle cx="200" cy="200" r="182" class="orbit"/>
+            <circle cx="200" cy="200" r="140" class="earth"/>
+            <path class="lat" d="M60 200 H340 M79 130 H321 M79 270 H321"/>
+            <ellipse cx="200" cy="200" rx="62" ry="140" class="lat"/>
+            <g class="spin"><circle cx="200" cy="18" r="22" class="halo"/><circle cx="200" cy="18" r="11" class="photon"/></g></svg>`);
+        const stats = el('div', 'lstats');
+        const s1 = el('div', 'lstat rev hide', '<div class="big">300,000 <span class="pk">km</span></div><div class="lbl">travelled by light every second</div>');
+        const s2 = el('div', 'lstat rev hide', '<div class="big"><span class="pk laps">0.0</span> laps</div><div class="lbl">around the Earth in one second</div><div class="note">Animation slowed down</div>');
+        stats.append(s1, s2); row.append(earth, stats); content.appendChild(row);
+        const spin = earth.querySelector('.spin'), laps = s2.querySelector('.laps');
+        let raf = 0;
+        cleanups.push(() => cancelAnimationFrame(raf));
+        const orbit = () => {
+            cancelAnimationFrame(raf);
+            const st = performance.now(), D = 6000, L = 7.5;
+            const f = n => {
+                const p = Math.min(1, (n - st) / D);
+                spin.setAttribute('transform', `rotate(${(p * L * 360).toFixed(1)} 200 200)`);
+                laps.textContent = (p * L).toFixed(1);
+                if (p < 1) raf = requestAnimationFrame(f);
+            };
+            raf = requestAnimationFrame(f);
+        };
+        beatAt(0, 'Light is the fastest thing in the universe.');
+        at(500, () => show(earth));
+        beatAt(3500, 'It travels about <b>300,000 kilometres</b> every second.');
+        at(4000, () => show(s1));
+        beatAt(7500, 'That is fast enough to travel around the Earth about <b>7.5 times</b> in a single second.');
+        at(8000, () => show(s2)); at(8400, orbit);
+        beatAt(15500, 'Electrical signals inside a computer also travel incredibly fast, at a large fraction of the speed of light.');
+    }
+},
+{
+    title: 'One <span>tick</span>',
+    dur: 20500,
+    run() {
+        const c = el('div', 'center');
+        let d = 'M0 70';
+        for (let x = 0; x < 1160; x += 80) d += ` H${x + 20} V20 H${x + 60} V70 H${x + 80}`;
+        const clock = el('div', 'clock rev hide', `<svg width="1160" height="90" viewBox="0 0 1160 90" aria-hidden="true"><path d="${d}"/></svg>`);
+        const stat = el('div', 'tstat rev hide', '<div class="big">3,000,000,000</div><div class="lbl">clock ticks every second in a modern processor</div>');
+        let ticks = '';
+        for (let mm = 0; mm <= 100; mm++) {
+            const x = mm * 6, h = mm % 10 === 0 ? 28 : mm % 5 === 0 ? 18 : 10;
+            ticks += `<line x1="${x}" x2="${x}" y1="0" y2="${h}"/>`;
+            if (mm % 10 === 0) ticks += `<text x="${x}" y="52">${mm / 10}</text>`;
+        }
+        const ruler = el('div', 'ruler rev hide', `<div class="rwrap"><div class="rbar"></div><svg width="600" height="60" viewBox="0 0 600 60" aria-hidden="true"><line x1="0" x2="600" y1="0" y2="0"/>${ticks}</svg></div><div class="rlab">10 cm</div>`);
+        c.append(clock, stat, ruler); content.appendChild(c);
+        beatAt(0, 'A computer processor works in tiny steps, timed by a clock that ticks over and over.');
+        at(500, () => show(clock));
+        beatAt(4500, 'A modern processor can tick about <b>3 billion times</b> every second.');
+        at(5000, () => show(stat));
+        beatAt(9500, 'In the time of one tick, light travels only about <b>10 centimetres</b>, roughly the width of your hand.');
+        at(10000, () => show(ruler)); at(10600, () => ruler.querySelector('.rbar').classList.add('go'));
+        beatAt(15500, 'So a computer has to read every signal instantly, and without making mistakes.');
+    }
+},
+{
+    title: 'Why <span>binary</span>?',
+    dur: 25500,
+    run() {
+        const wrap = el('div', 'center');
+        const panels = el('div', 'spanels');
+        const make = (levels, seq, seed, name, pink) => {
+            const s = signal(levels, seq, seed);
+            const p = el('div', 'spanel rev hide' + (pink ? ' pink' : ''), `<div class="dlbl">${name}</div>${s.svg}`);
+            const dec = el('div', 'dec rev hide'); dec.style.paddingLeft = s.padL + 'px';
+            let wrong = 0;
+            s.reads.forEach((r, i) => { const sp = el('span', r !== seq[i] ? 'bad' : '', r); if (r !== seq[i]) wrong++; sp.style.width = s.sw + 'px'; dec.appendChild(sp); });
+            const tag = el('div', 'stag rev hide' + (wrong ? ' bad' : ''), wrong ? `${wrong} of ${seq.length} values read incorrectly` : `All ${seq.length} values read correctly`);
+            p.append(dec, tag); panels.appendChild(p);
+            return { p, dec, tag, path: p.querySelector('.sig') };
+        };
+        const A = make(2, [1, 0, 1, 1, 0, 0, 1, 0, 1, 1], 7, 'Two states (binary)', false);
+        const B = make(10, [3, 7, 2, 9, 5, 1, 8, 4, 6, 0], 11, 'Ten states', true);
+        wrap.appendChild(panels); content.appendChild(wrap);
+        beatAt(0, 'At these speeds, a computer has no time to double check each signal.');
+        at(500, () => show(A.p)); at(800, () => show(B.p));
+        beatAt(4000, 'Real electrical signals are never perfectly clean. There is always a little <b>noise</b>.');
+        at(4500, () => { A.path.classList.add('go'); B.path.classList.add('go'); });
+        beatAt(9500, 'With <b>two states</b>, on and off are far apart, so they are easy to tell apart, even with noise.');
+        at(10000, () => show(A.dec)); at(10600, () => show(A.tag));
+        beatAt(15000, 'With <b>ten states</b>, the levels are close together, so the same noise causes mistakes.');
+        at(15500, () => show(B.dec)); at(16100, () => show(B.tag));
+        beatAt(20500, 'That is why computers use binary. Two states are <b>simple</b>, <b>fast</b> and <b>reliable</b>.');
+    }
+},
+{
+    title: '<span>Summary</span>',
+    dur: 17000,
+    run() {
+        const c = el('div', 'center');
+        const g = el('div', 'sumgrid');
+        const data = [
+            ['Morse code', 'Two symbols, dots and dashes, can represent every letter.', false],
+            ['Bit', 'A binary digit. It is always either 0 (off) or 1 (on).', true],
+            ['Byte', 'A group of 8 bits, which can make 256 different patterns.', true],
+            ['Why binary?', 'Two states can be read quickly and reliably, even with noise.', false]
+        ];
+        const cards = data.map(([t, d, p]) => { const k = el('div', 'dcard rev hide' + (p ? ' pink' : ''), `<div class="dex">${t}</div><div class="dhow">${d}</div>`); g.appendChild(k); return k; });
+        c.appendChild(g); content.appendChild(c);
+        beatAt(0, '<b>Morse code</b> uses two symbols, dots and dashes, to represent every letter.');
+        at(500, () => show(cards[0]));
+        beatAt(4000, 'A <b>bit</b> is a binary digit. It is always either 0 or 1.');
+        at(4400, () => show(cards[1]));
+        beatAt(8000, 'A <b>byte</b> is a group of 8 bits, which can make 256 different patterns.');
+        at(8400, () => show(cards[2]));
+        beatAt(12000, 'Computers use <b>binary</b> because two states can be read quickly and reliably.');
+        at(12400, () => show(cards[3]));
+    }
+}
+];
+
+/* ---------- player ---------- */
+const dots = $('#dots');
+scenes.forEach((_, i) => { const d = el('button'); d.setAttribute('aria-label', 'Scene ' + (i + 1)); d.onclick = () => go(i); dots.appendChild(d); });
+
+const stepLbl = $('#steplbl');
+const dur = () => scenes[idx].dur;
+const beatEnd = b => (b + 1 < beats.length ? beats[b + 1] : dur());
+function label() { stepLbl.textContent = `Step ${beat + 1} of ${beats.length}`; }
+
+function build(i) {
+    clearTimers();
+    stopInteractive();
+    const ni = Math.max(0, Math.min(scenes.length - 1, i));
+    if (ni !== idx) clearInk();
+    idx = ni;
+    events = []; beats = [];
+    const sc = scenes[idx];
+    content.innerHTML = ''; caption.innerHTML = '';
+    titleEl.innerHTML = sc.title;
+    counter.innerHTML = `<b>${idx + 1}</b> / ${scenes.length}`;
+    [...dots.children].forEach((d, j) => d.classList.toggle('cur', j === idx));
+    sc.run();
+    beats = [...new Set(beats)].sort((a, b) => a - b);
+}
+
+function jumpTo(to) {
+    stage.classList.add('instant');
+    events.filter(e => !e.done && e.t < to).sort((a, b) => a.t - b.t).forEach(e => { e.done = true; e.fn(); });
+    void stage.offsetWidth;
+    requestAnimationFrame(() => requestAnimationFrame(() => stage.classList.remove('instant')));
+}
+
+function setProgress(from, to) {
+    progress.style.transition = 'none';
+    progress.style.width = (from / dur() * 100) + '%';
+    void progress.offsetWidth;
+    progress.style.transition = `width ${Math.max(0, to - from)}ms linear`;
+    progress.style.width = (to / dur() * 100) + '%';
+}
+
+function play(from, to, onEnd) {
+    clearTimers();
+    segFrom = from; segTo = to; segStart = performance.now();
+    events.filter(e => !e.done && e.t >= from && e.t < to)
+        .forEach(e => timers.push(setTimeout(() => { e.done = true; e.fn(); }, e.t - from)));
+    beats.forEach((bt, k) => { if (bt > from && bt < to) timers.push(setTimeout(() => { beat = k; label(); }, bt - from)); });
+    if (onEnd) timers.push(setTimeout(onEnd, to - from));
+    setProgress(from, to);
+}
+
+function now() { return Math.min(segTo, segFrom + performance.now() - segStart); }
+
+function startBeat(b) {
+    beat = b; label();
+    jumpTo(beats[b]);
+    if (autoplay) play(beats[b], dur(), () => { if (idx < scenes.length - 1) go(idx + 1); });
+    else play(beats[b], beatEnd(b));
+}
+
+function go(i, b = 0) {
+    build(i);
+    startBeat(b === 'last' ? beats.length - 1 : b);
+}
+
+function next() {
+    if (autoplay) { if (idx < scenes.length - 1) go(idx + 1); return; }
+    clearTimers();
+    if (beat < beats.length - 1) { jumpTo(beatEnd(beat)); startBeat(beat + 1); }
+    else if (idx < scenes.length - 1) go(idx + 1);
+    else { jumpTo(dur()); setProgress(dur(), dur()); }
+}
+
+function back() {
+    if (autoplay) { go(idx - 1); return; }
+    if (beat > 0) go(idx, beat - 1);
+    else if (idx > 0) go(idx - 1, 'last');
+    else go(0);
+}
+
+function toggleAuto() {
+    autoplay = !autoplay;
+    autoBtn.textContent = 'Autoplay: ' + (autoplay ? 'On' : 'Off');
+    const cur = now();
+    clearTimers();
+    if (autoplay) {
+        play(cur, dur(), () => { if (idx < scenes.length - 1) go(idx + 1); });
+    } else {
+        let b = 0; beats.forEach((bt, k) => { if (bt <= cur) b = k; });
+        beat = b; label();
+        jumpTo(beatEnd(b));
+        setProgress(beatEnd(b), beatEnd(b));
+    }
+}
+
+const autoBtn = $('#auto');
+$('#next').onclick = next;
+$('#back').onclick = back;
+$('#replay').onclick = () => go(idx);
+autoBtn.onclick = toggleAuto;
+const typing = e => e.target && e.target.tagName === 'INPUT';
+document.addEventListener('keydown', e => {
+    if (typing(e)) return;
+    if (e.key === 'ArrowRight') next();
+    if (e.key === 'ArrowLeft') back();
+    if (e.key === 'r' || e.key === 'R') go(idx);
+    if (e.key === ' ') { e.preventDefault(); toggleAuto(); }
+});
+
+/* ---------- pen ---------- */
+const ink = $('#ink'), ctx = ink.getContext('2d'), penBtn = $('#pen');
+let penOn = false, penColour = '#ea008a', drawing = false, last = null;
+ctx.scale(2, 2); ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.lineWidth = 5;
+function setPen(v) { penOn = v; ink.classList.toggle('active', v); penBtn.classList.toggle('on', v); penBtn.setAttribute('aria-pressed', v); }
+function clearInk() { ctx.clearRect(0, 0, 1280, 720); }
+function pt(e) { const r = ink.getBoundingClientRect(); return { x: (e.clientX - r.left) / r.width * 1280, y: (e.clientY - r.top) / r.height * 720 }; }
+ink.addEventListener('pointerdown', e => { drawing = true; last = pt(e); ink.setPointerCapture(e.pointerId); ctx.strokeStyle = penColour; ctx.beginPath(); ctx.arc(last.x, last.y, 2.5, 0, Math.PI * 2); ctx.fillStyle = penColour; ctx.fill(); });
+ink.addEventListener('pointermove', e => {
+    if (!drawing) return;
+    const p = pt(e), mid = { x: (last.x + p.x) / 2, y: (last.y + p.y) / 2 };
+    ctx.beginPath(); ctx.moveTo(last.midX ?? last.x, last.midY ?? last.y); ctx.quadraticCurveTo(last.x, last.y, mid.x, mid.y); ctx.stroke();
+    last = { x: p.x, y: p.y, midX: mid.x, midY: mid.y };
+});
+['pointerup', 'pointercancel'].forEach(t => ink.addEventListener(t, () => { drawing = false; }));
+penBtn.onclick = () => setPen(!penOn);
+$('#clear').onclick = clearInk;
+document.querySelectorAll('.swatch').forEach(b => b.onclick = () => {
+    penColour = b.dataset.c; setPen(true);
+    document.querySelectorAll('.swatch').forEach(x => x.classList.toggle('cur', x === b));
+});
+document.addEventListener('keydown', e => {
+    if (typing(e)) return;
+    if (e.key === 'p' || e.key === 'P') setPen(!penOn);
+    if (e.key === 'c' || e.key === 'C') clearInk();
+    if (e.key === 'Escape') setPen(false);
+});
+
+function fit() {
+    const st = $('#stage');
+    const vw = window.innerWidth - 40, vh = window.innerHeight - 90;
+    const k = Math.min(vw / 1280, vh / 720);
+    st.style.transform = `scale(${k})`;
+    st.style.margin = `${(720 * k - 720) / 2}px ${(1280 * k - 1280) / 2}px`;
+}
+window.addEventListener('resize', fit);
+fit();
+(document.fonts ? document.fonts.ready : Promise.resolve()).then(() => go(0));
+</script>
+
+</body>
+</html>
