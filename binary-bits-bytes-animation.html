@@ -205,6 +205,32 @@
     .sep { width: 1.5px; height: 28px; background: #c9ccd6; margin: 0 6px; }
     .stage.instant *, .stage.instant *::before { transition: none !important; animation: none !important; }
 
+    /* tools, hide UI, export */
+    .controls { flex-wrap: wrap; justify-content: center; gap: 10px 26px; padding: 12px 20px 16px; width: 100%; }
+    .grp { display: flex; align-items: center; gap: 10px; }
+    .controls button#eraser.on { background: var(--pink); color: var(--white); }
+    .ink.erase { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30'%3E%3Ccircle cx='15' cy='15' r='13' fill='white' fill-opacity='.55' stroke='%231b1f45' stroke-width='2'/%3E%3C/svg%3E") 15 15, cell; }
+    body.noui .controls { display: none; }
+    .showui {
+        display: none; position: fixed; right: 14px; bottom: 14px; z-index: 10;
+        font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase;
+        background: var(--navy); color: var(--white); border: none; border-radius: 6px; padding: 8px 14px; cursor: pointer;
+        opacity: 0; transition: opacity .2s;
+    }
+    body.noui .showui { display: block; }
+    .showui:hover, .showui:focus-visible { opacity: 1; }
+    #print { display: none; }
+    @media print {
+        @page { size: 1280px 720px; margin: 0; }
+        * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        html, body { height: auto; overflow: visible; display: block; margin: 0; background: #fff; }
+        body > .viewport, body > .controls, .showui { display: none !important; }
+        #print { display: block; }
+        #print .stage { transform: none !important; margin: 0 !important; break-after: page; page-break-after: always; }
+        #print .stage:last-child { break-after: auto; page-break-after: auto; }
+        #print *, #print *::before { animation: none !important; transition: none !important; }
+    }
+
     @media (prefers-reduced-motion: reduce) {
         .rev, .bit-big, .step { transition: none !important; }
         .caption.in, .stat .pop { animation: none !important; }
@@ -229,18 +255,32 @@
 </div>
 
 <div class="controls">
-    <button class="alt" id="back" aria-label="Previous scene">Back</button>
-    <button class="alt" id="replay" aria-label="Replay scene">Replay</button>
-    <button id="next" aria-label="Next scene">Next</button>
-    <div class="dots" id="dots"></div>
-    <button class="alt" id="auto">Autoplay: Off</button>
-    <span class="steplbl" id="steplbl"></span>
-    <span class="sep"></span>
-    <button class="alt" id="pen" aria-pressed="false">Pen</button>
-    <button class="swatch cur" data-c="#ea008a" style="background:#ea008a" aria-label="Pink pen"></button>
-    <button class="swatch" data-c="#1b1f45" style="background:#1b1f45" aria-label="Navy pen"></button>
-    <button class="alt" id="clear">Clear</button>
+    <div class="grp">
+        <button class="alt" id="back" aria-label="Previous scene">Back</button>
+        <button class="alt" id="replay" aria-label="Replay scene">Replay</button>
+        <button id="next" aria-label="Next scene">Next</button>
+        <div class="dots" id="dots"></div>
+        <button class="alt" id="auto">Autoplay: Off</button>
+        <span class="steplbl" id="steplbl"></span>
+    </div>
+    <div class="grp">
+        <button class="alt" id="pen" aria-pressed="false">Pen</button>
+        <button class="swatch cur" data-c="#ea008a" style="background:#ea008a" aria-label="Pink pen"></button>
+        <button class="swatch" data-c="#1b1f45" style="background:#1b1f45" aria-label="Navy pen"></button>
+        <button class="swatch" data-c="#111111" style="background:#111111" aria-label="Black pen"></button>
+        <button class="swatch" data-c="#0a7bd6" style="background:#0a7bd6" aria-label="Blue pen"></button>
+        <button class="swatch" data-c="#12a150" style="background:#12a150" aria-label="Green pen"></button>
+        <button class="swatch" data-c="#f28c00" style="background:#f28c00" aria-label="Orange pen"></button>
+        <button class="alt" id="eraser" aria-pressed="false">Eraser</button>
+        <button class="alt" id="clear">Clear</button>
+    </div>
+    <div class="grp">
+        <button class="alt" id="pdf">Export PDF</button>
+        <button class="alt" id="hideui">Hide UI</button>
+    </div>
 </div>
+<button class="showui" id="showui">Show UI</button>
+<div id="print"></div>
 
 <script>
 const $ = s => document.querySelector(s);
@@ -487,8 +527,7 @@ function label() { stepLbl.textContent = `Step ${beat + 1} of ${beats.length}`; 
 function build(i) {
     clearTimers();
     const ni = Math.max(0, Math.min(scenes.length - 1, i));
-    if (ni !== idx) clearInk();
-    idx = ni;
+    if (ni !== idx) { saveInk(); idx = ni; loadInk(); }
     events = []; beats = [];
     const sc = scenes[idx];
     content.innerHTML = ''; caption.innerHTML = '';
@@ -582,43 +621,118 @@ document.addEventListener('keydown', e => {
     if (e.key === ' ') { e.preventDefault(); toggleAuto(); }
 });
 
-/* ---------- pen ---------- */
-const ink = $('#ink'), ctx = ink.getContext('2d'), penBtn = $('#pen');
-let penOn = false, penColour = '#ea008a', drawing = false, last = null;
-ctx.scale(2, 2); ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.lineWidth = 5;
-function setPen(v) { penOn = v; ink.classList.toggle('active', v); penBtn.classList.toggle('on', v); penBtn.setAttribute('aria-pressed', v); }
-function clearInk() { ctx.clearRect(0, 0, 1280, 720); }
+/* ---------- pen and eraser ---------- */
+const ink = $('#ink'), ctx = ink.getContext('2d'), penBtn = $('#pen'), eraserBtn = $('#eraser');
+let tool = null, penColour = '#ea008a', drawing = false, last = null, inkMarked = false, scaleK = 1, exporting = false;
+const inkStore = {};
+const isTyping = e => e.target && e.target.tagName === 'INPUT';
+ctx.scale(2, 2); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+
+function setTool(t) {
+    tool = t;
+    ink.classList.toggle('active', !!t);
+    ink.classList.toggle('erase', t === 'eraser');
+    penBtn.classList.toggle('on', t === 'pen'); penBtn.setAttribute('aria-pressed', t === 'pen');
+    eraserBtn.classList.toggle('on', t === 'eraser'); eraserBtn.setAttribute('aria-pressed', t === 'eraser');
+}
+function clearInk() { ctx.clearRect(0, 0, 1280, 720); inkMarked = false; }
+function saveInk() {
+    if (!inkMarked) { delete inkStore[idx]; return; }
+    const c = document.createElement('canvas'); c.width = ink.width; c.height = ink.height;
+    c.getContext('2d').drawImage(ink, 0, 0);
+    inkStore[idx] = c;
+}
+function loadInk() {
+    clearInk();
+    const c = inkStore[idx]; if (!c) return;
+    ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalCompositeOperation = 'source-over'; ctx.drawImage(c, 0, 0); ctx.restore();
+    inkMarked = true;
+}
+function brush() {
+    const er = tool === 'eraser';
+    ctx.globalCompositeOperation = er ? 'destination-out' : 'source-over';
+    ctx.strokeStyle = ctx.fillStyle = er ? '#000' : penColour;
+    ctx.lineWidth = er ? 26 / scaleK : 5;
+}
 function pt(e) { const r = ink.getBoundingClientRect(); return { x: (e.clientX - r.left) / r.width * 1280, y: (e.clientY - r.top) / r.height * 720 }; }
-ink.addEventListener('pointerdown', e => { drawing = true; last = pt(e); ink.setPointerCapture(e.pointerId); ctx.strokeStyle = penColour; ctx.beginPath(); ctx.arc(last.x, last.y, 2.5, 0, Math.PI * 2); ctx.fillStyle = penColour; ctx.fill(); });
+ink.addEventListener('pointerdown', e => {
+    if (!tool) return;
+    drawing = true; last = pt(e); ink.setPointerCapture(e.pointerId); brush();
+    if (tool === 'pen') inkMarked = true;
+    ctx.beginPath(); ctx.arc(last.x, last.y, ctx.lineWidth / 2, 0, Math.PI * 2); ctx.fill();
+});
 ink.addEventListener('pointermove', e => {
     if (!drawing) return;
     const p = pt(e), mid = { x: (last.x + p.x) / 2, y: (last.y + p.y) / 2 };
     ctx.beginPath(); ctx.moveTo(last.midX ?? last.x, last.midY ?? last.y); ctx.quadraticCurveTo(last.x, last.y, mid.x, mid.y); ctx.stroke();
     last = { x: p.x, y: p.y, midX: mid.x, midY: mid.y };
 });
-['pointerup', 'pointercancel'].forEach(t => ink.addEventListener(t, () => { drawing = false; }));
-penBtn.onclick = () => setPen(!penOn);
+['pointerup', 'pointercancel'].forEach(t => ink.addEventListener(t, () => {
+    if (drawing && last && last.midX !== undefined) { ctx.beginPath(); ctx.moveTo(last.midX, last.midY); ctx.lineTo(last.x, last.y); ctx.stroke(); }
+    drawing = false; ctx.globalCompositeOperation = 'source-over';
+}));
+penBtn.onclick = () => setTool(tool === 'pen' ? null : 'pen');
+eraserBtn.onclick = () => setTool(tool === 'eraser' ? null : 'eraser');
 $('#clear').onclick = clearInk;
 document.querySelectorAll('.swatch').forEach(b => b.onclick = () => {
-    penColour = b.dataset.c; setPen(true);
+    penColour = b.dataset.c; setTool('pen');
     document.querySelectorAll('.swatch').forEach(x => x.classList.toggle('cur', x === b));
 });
+
+/* ---------- hide UI ---------- */
+function setUI(hidden) { document.body.classList.toggle('noui', hidden); if (document.activeElement) document.activeElement.blur(); fit(); }
+$('#hideui').onclick = () => setUI(true);
+$('#showui').onclick = () => setUI(false);
+
+/* ---------- export PDF ---------- */
+const printBox = $('#print');
+async function exportPDF() {
+    const keepIdx = idx, keepBeat = beat;
+    exporting = true;
+    printBox.innerHTML = '';
+    const imgs = [];
+    for (let i = 0; i < scenes.length; i++) {
+        build(i);
+        events.slice().sort((a, b) => a.t - b.t).forEach(e => { if (!e.done) { e.done = true; e.fn(); } });
+        progress.style.transition = 'none'; progress.style.width = '100%';
+        stage.querySelectorAll('input').forEach(n => n.setAttribute('value', n.value));
+        const page = stage.cloneNode(true);
+        page.removeAttribute('id'); page.removeAttribute('style'); page.classList.remove('instant');
+        page.querySelectorAll('[id]').forEach(n => n.removeAttribute('id'));
+        const cv = page.querySelector('canvas.ink');
+        if (inkMarked) { const img = new Image(); img.className = 'ink'; img.alt = ''; img.src = ink.toDataURL(); cv.replaceWith(img); imgs.push(img); }
+        else cv.remove();
+        printBox.appendChild(page);
+    }
+    exporting = false;
+    go(keepIdx, keepBeat);
+    await Promise.all(imgs.map(im => im.decode().catch(() => {})));
+    window.print();
+}
+$('#pdf').onclick = exportPDF;
+window.addEventListener('afterprint', () => { printBox.innerHTML = ''; });
+
 document.addEventListener('keydown', e => {
-    if (e.key === 'p' || e.key === 'P') setPen(!penOn);
+    if (isTyping(e)) return;
+    if (e.key === 'p' || e.key === 'P') setTool(tool === 'pen' ? null : 'pen');
+    if (e.key === 'e' || e.key === 'E') setTool(tool === 'eraser' ? null : 'eraser');
     if (e.key === 'c' || e.key === 'C') clearInk();
-    if (e.key === 'Escape') setPen(false);
+    if (e.key === 'h' || e.key === 'H') setUI(!document.body.classList.contains('noui'));
+    if (e.key === 'Escape') setTool(null);
 });
 
+const controlsEl = document.querySelector('.controls');
 function fit() {
-    const st = $('#stage');
-    const vw = window.innerWidth - 40, vh = window.innerHeight - 90;
+    const st = $('#stage'), noui = document.body.classList.contains('noui');
+    const vw = window.innerWidth - (noui ? 0 : 40), vh = window.innerHeight - (noui ? 0 : controlsEl.offsetHeight + 20);
     const k = Math.min(vw / 1280, vh / 720);
+    scaleK = k;
     st.style.transform = `scale(${k})`;
     st.style.margin = `${(720 * k - 720) / 2}px ${(1280 * k - 1280) / 2}px`;
 }
 window.addEventListener('resize', fit);
 fit();
-(document.fonts ? document.fonts.ready : Promise.resolve()).then(() => go(0));
+(document.fonts ? document.fonts.ready : Promise.resolve()).then(() => { fit(); go(0); });
 </script>
 
 </body>
