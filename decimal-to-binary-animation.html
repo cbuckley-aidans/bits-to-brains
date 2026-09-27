@@ -205,12 +205,44 @@
     .sep { width: 1.5px; height: 28px; background: #c9ccd6; margin: 0 6px; }
     .stage.instant *, .stage.instant *::before { transition: none !important; animation: none !important; }
 
+    .controls kbd, .showui kbd { display: inline-block; margin-left: 7px; padding: 0 5px; min-width: 18px; text-align: center; border: 1.5px solid currentColor; border-radius: 4px;
+        font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 800; letter-spacing: 0.04em; line-height: 16px; opacity: .6; vertical-align: 1px; }
+
+    /* floating timer */
+    .ftimer { position: fixed; z-index: 20; left: 24px; top: 24px; width: 250px; background: #fff; border-top: 6px solid var(--navy); border-radius: 10px;
+        box-shadow: 0 10px 30px rgba(27,31,69,.25), 0 0 0 1px rgba(27,31,69,.08); padding: 0 16px 16px; font-family: 'Barlow Condensed', sans-serif; color: var(--navy); user-select: none; }
+    .ftimer[hidden] { display: none; }
+    .fth { display: flex; justify-content: space-between; align-items: center; height: 40px; cursor: grab; touch-action: none; }
+    .fth:active { cursor: grabbing; }
+    .fth span { font-size: 16px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: var(--mid-grey); }
+    .fth button { width: 30px; height: 30px; border: none; background: none; color: var(--navy); cursor: pointer; border-radius: 6px; padding: 0; display: inline-flex; align-items: center; justify-content: center; }
+    .fth button:hover { background: var(--light-grey); }
+    .fth svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; }
+    .ftring { position: relative; width: 150px; height: 150px; margin: 2px auto 12px; }
+    .ftring svg { width: 100%; height: 100%; transform: rotate(-90deg); display: block; }
+    .ftring .tb { fill: none; stroke: var(--light-grey); stroke-width: 8; }
+    .ftring .tf { fill: none; stroke: var(--pink); stroke-width: 8; stroke-dasharray: 1; stroke-dashoffset: 0; transition: stroke-dashoffset .25s linear; }
+    .ftv { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 46px; font-weight: 900; font-variant-numeric: tabular-nums; }
+    .ftimer.done .ftring { animation: ftflash .6s ease-in-out 6 alternate; }
+    .ftimer.done .ftv { color: var(--pink); }
+    @keyframes ftflash { to { transform: scale(1.06); opacity: .55; } }
+    .ftrow { display: flex; gap: 6px; justify-content: center; margin-top: 6px; }
+    .ftrow button { flex: 1; font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; border: 2px solid var(--navy);
+        background: #fff; color: var(--navy); border-radius: 6px; padding: 6px 0; cursor: pointer; }
+    .ftrow button.pri { background: var(--pink); border-color: var(--pink); color: #fff; }
+    .ftrow button:focus-visible, .fth button:focus-visible { outline: 3px solid var(--pink); outline-offset: 2px; }
+    .ftimer.big { width: 400px; }
+    .ftimer.big .ftring { width: 280px; height: 280px; }
+    .ftimer.big .ftv { font-size: 88px; }
+    .ftimer.big .ftrow button { font-size: 19px; padding: 8px 0; }
+
     /* tools, hide UI, export */
     .controls { flex-wrap: wrap; justify-content: center; gap: 10px 26px; padding: 12px 20px 16px; width: 100%; }
     .grp { display: flex; align-items: center; gap: 10px; }
-    .controls button#eraser.on { background: var(--pink); color: var(--white); }
+    .controls button#eraser.on, .controls button#timerbtn.on { background: var(--pink); color: var(--white); }
     .ink.erase { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30'%3E%3Ccircle cx='15' cy='15' r='13' fill='white' fill-opacity='.55' stroke='%231b1f45' stroke-width='2'/%3E%3C/svg%3E") 15 15, cell; }
     body.noui .controls { display: none; }
+    body.nosubs .caption { visibility: hidden; }
     .showui {
         display: none; position: fixed; right: 14px; bottom: 14px; z-index: 10;
         font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase;
@@ -224,7 +256,7 @@
         @page { size: 1280px 720px; margin: 0; }
         * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
         html, body { height: auto; overflow: visible; display: block; margin: 0; background: #fff; }
-        body > .viewport, body > .controls, .showui { display: none !important; }
+        body > .viewport, body > .controls, .showui, .ftimer { display: none !important; }
         #print { display: block; }
         #print .stage { transform: none !important; margin: 0 !important; break-after: page; page-break-after: always; }
         #print .stage:last-child { break-after: auto; page-break-after: auto; }
@@ -286,30 +318,41 @@
 
 <div class="controls">
     <div class="grp">
-        <button class="alt" id="back" aria-label="Previous scene">Back</button>
-        <button class="alt" id="replay" aria-label="Replay scene">Replay</button>
-        <button id="next" aria-label="Next scene">Next</button>
+        <button class="alt" id="back" aria-label="Previous scene">Back<kbd>&larr;</kbd></button>
+        <button class="alt" id="replay" aria-label="Replay scene">Replay<kbd>R</kbd></button>
+        <button id="next" aria-label="Next scene">Next<kbd>&rarr;</kbd></button>
         <div class="dots" id="dots"></div>
-        <button class="alt" id="auto">Autoplay: Off</button>
+        <button class="alt" id="auto"><span class="bl">Autoplay: Off</span><kbd>Space</kbd></button>
         <span class="steplbl" id="steplbl"></span>
     </div>
     <div class="grp">
-        <button class="alt" id="pen" aria-pressed="false">Pen</button>
+        <button class="alt" id="pen" aria-pressed="false">Pen<kbd>P</kbd></button>
         <button class="swatch cur" data-c="#ea008a" style="background:#ea008a" aria-label="Pink pen"></button>
         <button class="swatch" data-c="#1b1f45" style="background:#1b1f45" aria-label="Navy pen"></button>
         <button class="swatch" data-c="#111111" style="background:#111111" aria-label="Black pen"></button>
         <button class="swatch" data-c="#0a7bd6" style="background:#0a7bd6" aria-label="Blue pen"></button>
         <button class="swatch" data-c="#12a150" style="background:#12a150" aria-label="Green pen"></button>
         <button class="swatch" data-c="#f28c00" style="background:#f28c00" aria-label="Orange pen"></button>
-        <button class="alt" id="eraser" aria-pressed="false">Eraser</button>
-        <button class="alt" id="clear">Clear</button>
+        <button class="alt" id="eraser" aria-pressed="false">Eraser<kbd>E</kbd></button>
+        <button class="alt" id="clear">Clear<kbd>C</kbd></button>
     </div>
     <div class="grp">
         <button class="alt" id="pdf">Export PDF</button>
-        <button class="alt" id="hideui">Hide UI</button>
+        <button class="alt" id="timerbtn" aria-pressed="false">Timer<kbd>T</kbd></button>
+        <button class="alt" id="subs" aria-pressed="true"><span class="bl">Subtitles: On</span><kbd>S</kbd></button>
+        <button class="alt" id="hideui">Hide UI<kbd>U</kbd></button>
     </div>
 </div>
-<button class="showui" id="showui">Show UI</button>
+<button class="showui" id="showui">Show UI<kbd>U</kbd></button>
+<div class="ftimer" id="ftimer" hidden role="dialog" aria-label="Timer">
+    <div class="fth" id="fth"><span>Timer</span><div>
+        <button id="ftsize" aria-label="Toggle timer size"><svg viewBox="0 0 24 24"><path d="M14 4h6v6M10 20H4v-6M20 4l-7 7M4 20l7-7"/></svg></button>
+        <button id="ftclose" aria-label="Close timer"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div></div>
+    <div class="ftring"><svg viewBox="0 0 100 100"><circle class="tb" cx="50" cy="50" r="44"/><circle class="tf" id="ftf" cx="50" cy="50" r="44" pathLength="1"/></svg><div class="ftv" id="ftv">1:00</div></div>
+    <div class="ftrow"><button data-set="30">0:30</button><button data-set="60">1:00</button><button data-set="120">2:00</button><button data-set="180">3:00</button><button data-set="300">5:00</button></div>
+    <div class="ftrow"><button data-adj="-30">&minus;30s</button><button data-adj="30">+30s</button><button data-adj="60">+1 min</button></div>
+    <div class="ftrow"><button class="pri" id="ftstart">Start</button><button id="ftreset">Reset</button></div>
+</div>
 <div id="print"></div>
 
 <script>
@@ -637,7 +680,7 @@ function back() {
 
 function toggleAuto() {
     autoplay = !autoplay;
-    autoBtn.textContent = 'Autoplay: ' + (autoplay ? 'On' : 'Off');
+    autoBtn.querySelector('.bl').textContent = 'Autoplay: ' + (autoplay ? 'On' : 'Off');
     const cur = now();
     clearTimers();
     if (autoplay) {
@@ -726,6 +769,77 @@ function setUI(hidden) { document.body.classList.toggle('noui', hidden); if (doc
 $('#hideui').onclick = () => setUI(true);
 $('#showui').onclick = () => setUI(false);
 
+/* ---------- subtitles ---------- */
+const subsBtn = $('#subs');
+function toggleSubs() {
+    const off = document.body.classList.toggle('nosubs');
+    subsBtn.querySelector('.bl').textContent = 'Subtitles: ' + (off ? 'Off' : 'On');
+    subsBtn.setAttribute('aria-pressed', !off);
+    subsBtn.blur();
+}
+subsBtn.onclick = toggleSubs;
+
+
+/* ---------- floating timer ---------- */
+const ftEl = $('#ftimer'), ftV = $('#ftv'), ftF = $('#ftf'), ftStart = $('#ftstart'), ftBtn = $('#timerbtn');
+const FT = { total: 60, left: 60, iv: null, end: 0 };
+const ftFmt = s => Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+function ftDraw() { ftV.textContent = ftFmt(Math.ceil(FT.left)); ftF.style.strokeDashoffset = (1 - FT.left / FT.total).toFixed(4); }
+function ftStop() { clearInterval(FT.iv); FT.iv = null; ftStart.textContent = 'Start'; }
+function ftBeep() {
+    try {
+        const ac = new (window.AudioContext || window.webkitAudioContext)();
+        [0, .35, .7].forEach(t => { const o = ac.createOscillator(), g = ac.createGain(); o.frequency.value = 880; o.connect(g); g.connect(ac.destination);
+            g.gain.setValueAtTime(.0001, ac.currentTime + t); g.gain.exponentialRampToValueAtTime(.25, ac.currentTime + t + .02); g.gain.exponentialRampToValueAtTime(.0001, ac.currentTime + t + .25);
+            o.start(ac.currentTime + t); o.stop(ac.currentTime + t + .3); });
+    } catch (e) {}
+}
+function ftTick() {
+    FT.left = Math.max(0, (FT.end - performance.now()) / 1000);
+    ftDraw();
+    if (FT.left <= 0) { ftStop(); ftEl.classList.add('done'); ftBeep(); }
+}
+function ftSet(sec) { ftStop(); ftEl.classList.remove('done'); FT.total = FT.left = sec; ftDraw(); }
+function ftToggleRun() {
+    if (FT.iv) { ftTick(); ftStop(); return; }
+    if (FT.left <= 0) ftSet(FT.total);
+    ftEl.classList.remove('done');
+    FT.end = performance.now() + FT.left * 1000;
+    FT.iv = setInterval(ftTick, 200); ftStart.textContent = 'Pause';
+}
+function ftAdj(d) {
+    const nl = Math.max(10, Math.round(FT.left) + d);
+    const diff = nl - FT.left;
+    FT.left = nl; FT.total = Math.max(nl, FT.total + d, 10);
+    if (FT.iv) FT.end += diff * 1000;
+    ftEl.classList.remove('done'); ftDraw();
+}
+function ftShow(on) {
+    ftEl.hidden = !on; ftBtn.setAttribute('aria-pressed', on); ftBtn.classList.toggle('on', on);
+    if (!on) ftStop();
+}
+ftEl.querySelectorAll('[data-set]').forEach(b => b.onclick = () => ftSet(+b.dataset.set));
+ftEl.querySelectorAll('[data-adj]').forEach(b => b.onclick = () => ftAdj(+b.dataset.adj));
+ftStart.onclick = ftToggleRun;
+$('#ftreset').onclick = () => ftSet(FT.total);
+$('#ftclose').onclick = () => ftShow(false);
+$('#ftsize').onclick = () => { ftEl.classList.toggle('big'); ftClamp(); };
+ftBtn.onclick = () => ftShow(ftEl.hidden);
+ftEl.addEventListener('click', e => { if (e.target.closest('button')) e.target.closest('button').blur(); });
+function ftClamp() {
+    const r = ftEl.getBoundingClientRect();
+    ftEl.style.left = Math.max(0, Math.min(window.innerWidth - r.width, r.left)) + 'px';
+    ftEl.style.top = Math.max(0, Math.min(window.innerHeight - r.height, r.top)) + 'px';
+}
+(() => {
+    const h = $('#fth'); let dx = 0, dy = 0, drag = false;
+    h.addEventListener('pointerdown', e => { if (e.target.closest('button')) return; drag = true; const r = ftEl.getBoundingClientRect(); dx = e.clientX - r.left; dy = e.clientY - r.top; h.setPointerCapture(e.pointerId); });
+    h.addEventListener('pointermove', e => { if (!drag) return; ftEl.style.left = (e.clientX - dx) + 'px'; ftEl.style.top = (e.clientY - dy) + 'px'; ftClamp(); });
+    ['pointerup', 'pointercancel'].forEach(t => h.addEventListener(t, () => drag = false));
+    window.addEventListener('resize', () => { if (!ftEl.hidden) ftClamp(); });
+})();
+ftDraw();
+
 /* ---------- export PDF ---------- */
 const printBox = $('#print');
 async function exportPDF() {
@@ -759,7 +873,9 @@ document.addEventListener('keydown', e => {
     if (e.key === 'p' || e.key === 'P') setTool(tool === 'pen' ? null : 'pen');
     if (e.key === 'e' || e.key === 'E') setTool(tool === 'eraser' ? null : 'eraser');
     if (e.key === 'c' || e.key === 'C') clearInk();
-    if (e.key === 'h' || e.key === 'H') setUI(!document.body.classList.contains('noui'));
+    if (e.key === 's' || e.key === 'S') toggleSubs();
+    if (e.key === 't' || e.key === 'T') ftShow(ftEl.hidden);
+    if (e.key === 'u' || e.key === 'U') setUI(!document.body.classList.contains('noui'));
     if (e.key === 'Escape') setTool(null);
 });
 
