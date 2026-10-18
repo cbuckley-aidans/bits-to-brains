@@ -1,0 +1,1357 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Digital Technologies Flashcards</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='7' y='13' width='32' height='44' rx='5' fill='%231b1f45' stroke='%23fff' stroke-width='2.5' transform='rotate(-12 23 35)'/%3E%3Crect x='24' y='8' width='32' height='44' rx='5' fill='%23ea008a' stroke='%23fff' stroke-width='2.5' transform='rotate(9 40 30)'/%3E%3Crect x='31' y='17' width='15' height='4' rx='2' fill='%23fff' transform='rotate(9 40 30)'/%3E%3C/svg%3E">
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700;800;900&family=Barlow+Condensed:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --navy: #1b1f45;
+        --pink: #ea008a;
+        --mid-grey: #9a9a9a;
+        --light-grey: #e8e8e8;
+        --blank: #f0f3f6;
+        --tint: #e9ecf5;
+        --cond: 'Barlow Condensed', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        --ease: cubic-bezier(.2,.8,.2,1);
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; }
+    body { font-family: 'Barlow', 'Helvetica Neue', Helvetica, Arial, sans-serif; background: #eaeaea; color: var(--navy);
+        display: flex; align-items: center; justify-content: center; overflow: hidden; -webkit-user-select: none; user-select: none; }
+    .stage { width: 1280px; height: 720px; background: #fff; border-top: 6px solid var(--navy); position: relative; padding: 36px 64px 0; flex-shrink: 0; overflow: hidden; transform-origin: center; }
+    .top { gap: 24px; display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 4px solid var(--navy); padding-bottom: 12px; height: 70px; }
+    .sheet-title { white-space: nowrap; flex: 1; min-width: 0; overflow: hidden; font-family: var(--cond); font-size: 42px; font-weight: 900; text-transform: uppercase; letter-spacing: .01em; margin: 0; line-height: 1; }
+    .sheet-title span { color: var(--pink); }
+    .topr { display: flex; align-items: center; gap: 22px; }
+    .counter { white-space: nowrap; font-family: var(--cond); font-size: 22px; font-weight: 800; letter-spacing: .08em; color: var(--mid-grey); text-transform: uppercase; display: flex; align-items: center; gap: 22px; }
+    .counter b { color: var(--navy); }
+    .snd { width: 40px; height: 40px; border: 3px solid var(--navy); border-radius: 8px; background: #fff; color: var(--navy); cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; }
+    .snd svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+    .snd.on { background: var(--navy); color: #fff; }
+    .content { position: absolute; left: 64px; right: 64px; top: 124px; bottom: 108px; }
+    .caption { position: absolute; left: 64px; right: 64px; bottom: 28px; min-height: 60px; display: flex; align-items: center; gap: 16px; font-size: 25px; font-weight: 500; line-height: 1.32; }
+    .caption::before { content: ''; width: 10px; height: 10px; background: var(--pink); flex-shrink: 0; }
+    .caption .txt { flex: 1; }
+    .caption b { color: var(--pink); font-weight: 800; }
+    .caption b.no { color: var(--navy); }
+    .caption .in { animation: capIn .45s var(--ease); display: block; }
+    @keyframes capIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+    .progress { position: absolute; left: 0; bottom: 0; height: 6px; background: var(--pink); width: 0; transition: width .6s var(--ease); }
+    .btns { display: flex; gap: 12px; flex-shrink: 0; }
+    .next, .btn2 { font-family: var(--cond); font-size: 26px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; border-radius: 8px; padding: 12px 30px; cursor: pointer; }
+    .next { background: var(--pink); color: #fff; border: 3px solid var(--pink); }
+    .next:disabled { background: #c3c6d0; border-color: #c3c6d0; cursor: default; }
+    .btn2 { background: #fff; color: var(--navy); border: 3px solid var(--navy); }
+    .btn2:hover { background: var(--blank); }
+    button:focus-visible { outline: 3px solid var(--pink); outline-offset: 3px; }
+    .next:focus-visible { outline-color: var(--navy); }
+    .pop-in { animation: capIn .45s var(--ease); }
+    @keyframes shake { 20%, 60% { transform: translateX(-8px); } 40%, 80% { transform: translateX(8px); } }
+    @keyframes draw { to { stroke-dashoffset: 0; } }
+
+    /* svg text */
+    svg { display: block; }
+    .vis { overflow: hidden; }
+    .halo { paint-order: stroke; stroke: #fff; stroke-width: 5px; stroke-linejoin: round; }
+    .num { font-family: 'Barlow', 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 18px; font-weight: 800; fill: var(--navy); }
+    .lb { font-family: var(--cond); font-size: 18px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; fill: var(--navy); }
+    .lbg { font-family: var(--cond); font-size: 18px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; fill: var(--mid-grey); }
+    .lbs { font-family: 'Barlow', 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 15px; font-weight: 700; fill: var(--navy); }
+    .lg { font-family: 'Barlow', 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 16px; font-weight: 600; fill: var(--navy); }
+    .tiny { font-family: var(--cond); font-size: 15px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; fill: var(--navy); }
+    .bd { font-family: var(--cond); font-size: 19px; font-weight: 900; }
+    .big { font-family: var(--cond); font-size: 44px; font-weight: 900; }
+    .sm { font-family: 'Barlow', 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 14px; font-weight: 700; }
+    .qm { font-family: var(--cond); font-size: 28px; font-weight: 900; }
+    .ax { font-family: 'Barlow', 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 14px; font-weight: 600; fill: var(--mid-grey); }
+    .axp { font-family: 'Barlow', 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 14px; font-weight: 700; fill: var(--pink); }
+    .bigl { font-family: var(--cond); font-size: 36px; font-weight: 900; fill: var(--navy); }
+
+    /* home */
+    .decks { display: grid; grid-template-columns: repeat(5, 1fr); gap: 24px; height: 100%; align-items: center; padding-right: 12px; }
+    .deck { position: relative; height: 430px; background: none; border: none; padding: 0; cursor: pointer; font-family: inherit; color: var(--navy); text-align: left; }
+    .deck::before, .deck::after { content: ''; position: absolute; inset: 0; border: 3px solid var(--navy); border-radius: 14px; transition: transform .35s var(--ease); }
+    .deck::before { transform: translate(12px, 12px); background: var(--navy); }
+    .deck::after { transform: translate(6px, 6px); background: #fff; }
+    .dface { position: absolute; inset: 0; z-index: 1; border: 3px solid var(--navy); border-radius: 14px; background: #fff; padding: 20px 20px 18px; display: flex; flex-direction: column; transition: transform .35s var(--ease), border-color .2s; }
+    .deck:hover .dface, .deck:focus-visible .dface { transform: translate(-4px, -10px) rotate(-1.5deg); border-color: var(--pink); }
+    .deck:hover::after { transform: translate(9px, 4px) rotate(1.5deg); }
+    .deck:focus-visible { outline: none; }
+    .dface svg { width: 100%; height: 112px; }
+    .dcode { font-family: var(--cond); font-size: 66px; font-weight: 900; color: var(--pink); line-height: 1; margin-top: auto; }
+    .dname { font-size: 25px; font-weight: 800; line-height: 1.15; margin-top: 4px; min-height: 58px; }
+    .dmeta span { white-space: nowrap; }
+    .dmeta { gap: 8px; font-size: 17px !important; display: flex; justify-content: space-between; border-top: 3px solid var(--navy); margin-top: 14px; padding-top: 10px; font-family: var(--cond); font-size: 19px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--mid-grey); }
+
+    /* deck screen */
+    .dscreen { display: grid; grid-template-columns: 340px 1fr; gap: 48px; height: 100%; }
+    .dscreen .deck { height: 470px; cursor: default; }
+    .dscreen .deck:hover .dface { transform: none; border-color: var(--navy); }
+    .dscreen .deck:hover::after { transform: translate(6px, 6px); }
+    .dstate { font-size: 19px; font-weight: 600; line-height: 1.3; margin-top: 10px; }
+    .sccol { display: flex; flex-direction: column; min-height: 0; }
+    .sch { font-family: var(--cond); font-size: 20px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: var(--mid-grey); margin-bottom: 10px; display: flex; justify-content: space-between; }
+    .sch button { font: inherit; letter-spacing: inherit; text-transform: inherit; color: var(--navy); background: none; border: none; cursor: pointer; padding: 0; }
+    .sclist { display: flex; flex-direction: column; gap: 6px; overflow-y: auto; padding: 2px 8px 4px 2px; }
+    .scrow { display: grid; grid-template-columns: 30px 60px 1fr auto auto; align-items: center; gap: 14px; border: 3px solid var(--navy); border-radius: 8px; padding: 6px 14px; background: #fff; font-family: inherit;
+        font-size: 17px; font-weight: 600; color: var(--navy); text-align: left; cursor: pointer; line-height: 1.2; min-height: 58px; transition: opacity .2s, background-color .2s; }
+    .scrow:hover { background: #f6f7fb; }
+    .scrow .box { width: 30px; height: 30px; border: 3px solid var(--navy); border-radius: 6px; display: flex; align-items: center; justify-content: center; transition: background-color .2s, border-color .2s; }
+    .scrow .box svg { width: 18px; height: 18px; fill: none; stroke: #fff; stroke-width: 3.5; stroke-linecap: round; stroke-linejoin: round; opacity: 0; }
+    .scrow.on .box { background: var(--pink); border-color: var(--pink); }
+    .scrow.on .box svg { opacity: 1; }
+    .scrow:not(.on) { opacity: .5; border-style: dashed; }
+    .scrow .code { font-family: var(--cond); font-size: 25px; font-weight: 900; }
+    .scrow .n { font-family: var(--cond); font-size: 18px; font-weight: 800; color: var(--mid-grey); letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; }
+
+    /* play */
+    .play { display: grid; grid-template-columns: 612px 1fr; gap: 32px; height: 100%; align-items: center; }
+    .cwrap { position: relative; width: 584px; height: 470px; perspective: 1800px; }
+    .stk { position: absolute; inset: 0; border-radius: 14px; background: var(--navy); border: 3px solid var(--navy); transition: transform .4s var(--ease), opacity .3s; }
+    .stk::after { content: ''; position: absolute; inset: 8px; border: 2px solid rgba(234,0,138,.5); border-radius: 8px; }
+    .card { position: absolute; inset: 0; transform-style: preserve-3d; z-index: 5; }
+    .face { position: absolute; inset: 0; -webkit-backface-visibility: hidden; backface-visibility: hidden; border: 3px solid var(--navy); border-radius: 14px; background: #fff; overflow: hidden; display: flex; flex-direction: column; }
+    .face.back { transform: rotateY(180deg); }
+    .front { padding: 22px 28px 20px; }
+    .fmeta { display: flex; align-items: center; gap: 12px; position: relative; z-index: 1; }
+    .sctag { font-family: var(--cond); font-size: 20px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: #fff; background: var(--navy); border-radius: 6px; padding: 5px 12px 4px; line-height: 1; }
+    .tchip { font-family: var(--cond); font-size: 18px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--pink); border: 3px solid var(--pink); border-radius: 6px; padding: 2px 10px 1px; }
+    .lgc { margin-left: auto; font-family: var(--cond); font-size: 20px; font-weight: 800; letter-spacing: .08em; color: var(--mid-grey); }
+    .fq { font-size: 26px; font-weight: 700; line-height: 1.25; margin-top: 14px; position: relative; z-index: 1; }
+    .front.t .fq { font-size: 37px; font-weight: 800; line-height: 1.18; margin: auto 0; padding-bottom: 30px; }
+    .ghost { position: absolute; right: 16px; bottom: -40px; font-family: var(--cond); font-weight: 900; font-size: 210px; color: var(--blank); line-height: 1; pointer-events: none; }
+    .fvis { flex: 1; min-height: 0; margin-top: 10px; display: flex; align-items: center; justify-content: center; }
+    .fvis svg { width: 100%; height: 100%; }
+    .pat { background: var(--navy); border-color: var(--navy); }
+    .pat svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+    .pcode { position: absolute; left: 30px; top: 22px; font-family: var(--cond); font-size: 70px; font-weight: 900; color: #fff; line-height: 1; }
+    .bhead { display: flex; align-items: center; gap: 12px; padding: 14px 26px; color: #fff; font-family: var(--cond); font-size: 40px; font-weight: 900; text-transform: uppercase; letter-spacing: .02em; line-height: 1; }
+    .bhead.ok { background: var(--pink); }
+    .bhead.no { background: var(--navy); }
+    .bhead svg { width: 36px; height: 36px; fill: none; stroke: #fff; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
+    .bsc { margin-left: auto; font-size: 22px; letter-spacing: .08em; opacity: .85; }
+    .bbody { flex: 1; min-height: 0; display: flex; flex-direction: column; padding: 16px 28px 18px; }
+    .alab { font-family: var(--cond); font-size: 18px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--mid-grey); }
+    .ans { font-size: 28px; font-weight: 800; line-height: 1.2; margin-top: 4px; }
+    .bhead.ok + .bbody .ans { color: var(--pink); }
+    .apic { height: 118px; margin-top: 6px; }
+    .apic svg { height: 100%; width: auto; }
+    .exp { font-size: 21px; font-weight: 500; line-height: 1.38; margin: 10px 0 0; }
+    .bbody.nov .exp { font-size: 24px; }
+    .bbody.nov .ans { font-size: 32px; }
+    .back .ghost { z-index: 0; }
+    .bbody { position: relative; z-index: 1; }
+    .bvis { flex: 1; min-height: 0; margin-top: 10px; display: flex; justify-content: center; }
+    .bvis svg { width: 100%; height: 100%; }
+
+    /* options */
+    .opts { display: flex; flex-direction: column; gap: 12px; justify-content: center; height: 100%; }
+    .opt { display: flex; align-items: center; gap: 16px; border: 3px solid var(--navy); border-radius: 8px; background: #fff; padding: 12px 18px; min-height: 96px;
+        font-family: inherit; font-size: 23px; font-weight: 600; color: var(--navy); text-align: left; line-height: 1.25; cursor: pointer;
+        transition: background-color .2s, border-color .2s, color .2s, opacity .25s, box-shadow .2s; position: relative; }
+    .opt.short { font-size: 28px; font-weight: 700; }
+    .l { flex-shrink: 0; width: 40px; height: 40px; border-radius: 50%; background: var(--navy); color: #fff; font-family: var(--cond); font-size: 24px; font-weight: 900;
+        display: flex; align-items: center; justify-content: center; transition: background-color .2s, color .2s; }
+    .l svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
+    .l svg path { stroke-dasharray: 30; stroke-dashoffset: 30; animation: draw .35s .12s var(--ease) forwards; }
+    .opt:hover:not(:disabled), .pcard:hover:not(:disabled) { background: #f6f7fb; }
+    .opt:disabled, .pcard:disabled { cursor: default; }
+    .opt.right, .opt.right:hover { background: var(--pink); border-color: var(--pink); color: #fff; }
+    .opt.right .l { background: #fff; color: var(--pink); }
+    .wrong { border-style: dashed !important; opacity: .5; animation: shake .4s; }
+    .reveal { border-color: var(--pink) !important; box-shadow: 0 0 0 5px rgba(234,0,138,.18); }
+    .reveal .l { background: var(--pink); }
+    .dim { opacity: .3; }
+    .pgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .pcard { position: relative; border: 3px solid var(--navy); border-radius: 8px; background: #fff; padding: 12px 8px 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; height: 214px;
+        font-family: inherit; color: var(--navy); transition: background-color .2s, border-color .2s, opacity .25s, box-shadow .2s; }
+    .pcard .l { position: absolute; left: 10px; top: 10px; width: 36px; height: 36px; font-size: 22px; }
+    .pcard svg.vis { width: 100%; height: 170px; }
+    .pcard.right, .pcard.right:hover { border-color: var(--pink); background: #fff; box-shadow: 0 0 0 6px rgba(234,0,138,.22); }
+    .pcard.right .l { background: var(--pink); color: #fff; }
+
+
+    /* interactive cards */
+    .fvis { position: relative; }
+    .replay { position: absolute; right: 0; top: 0; display: flex; align-items: center; gap: 6px; font-family: var(--cond); font-size: 18px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase;
+        background: #fff; color: var(--navy); border: 3px solid var(--navy); border-radius: 6px; padding: 4px 11px 3px 8px; cursor: pointer; }
+    .replay svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+    .replay:hover { background: var(--blank); }
+    .tile { display: inline-flex; align-items: center; gap: 10px; font-family: inherit; font-size: 21px; font-weight: 700; color: var(--navy); background: #fff; border: 3px solid var(--navy); border-radius: 8px; padding: 6px 14px;
+        line-height: 1.2; cursor: grab; touch-action: none; position: relative; z-index: 2; box-shadow: 0 4px 0 #c3c6d0; white-space: nowrap; transition: box-shadow .2s, border-color .2s, background-color .2s; }
+    .tile:hover { background: #f6f7fb; }
+    .tile .mini { width: 32px; height: 32px; flex-shrink: 0; overflow: visible; }
+    .tile.sel { border-color: var(--pink); box-shadow: 0 0 0 4px rgba(234,0,138,.22); }
+    .tile.drag { cursor: grabbing; z-index: 40; box-shadow: 0 14px 30px rgba(27,31,69,.25); border-color: var(--pink); }
+    .tile.right { background: var(--pink); color: #fff; border-color: var(--pink); box-shadow: none; }
+    .tile.wrong { border-style: dashed; background: var(--tint); box-shadow: none; animation: shake .4s; }
+    .tile:focus-visible { outline: 3px solid var(--pink); outline-offset: 2px; }
+    .pool { display: flex; flex-wrap: wrap; gap: 12px; align-content: center; justify-content: center; background: var(--blank); border-radius: 12px; padding: 16px; height: 100%; }
+    .pool2 { display: grid; grid-template-columns: 1fr 1fr; align-content: center; gap: 14px; }
+    .pool2 .tile { justify-content: flex-start; font-size: 22px; padding: 8px 14px; }
+    .pool3 { display: grid; grid-template-columns: repeat(3, 1fr); align-content: center; justify-items: center; gap: 16px; }
+    .mtile { padding: 6px; }
+    .mtile svg { width: 92px; height: 92px; display: block; }
+    .mtile.right svg circle[fill="#fbfbf7"], .mtile.right svg path[fill="#fbfbf7"] { fill: #fff; }
+    .wtile { font-size: 26px; padding: 10px 24px; }
+    .kz { flex-direction: column; align-items: stretch; justify-content: center; gap: 14px; }
+    .ordtop { display: flex; align-items: center; gap: 10px; font-family: var(--cond); font-size: 17px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--mid-grey); white-space: nowrap; }
+    .ordtop i { flex: 1; height: 3px; background: linear-gradient(90deg, var(--pink), var(--light-grey)); }
+    .ordtop .mini { width: 36px; height: 36px; overflow: visible; flex-shrink: 0; }
+    .ogrid { display: grid; gap: 10px; }
+    .slot { position: relative; border: 3px dashed #c3c6d0; border-radius: 10px; min-height: 96px; display: flex; align-items: center; justify-content: center; padding: 20px 4px 6px; transition: border-color .2s, background-color .2s, box-shadow .2s; }
+    .slot > b { position: absolute; left: 8px; top: 3px; font-family: var(--cond); font-size: 16px; font-weight: 900; color: var(--mid-grey); letter-spacing: .04em; }
+    .slot .sb { display: flex; justify-content: center; width: 100%; }
+    .slot:has(.tile) { border-style: solid; border-color: var(--light-grey); }
+    .slot .tile { box-shadow: none; flex-direction: column; gap: 2px; font-size: 15px; padding: 4px 6px; min-width: 100px; }
+    .slot .tile .mini { width: 30px; height: 30px; }
+    .slot .mtile { min-width: 0; padding: 4px; }
+    .slot .mtile svg { width: 74px; height: 74px; }
+    .slot.hover, .slot.armed:hover { border-color: var(--pink); background: rgba(234,0,138,.06); }
+    .bins { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; height: 100%; }
+    .bin { border: 3px solid var(--navy); border-radius: 10px; display: flex; flex-direction: column; overflow: hidden; transition: box-shadow .2s; }
+    .bin h3 { margin: 0; padding: 6px 14px 5px; font-family: var(--cond); font-size: 24px; font-weight: 900; text-transform: uppercase; letter-spacing: .04em; color: #fff; background: var(--navy); }
+    .bin.pk { border-color: var(--pink); }
+    .bin.pk h3 { background: var(--pink); }
+    .bin .sub { font-size: 15px; font-weight: 600; color: var(--mid-grey); padding: 5px 14px 0; }
+    .bin .area { flex: 1; display: flex; flex-wrap: wrap; gap: 6px; align-content: flex-start; justify-content: center; padding: 8px; }
+    .bin .mtile svg { width: 54px; height: 54px; }
+    .pool4 { display: grid; grid-template-columns: 1fr 1fr; align-content: center; justify-items: center; gap: 20px; }
+    .ai.am svg { width: 60px; height: 60px; }
+    .ai small { font-size: 14px; }
+    .pair { display: flex; gap: 10px; width: 100%; justify-content: center; }
+    .pair svg { width: 48%; height: 100%; }
+    .bin.hover, .bin.armed { box-shadow: 0 0 0 5px rgba(234,0,138,.18); cursor: pointer; }
+    .ctext { font-size: 24px; font-weight: 600; line-height: 1.95; margin: 0; }
+    .blank { display: inline-flex; vertical-align: middle; min-width: 112px; height: 48px; border: 3px dashed #c3c6d0; border-radius: 8px; margin: 0 3px; align-items: center; justify-content: center; transition: border-color .2s, background-color .2s; }
+    .blank:has(.tile) { border-color: transparent; min-width: 0; }
+    .blank .bb { display: flex; }
+    .blank .tile { box-shadow: none; font-size: 22px; padding: 4px 12px; }
+    .blank.hover, .blank.armed:hover { border-color: var(--pink); background: rgba(234,0,138,.06); }
+    .hsw { height: 100%; border: 3px solid var(--navy); border-radius: 14px; background: #fff; overflow: hidden; display: flex; }
+    .hsw svg { width: 100%; height: 100%; }
+    .spinw { flex-direction: column; }
+    .spinw > svg { flex: 1; min-height: 0; cursor: grab; touch-action: none; }
+    .spinw.grab > svg { cursor: grabbing; }
+    .spinw.done > svg { cursor: default; }
+    .spbtns { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 0 14px 12px; font-family: var(--cond); font-size: 18px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--mid-grey); }
+    .sbtn { width: 64px; height: 46px; border: 3px solid var(--navy); border-radius: 8px; background: #fff; color: var(--navy); cursor: pointer; display: flex; align-items: center; justify-content: center; touch-action: none; }
+    .sbtn svg { width: 26px; height: 26px; fill: none; stroke: currentColor; stroke-width: 3.5; stroke-linecap: round; stroke-linejoin: round; }
+    .sbtn:hover { background: var(--blank); }
+    .sbtn:active { background: var(--pink); border-color: var(--pink); color: #fff; }
+    .spinw.done .sbtn { opacity: .35; pointer-events: none; }
+    .hs { cursor: pointer; }
+    .hs .hok, .hs .hno { display: none; }
+    .hs:hover .hdot { fill: var(--tint); }
+    .hs:focus { outline: none; }
+    .hs:focus-visible .hdot { stroke: var(--pink); }
+    .hsv.done .hpl { display: none; }
+    .hsv.done .hs { cursor: default; }
+    .hs.good .hdot { fill: var(--pink); stroke: #fff; }
+    .hs.good .hok { display: block; }
+    .hs.bad .hdot { stroke-dasharray: 5 4; }
+    .hs.bad .hno { display: block; }
+    .hs.off { opacity: .3; }
+    .arow { display: flex; gap: 8px; margin-top: 6px; flex-wrap: wrap; }
+    .ai { display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 13px; font-weight: 700; }
+    .ai .mini { width: 34px; height: 34px; overflow: visible; }
+    .asort { display: grid; grid-template-columns: auto repeat(3, 56px); align-items: center; gap: 4px 8px; margin-top: 6px; justify-content: start; }
+    .asort.a4 { grid-template-columns: repeat(4, 64px); }
+    .asort span { font-family: var(--cond); font-size: 20px; font-weight: 900; text-transform: uppercase; padding-right: 8px; }
+    .asort svg { width: 56px; height: 56px; }
+    .asort.a4 svg { width: 64px; height: 64px; }
+    .actext { font-size: 21px; line-height: 1.4; margin: 6px 0 0; font-weight: 600; }
+    .actext b { color: var(--pink); }
+    /* buckles (shared with the other checking for understanding pages) */
+    .bcount { display: flex; align-items: center; gap: 8px; }
+    .counter-icon { width: 34px; height: 34px; display: block; }
+    .bcount .num { font-family: var(--cond); font-size: 34px; font-weight: 900; line-height: 1; }
+    .bcount .lbl { font-family: var(--cond); font-size: 18px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: var(--mid-grey); }
+    .award { position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%) scale(.8); opacity: 0; pointer-events: none; z-index: 30;
+        background: #fff; border: 3px solid var(--pink); border-radius: 12px; padding: 24px 40px; display: flex; flex-direction: column; align-items: center; gap: 10px;
+        box-shadow: 0 20px 50px rgba(27,31,69,.25); transition: opacity .3s, transform .35s var(--ease); }
+    .award.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    .award.hide { opacity: 0; transform: translate(-50%, -60%) scale(.95); }
+    .award-img { width: 140px; height: auto; }
+    .award-text { font-family: var(--cond); font-size: 40px; font-weight: 900; color: var(--pink); text-transform: uppercase; letter-spacing: .04em; }
+    .confetti-canvas { position: fixed; inset: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 29; }
+    .bkmeta { display: flex; align-items: center; gap: 6px; margin-top: 8px; font-family: var(--cond); font-size: 19px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--navy); }
+    .bkmeta img { width: 22px; height: 22px; }
+    .bkmeta span { color: var(--mid-grey); }
+    .scrow .bk { display: flex; align-items: center; gap: 4px; font-family: var(--cond); font-size: 18px; font-weight: 800; color: var(--navy); white-space: nowrap; }
+    .scrow .bk img { width: 20px; height: 20px; }
+    .bkchip { display: inline-flex; align-items: center; gap: 4px; font-family: var(--cond); font-size: 16px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--navy); }
+    .bkchip img { width: 20px; height: 20px; }
+    .rbk { display: flex; align-items: center; justify-content: center; gap: 10px; margin: -4px 0 10px; font-family: var(--cond); font-size: 22px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; }
+    .rbk img { width: 34px; height: 34px; }
+    .rbk b { color: var(--pink); font-size: 30px; }
+    .rbk span { color: var(--mid-grey); font-size: 18px; letter-spacing: .1em; }
+    .devcheck { position: absolute; left: 64px; top: 6px; z-index: 50; font-family: var(--cond); font-size: 15px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase;
+        background: var(--navy); color: #fff; border: none; border-radius: 0 0 6px 6px; padding: 3px 10px; cursor: pointer; }
+    .devcheck.bad { background: var(--pink); }
+    /* piles */
+    .piles { display: flex; gap: 16px; }
+    .pile { white-space: nowrap; display: flex; align-items: center; gap: 8px; font-family: var(--cond); font-size: 18px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--mid-grey); }
+    .pile i { width: 19px; height: 25px; border-radius: 3px; border: 3px solid var(--pink); background: var(--pink); display: block; }
+    .pile.rv i { background: #fff; border: 3px dashed var(--navy); }
+    .pile b { font-size: 26px; color: var(--navy); min-width: 16px; display: inline-block; }
+    .divv { width: 3px; height: 26px; background: var(--light-grey); }
+
+    /* fx */
+    .pt { position: absolute; pointer-events: none; z-index: 60; }
+    .plus { white-space: nowrap; position: absolute; z-index: 61; font-family: var(--cond); font-size: 40px; font-weight: 900; color: var(--pink); pointer-events: none; line-height: 1; }
+    .shock { position: absolute; z-index: 59; border: 4px solid var(--pink); border-radius: 50%; pointer-events: none; }
+
+    /* results */
+    .res { display: grid; grid-template-columns: 300px 1fr; gap: 44px; height: 100%; }
+    .rleft { display: flex; flex-direction: column; align-items: stretch; justify-content: center; gap: 10px; }
+    .ringw { position: relative; width: 180px; height: 180px; align-self: center; }
+    .ringw svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+    .rnum { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-family: var(--cond); font-weight: 900; white-space: nowrap; }
+    .rnum b { font-size: 64px; color: var(--pink); line-height: 1; }
+    .rnum span { font-size: 26px; color: var(--mid-grey); margin-left: 8px; align-self: flex-end; margin-bottom: 62px; }
+    .rlab { text-align: center; font-family: var(--cond); font-size: 20px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: var(--mid-grey); margin: 0 0 12px; }
+    .rleft .next, .rleft .btn2 { font-size: 20px; padding: 10px 12px; white-space: nowrap; letter-spacing: .04em; }
+    .rright { --rs: 1; display: flex; flex-direction: column; min-height: 0; }
+    .rhead { font-family: var(--cond); font-size: 18px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--mid-grey); border-bottom: 4px solid var(--navy); padding-bottom: 6px; display: flex; justify-content: space-between; }
+    .rhead i { font-style: normal; display: flex; gap: 14px; align-items: center; }
+    .rhead i .chip { letter-spacing: 0; text-transform: none; font-family: 'Barlow', 'Helvetica Neue', Helvetica, Arial, sans-serif; }
+    .rlist { --rs: 1; overflow-y: auto; flex: 1; padding-right: 8px; display: grid; grid-template-columns: 1fr; column-gap: 28px; align-content: start; }
+    .rlist.two { grid-template-columns: 1fr 1fr; }
+    .rlist.three { display: block; column-count: 4; column-gap: 18px; }
+    .rlist.three .rblock { break-inside: avoid; }
+    .rlist.three .rsc { padding: 1px 6px 0; }
+    .rlist.three .chip.n { white-space: normal; }
+    .rblock { padding: calc(var(--rs) * 8px) 0; border-bottom: 2px solid var(--light-grey); min-width: 0; }
+    .rbh { display: flex; align-items: center; gap: 10px; }
+    .rsc { font-family: var(--cond); font-size: calc(var(--rs) * 22px); font-weight: 900; letter-spacing: .04em; border: 3px solid var(--navy); border-radius: 6px; padding: 1px 9px 0; line-height: 1.2; }
+    .rbh b { margin-left: auto; font-family: var(--cond); font-size: calc(var(--rs) * 24px); font-weight: 900; }
+    .rtx { font-size: calc(var(--rs) * 16px); font-weight: 600; line-height: 1.28; margin-top: calc(var(--rs) * 6px); }
+    .chips { display: flex; flex-wrap: wrap; gap: 5px; margin-top: calc(var(--rs) * 7px); }
+    .chip { font-size: calc(var(--rs) * 14px); font-weight: 700; padding: 2px 9px 2px 6px; border-radius: 5px; display: inline-flex; gap: 5px; align-items: center; line-height: 1.2; }
+    .chip svg { width: 12px; height: 12px; fill: none; stroke: currentColor; stroke-width: 3.5; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+    .chip.y { background: var(--pink); color: #fff; border: 2px solid var(--pink); }
+    .chip.n { border: 2px dashed var(--navy); color: var(--navy); background: #fff; }
+    .chip.dot { padding: 2px 4px; }
+    .tag { display: inline-block; font-family: var(--cond); font-size: calc(var(--rs) * 16px); font-weight: 800; letter-spacing: .08em; text-transform: uppercase; padding: 2px 8px 1px; border-radius: 5px; }
+    .tag.sec { background: var(--pink); color: #fff; }
+    .tag.near { border: 2px solid var(--pink); color: var(--pink); }
+    .tag.rev { background: var(--navy); color: #fff; }
+    .rlist::-webkit-scrollbar, .sclist::-webkit-scrollbar { width: 8px; }
+    .rlist::-webkit-scrollbar-thumb, .sclist::-webkit-scrollbar-thumb { background: var(--navy); border-radius: 4px; }
+    .rlist::-webkit-scrollbar-track, .sclist::-webkit-scrollbar-track { background: var(--blank); border-radius: 4px; }
+    /* six decks on the home screen */
+    .decks { grid-template-columns: repeat(6, 1fr); gap: 22px; }
+    .decks .deck { height: 420px; }
+    .decks .dface { padding: 18px 16px 16px; }
+    .decks .dface svg { height: 96px; }
+    .decks .dcode { font-size: 60px; }
+    .decks .dname { font-size: 23px; min-height: 54px; }
+    .decks .dmeta { flex-direction: column; gap: 2px; }
+    .deck.soon { cursor: default; }
+    .deck.soon::before { background: #d5d8e1; border-color: #d5d8e1; }
+    .deck.soon::after { border-color: #c3c6d0; }
+    .deck.soon .dface, .deck.soon:hover .dface, .deck.soon:focus-visible .dface { transform: none; border-color: #c3c6d0; border-style: dashed; color: var(--mid-grey); }
+    .deck.soon:hover::after { transform: translate(6px, 6px); }
+    .deck.soon .dface svg { opacity: .35; filter: grayscale(1); }
+    .deck.soon .dcode { color: #c3c6d0; }
+    .deck.soon .dmeta { color: #b5b9c6; border-top-color: #c3c6d0; letter-spacing: .02em; font-size: 16px !important; }
+    .lock { gap: 5px !important; white-space: nowrap; }
+    .lock { display: inline-flex; align-items: center; gap: 6px; }
+    .decks .dface .lock svg { width: 16px; height: 16px; opacity: 1; filter: none; flex-shrink: 0; fill: none; stroke: currentColor; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+
+    /* key caps in text */
+    kbd { display: inline-block; font-family: inherit; font-size: .8em; font-weight: 700; line-height: 1.15; color: var(--navy); background: #fff; border: 2px solid var(--navy); border-bottom-width: 4px;
+        border-radius: 6px; padding: .06em .42em .02em; white-space: nowrap; vertical-align: .08em; }
+    kbd svg { display: inline-block !important; vertical-align: -.06em; margin-right: .28em; width: .78em !important; height: .78em !important; }
+    .kc { white-space: nowrap; }
+    .kc i { font-style: normal; font-weight: 700; margin: 0 .18em; }
+    .opt.right kbd { border-color: var(--navy); }
+    .tile.right kbd { color: var(--navy); }
+    .pcode { white-space: nowrap; }
+    .decks .bkmeta { white-space: nowrap; font-size: 17px; }
+    .actext .kc { font-size: 1.08em; }
+
+    /* key tiles for sorting */
+    .tile.ktile { font-size: 26px; padding: 6px 16px 3px; min-width: 70px; justify-content: center; border-bottom-width: 9px; border-radius: 10px; box-shadow: none; }
+    .tile.ktile svg { width: 20px; height: 20px; display: block; }
+    .tile.ktile svg rect { fill: currentColor; }
+    .bin .area .tile.ktile { font-size: 21px; padding: 4px 12px 2px; min-width: 54px; border-bottom-width: 7px; }
+
+    /* order steps as rows */
+    .ogrid.rows { gap: 7px; }
+    .ogrid.rows .slot { min-height: 48px; padding: 3px 6px 3px 40px; justify-content: flex-start; }
+    .ogrid.rows .slot > b { top: 50%; transform: translateY(-50%); left: 12px; font-size: 22px; color: var(--pink); }
+    .ogrid.rows .slot .sb { justify-content: flex-start; }
+    .ogrid.rows .slot .tile { flex-direction: row; font-size: 19px; padding: 4px 12px; min-width: 0; }
+    .poolc { display: flex; flex-direction: column; flex-wrap: nowrap; align-items: center; justify-content: center; gap: 14px; }
+    .poolc .tile { font-size: 22px; padding: 8px 16px; }
+
+    /* cloze answers */
+    .wtile .kc { font-size: 1em; }
+    .blank .tile .kc { font-size: 1em; }
+
+    /* tap the keyboard */
+    .hsw:has(.kbhs) { background: #e3e6ee; }
+    .kbhs .hs { cursor: pointer; outline: none; }
+    .kbhs .hs:hover .hdot { fill: var(--tint); }
+    .kbhs .hs:focus-visible .hdot { fill: #fde6f3; }
+    .kbhs .hs .hok, .kbhs .hs .hno { display: none; }
+    .kbhs.done .hs { cursor: default; }
+    .kbhs .hs.good .hdot, .kbhs .hs.good:hover .hdot { fill: var(--pink); stroke: none; }
+    .kbhs .hs.good .hok { display: block; }
+    .kbhs .hs.bad .hdot, .kbhs .hs.bad:hover .hdot { fill: #fff; stroke: var(--pink); stroke-width: 5; stroke-dasharray: 10 7; }
+    .kbhs .hs.bad .hno { display: block; }
+    .kbhs .hs.off { opacity: .35; }
+
+    /* window pictures and wide options */
+    .pcard .vis { overflow: visible; }
+    .opt .kc { font-size: 1.04em; }
+</style>
+</head>
+<body>
+<div class="stage" id="stage">
+    <div class="top">
+        <h1 class="sheet-title">Digital Tech <span>flashcards</span></h1>
+        <div class="topr"><div class="counter" id="counter"></div>
+            <div class="bcount" title="Buckles earned">
+                <img src="buckle.svg" alt="" class="counter-icon" onerror="this.style.visibility='hidden'">
+                <div class="num" id="buckleCount">0</div>
+                <div class="lbl">Buckles</div>
+            </div>
+            <button class="snd" id="snd" aria-label="Turn sound on"></button></div>
+    </div>
+    <div class="content" id="content"></div>
+    <div class="caption"><div class="txt" id="cap"></div><div class="btns" id="btns"></div></div>
+    <div class="progress" id="progress"></div>
+</div>
+
+<div class="award" id="award" role="status" aria-live="polite">
+    <img src="penguin-with-buckle.svg" alt="" class="award-img" onerror="this.style.display='none'">
+    <div class="award-text" id="awardText">+1 Buckle!</div>
+</div>
+
+<script>
+/* =====================================================================================
+   DIGITAL TECHNOLOGIES FLASHCARDS: MAINTENANCE GUIDE
+   Built from the Earth and Space flashcards template. Read this before adding, editing
+   or removing cards.
+
+   1. BUCKLES (shared reward system)
+      - Buckles are stored in localStorage under 'buckles-shared', the same record used by
+        the other checking for understanding pages. Each entry is 'PAGE_ID:card-id': 1.
+      - One buckle per card, awarded the first time the card is answered correctly and
+        never again. A wrong answer awards nothing, so the card can still be earned later.
+      - Every total on screen is counted from CARDS when the page loads.
+      - PAGE_ID must never change. Changing it would orphan every buckle already earned.
+
+   2. CARD IDS (permanent)
+      - The first argument of C() is the card's buckle ID, for example 'shortcuts-sc1-hold-or-tap'.
+      - Start with the deck id, then the SC, so IDs stay unique when new decks add their own SCs.
+      - Once a card is published its ID is permanent. Labels, questions, options,
+        explanations and visuals can all be edited freely without affecting buckles.
+      - Adding a card: write a new C('new-id', ...) and add 'new-id' to RELEASED_IDS.
+      - Deleting a card: remove the C(...) entry and add its ID to RETIRED_IDS. Leave it in
+        RELEASED_IDS. Never reuse a retired ID.
+      - If an ID ever has to change, add 'old-id': 'new-id' to ID_ALIASES.
+
+   3. DECKS
+      - Decks are listed in LGS in home screen order. Binary, Integers, Text, Audio and
+        Networks are placeholders (soon: true) and cannot be opened yet.
+      - To release a deck: add its SC statements to SCT (continue the numbering, SC4 onwards),
+        list them in the deck's sc array, write its cards and delete soon: true.
+      - Each deck needs an ICON entry with the same key as its id.
+
+   4. DATA CHECK
+      - validateCards() runs on every load. Problems and reminders are listed in the browser
+        console, and a small strip appears at the top left of the page.
+
+   5. CARD TYPES (opts[0] is correct unless ans is given)
+      Multiple choice:  C(id, sc, label, question, [4 options], explanation, { vis? , ordered?, ans? })
+      Pick the picture: as above with { pic: true } and 4 SVG strings as options (pic('copy'), winPic(...))
+      Watch the keys:   as multiple choice with { scene: 'keys', codes: [...key codes], vis, backVis, say }
+      Put in order:     { kind: 'order', seq, tile: key => html, cols, rows?, ordTop?, instr, ansHTML }
+      Sort:             { kind: 'sort', bins: [[title, hint], [title, hint]], items: [[html, 0 or 1], ...], tileCls?, poolCls?, instr, ansHTML }
+      Fill the gaps:    { kind: 'cloze', text: 'Use [] for each gap', answers, bank, tileHTML?, instr, ansHTML }
+      Tap the keyboard: { kind: 'hotspot', hsSVG: kbSVG({ noLabels: true, hs: true, cls: 'hsv kbhs' }), correct: [KIDX('ControlLeft')], instr, ansHTML }
+      Inline key caps:  K('Ctrl', 'C') anywhere in questions, options or answers.
+
+   6. HOUSE STYLE
+      - Swiss design, navy #1b1f45 and pink #ea008a, Barlow / Helvetica, 1280 x 720 stage.
+      - Australian English in all student-facing text. No em dashes.
+      - Animations always play at full speed. Do not add prefers-reduced-motion rules or any
+        code that shortens or disables animation (classroom laptops have reduced motion on).
+      - Keyboard visuals match the keyboard shortcut cards and checking for understanding page.
+   ===================================================================================== */
+const FILE_VERSION = '1.0';
+const $ = s => document.querySelector(s);
+const stage = $('#stage'), content = $('#content'), cap = $('#cap'), btns = $('#btns'), counter = $('#counter'), progress = $('#progress'), sndBtn = $('#snd');
+const NV = '#1b1f45', PK = '#ea008a', LT = '#f0f3f6', GR = '#c9ccd6', TN = '#e9ecf5';
+let scaleK = 1;
+function el(tag, cls, html) { const e = document.createElement(tag); if (cls) e.className = cls; if (html !== undefined) e.innerHTML = html; return e; }
+function say(html) { cap.innerHTML = `<span class="in">${html}</span>`; }
+function addBtn(t, cls, fn) { const b = el('button', cls, t); b.onclick = fn; btns.appendChild(b); return b; }
+function A(e, kf, o = {}) { const a = e.animate(kf, { duration: 500, easing: 'cubic-bezier(.2,.8,.2,1)', fill: 'both', ...o }); return a.finished.catch(() => {}); }
+const easeInOut = t => t < .5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const local = r => { const s = stage.getBoundingClientRect(); return { x: (r.left - s.left) / scaleK, y: (r.top - s.top) / scaleK, w: r.width / scaleK, h: r.height / scaleK }; };
+const TICK = '<svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+const CROSS = '<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>';
+
+/* ---------- sound ---------- */
+let sound = false, actx = null;
+const SPK = on => `<svg viewBox="0 0 24 24"><path d="M4 9h4l5-4v14l-5-4H4z"/>${on ? '<path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/>' : '<path d="M17 9.5l5 5M22 9.5l-5 5"/>'}</svg>`;
+function setSound(on) { sound = on; sndBtn.innerHTML = SPK(on); sndBtn.classList.toggle('on', on); sndBtn.setAttribute('aria-label', on ? 'Turn sound off' : 'Turn sound on'); }
+sndBtn.onclick = () => { setSound(!sound); if (sound) tone([[880, .1]]); };
+function tone(seq) {
+    if (!sound) return;
+    try {
+        actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+        let t = actx.currentTime + .01;
+        seq.forEach(([f, d, type = 'sine', v = .14]) => {
+            const o = actx.createOscillator(), g = actx.createGain();
+            o.type = type; o.frequency.value = f;
+            g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(v, t + .012); g.gain.exponentialRampToValueAtTime(.0008, t + d);
+            o.connect(g); g.connect(actx.destination); o.start(t); o.stop(t + d + .03); t += d * .62;
+        });
+    } catch (e) {}
+}
+setSound(false);
+
+/* =========================================================
+   DRAWING HELPERS
+   ========================================================= */
+const f1 = v => (+v).toFixed(1);
+const tx = (x, y, s, o = {}) => `<text class="${o.c || 'lb'}" x="${f1(x)}" y="${f1(y)}" text-anchor="${o.a || 'middle'}"${o.fill ? ` style="fill:${o.fill}"` : ''}>${s}</text>`;
+const V = (w, h, inner, cls = '') => `<svg class="vis ${cls}" viewBox="0 0 ${w} ${h}" preserveAspectRatio="xMidYMid meet">${inner}</svg>`;
+function arr(x1, y1, x2, y2, c = NV, sw = 5, hl = 16, hw = 10) {
+    const a = Math.atan2(y2 - y1, x2 - x1), ux = Math.cos(a), uy = Math.sin(a), bx = x2 - ux * hl, by = y2 - uy * hl, px = -uy * hw, py = ux * hw;
+    return `<line x1="${f1(x1)}" y1="${f1(y1)}" x2="${f1(bx)}" y2="${f1(by)}" stroke="${c}" stroke-width="${sw}" stroke-linecap="round"/><polygon points="${f1(x2)},${f1(y2)} ${f1(bx + px)},${f1(by + py)} ${f1(bx - px)},${f1(by - py)}" fill="${c}" stroke="${c}" stroke-width="1" stroke-linejoin="round"/>`;
+}
+const badge = (x, y, s, o = {}) => `<circle cx="${f1(x)}" cy="${f1(y)}" r="${o.r || 15}" fill="${o.bg || NV}" stroke="#fff" stroke-width="3"/>${tx(x, y + 6.5, s, { c: 'bd', fill: o.fg || '#fff' })}`;
+let UID = 0; const uid = p => p + (++UID);
+const th = (x, y, s, o = {}) => tx(x, y, s, { ...o, c: (o.c || 'lb') + ' halo' });
+const LOCK = '<svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>';
+
+/* =========================================================
+   KEYBOARD VISUALS (shared with the keyboard shortcut cards and checking for understanding page)
+   ========================================================= */
+const FONT = 'Barlow, Helvetica Neue, Helvetica, Arial, sans-serif';
+const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+/* inline key caps in text: K('Ctrl', 'C') */
+const WINI = `<svg viewBox="0 0 16 16" width=".78em" height=".78em"><rect width="7.2" height="7.2" fill="currentColor"/><rect x="8.8" width="7.2" height="7.2" fill="currentColor"/><rect y="8.8" width="7.2" height="7.2" fill="currentColor"/><rect x="8.8" y="8.8" width="7.2" height="7.2" fill="currentColor"/></svg>`;
+const K = (...ks) => `<span class="kc">${ks.map(k => k === 'Win' ? `<kbd>${WINI}Win</kbd>` : `<kbd>${k}</kbd>`).join('<i>+</i>')}</span>`;
+const KT = s => s.includes(' + ') ? K(...s.split(' + ')) : s;
+const winLogo = (x, y, s, c) => `<g transform="translate(${f1(x)} ${f1(y)}) scale(${s})"><rect width="7.2" height="7.2" fill="${c}"/><rect x="8.8" width="7.2" height="7.2" fill="${c}"/><rect y="8.8" width="7.2" height="7.2" fill="${c}"/><rect x="8.8" y="8.8" width="7.2" height="7.2" fill="${c}"/></g>`;
+
+/* one key cap in the style of the shortcut cards: navy edge, deep bottom edge, white face */
+function keyCap(x, y, w, h, label, o = {}) {
+    const k = h / 150, bw = 5 * k, bb = 20 * k, r = 22 * k, fs = (o.fs || 62) * k, on = o.on, face = on ? PK : '#fff', ink = on ? '#fff' : NV, edge = on ? PK : NV;
+    let s = `<rect x="${f1(x)}" y="${f1(y)}" width="${f1(w)}" height="${f1(h)}" rx="${f1(r)}" fill="${on ? '#a8005f' : edge}"/><rect x="${f1(x + bw)}" y="${f1(y + bw)}" width="${f1(w - 2 * bw)}" height="${f1(h - bw - bb)}" rx="${f1(r * .75)}" fill="${face}"/>`;
+    const cx = x + w / 2, cy = y + bw + (h - bw - bb) / 2;
+    if (label === 'Win') {
+        const lw = 46 * k, tw = 3 * fs * .58, gap = 16 * k, x0 = cx - (lw + gap + tw) / 2;
+        s += winLogo(x0, cy - lw / 2, lw / 16, ink) + `<text x="${f1(x0 + lw + gap)}" y="${f1(cy + fs * .36)}" style="font:700 ${f1(fs)}px ${FONT}" fill="${ink}">Win</text>`;
+    } else s += `<text x="${f1(cx)}" y="${f1(cy + fs * .36)}" text-anchor="middle" style="font:700 ${f1(fs)}px ${FONT}" fill="${ink}">${esc(label)}</text>`;
+    return s;
+}
+const capW = k => k === 'Win' ? 262 : k.length === 1 ? 150 : Math.max(230, k.length * 36 + 84);
+/* a row of key caps joined by pink plus signs, as on the shortcut cards */
+function keysRow(keys, o = {}) {
+    let x = 0, s = '';
+    keys.forEach((k, i) => {
+        if (i) { s += `<text x="${x + 38}" y="98" text-anchor="middle" style="font:800 70px ${FONT}" fill="${PK}">+</text>`; x += 76; }
+        const w = capW(k); s += keyCap(x, 10, w, 150, k); x += w;
+    });
+    return { s, w: x };
+}
+function keysSVG(keys) { const r = keysRow(keys); return V(r.w + 40, 210, `<g transform="translate(20 20)">${r.s}</g>`); }
+
+/* pictures of what each shortcut does (from the keyboard shortcut cards) */
+const page = (x, y, w, h) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="10" fill="#fff" stroke="${NV}" stroke-width="5"/>`;
+const lines = (x, y, ws, c = '#c3c6d0', gap = 22) => ws.map((w, i) => `<rect x="${x}" y="${y + i * gap}" width="${w}" height="10" rx="5" fill="${c}"/>`).join('');
+const PICS = {
+    all: `${page(50, 14, 170, 182)}${lines(70, 40, [130, 118, 130, 96, 130, 110])
+        .replace(/fill="#c3c6d0"/g, `fill="${NV}"`)}${[0, 1, 2, 3, 4, 5].map(i => `<rect x="64" y="${32 + i * 22}" width="142" height="26" rx="4" fill="${PK}" opacity=".28"/>`).join('')}`,
+    copy: `${page(40, 14, 140, 160)}${lines(58, 40, [100, 90, 104, 70])}${page(92, 46, 140, 160)}<rect x="92" y="46" width="140" height="160" rx="10" fill="#fff5fa" stroke="${PK}" stroke-width="5"/>${lines(110, 74, [100, 90, 104, 70], PK)}`,
+    paste: `<rect x="56" y="24" width="160" height="182" rx="12" fill="#fff" stroke="${NV}" stroke-width="5"/><rect x="100" y="10" width="72" height="30" rx="8" fill="${NV}"/>
+        <rect x="80" y="70" width="112" height="104" rx="6" fill="#fff5fa" stroke="${PK}" stroke-width="4"/>${lines(96, 92, [80, 70, 80], PK)}`,
+    find: `${page(30, 14, 170, 182)}${lines(50, 40, [130, 110, 130, 96, 120, 130])}<rect x="48" y="80" width="56" height="20" rx="4" fill="${PK}" opacity=".35"/>
+        <circle cx="178" cy="132" r="42" fill="#fff" stroke="${PK}" stroke-width="10"/><line x1="208" y1="162" x2="248" y2="202" stroke="${PK}" stroke-width="14" stroke-linecap="round"/>`,
+    alttab: `${[[14, 40], [64, 24], [114, 8]].map(([x, y], i) => `<rect x="${x}" y="${y + 30}" width="140" height="104" rx="10" fill="#fff" stroke="${i === 1 ? PK : NV}" stroke-width="${i === 1 ? 7 : 5}"/><rect x="${x + 2.5}" y="${y + 32.5}" width="135" height="18" rx="7" fill="${i === 1 ? '#fde6f3' : LT}"/>`).join('')}
+        <path d="M70 196h120M168 178l22 18-22 18" fill="none" stroke="${PK}" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>`,
+    snip: `<rect x="20" y="20" width="230" height="170" rx="10" fill="${LT}"/><circle cx="96" cy="88" r="30" fill="${NV}"/><path d="M120 160 L170 84 L222 160Z" fill="${NV}"/>
+        <rect x="54" y="44" width="150" height="128" fill="#fff" fill-opacity=".55" stroke="${PK}" stroke-width="5" stroke-dasharray="14 9"/>
+        <g stroke="${PK}" stroke-width="6" stroke-linecap="round"><line x1="204" y1="150" x2="204" y2="194"/><line x1="182" y1="172" x2="226" y2="172"/></g>`
+};
+const pic = n => `<svg class="vis" viewBox="0 0 270 210" preserveAspectRatio="xMidYMid meet">${PICS[n]}</svg>`;
+
+/* laptop keyboard (same layout as the checking for understanding page) */
+const U = 100;
+const KB = (() => {
+    const m = {};
+    const add = (row, y, h) => { let x = 0; row.forEach(([c, l, w = 1]) => { m[c] = { c, l, x, y, w, h }; x += w; }); };
+    add([['Escape', 'Esc', 1.5], ...[...Array(12)].map((_, i) => ['F' + (i + 1), 'F' + (i + 1)]), ['Delete', 'Del', 1.5]], 0, .62);
+    add([['Backquote', '`'], ...'1234567890'.split('').map(d => ['Digit' + d, d]), ['Minus', '-'], ['Equal', '='], ['Backspace', 'Backspace', 2]], .62, 1);
+    add([['Tab', 'Tab', 1.5], ...'QWERTYUIOP'.split('').map(c => ['Key' + c, c]), ['BracketLeft', '['], ['BracketRight', ']'], ['Backslash', '\\', 1.5]], 1.62, 1);
+    add([['CapsLock', 'Caps Lock', 1.75], ...'ASDFGHJKL'.split('').map(c => ['Key' + c, c]), ['Semicolon', ';'], ['Quote', '\''], ['Enter', 'Enter', 2.25]], 2.62, 1);
+    add([['ShiftLeft', 'Shift', 2.25], ...'ZXCVBNM'.split('').map(c => ['Key' + c, c]), ['Comma', ','], ['Period', '.'], ['Slash', '/'], ['ShiftRight', 'Shift', 2.75]], 3.62, 1);
+    add([['ControlLeft', 'Ctrl', 1.25], ['Fn', 'Fn'], ['MetaLeft', '', 1.25], ['AltLeft', 'Alt', 1.25], ['Space', '', 4.75], ['AltRight', 'Alt', 1.25], ['ControlRight', 'Ctrl', 1.25]], 4.62, 1);
+    return m;
+})();
+const KBLIST = Object.keys(KB);
+const KIDX = c => KBLIST.indexOf(c);
+const CROPS = { left: [-.6, -.6, 9.05, 6.75], deck: [-.6, -.6, 16.2, 6.75] };
+const OKP = `<path class="hok" d="M-11 1l7 7 15-16" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>`;
+const NOP = `<path class="hno" d="M-9 -9l18 18M9 -9l-18 18" fill="none" stroke="${PK}" stroke-width="5" stroke-linecap="round"/>`;
+/* o: crop, noLabels, press (codes drawn pressed), hs (every key is a tap target), cls */
+function kbSVG(o = {}) {
+    const [vx, vy, vw, vh] = CROPS[o.crop || 'left'], press = new Set(o.press || []);
+    let s = `<rect x="${-.6 * U}" y="${-.7 * U}" width="${16.2 * U}" height="${12 * U}" rx="40" fill="#e3e6ee"/><rect x="${-.24 * U}" y="${-.24 * U}" width="${15.48 * U}" height="${6.1 * U}" rx="22" fill="${NV}"/>`;
+    KBLIST.forEach((code, i) => {
+        const k = KB[code];
+        if (k.x > vx + vw) return;
+        const x = k.x * U + 7, y = k.y * U + 6, w = k.w * U - 14, h = k.h * U - 19, cx = x + w / 2, cy = y + h / 2, on = press.has(code);
+        const ink = on ? '#fff' : NV, fs = k.h < .7 ? 20 : k.l.length === 1 ? 34 : k.l.length > 5 ? 21 : 25;
+        let lab = '';
+        if (!o.noLabels) lab = code === 'MetaLeft' ? winLogo(cx - 15, cy - 15, 30 / 16, ink) : `<text class="kl" x="${f1(cx)}" y="${f1(cy + fs * .36)}" text-anchor="middle" style="font:600 ${fs}px ${FONT}" fill="${ink}">${esc(k.l)}</text>`;
+        const face = `<rect class="kf hdot" x="${x}" y="${y}" width="${w}" height="${h}" rx="11" fill="${on ? PK : '#fff'}"/>`;
+        const top = `<g class="kt"${on ? ' transform="translate(0 6)"' : ''}>${face}<g class="lb">${lab}</g>${o.hs ? `<g transform="translate(${f1(cx)} ${f1(cy)})">${OKP}${NOP}</g>` : ''}</g>`;
+        const base = `<rect x="${x}" y="${y + 7}" width="${w}" height="${h}" rx="11" fill="#a3a8bc"/>`;
+        s += o.hs ? `<g class="hs" data-k="${i}" data-c="${code}" tabindex="0" role="button" aria-label="Key">${base}${top}</g>` : `<g data-c="${code}">${base}${top}</g>`;
+    });
+    return `<svg class="vis ${o.cls || ''}" viewBox="${vx * U} ${vy * U} ${vw * U} ${vh * U}" preserveAspectRatio="xMidYMid meet">${s}</svg>`;
+}
+
+/* small window pictures (from the checking for understanding page), drawn at 300 x 200 */
+function winArt(type) {
+    const ctl = `<g stroke="#8b90a8" stroke-width="2.5" stroke-linecap="round"><line x1="236" y1="13" x2="246" y2="13"/><rect x="258" y="8" width="9" height="9" fill="none"/><line x1="279" y1="8" x2="288" y2="17"/><line x1="288" y1="8" x2="279" y2="17"/></g>`;
+    let s = `<rect width="300" height="200" rx="8" fill="#fff"/><rect width="300" height="26" rx="8" fill="${LT}"/><rect y="18" width="300" height="8" fill="${LT}"/>${ctl}`;
+    if (type === 'browser') {
+        s += `<rect x="10" y="5" width="96" height="21" rx="5" fill="#fff"/><rect x="18" y="12" width="60" height="6" rx="3" fill="#c3c6d0"/>
+            <rect x="10" y="33" width="280" height="15" rx="7.5" fill="${LT}"/><rect x="22" y="38" width="90" height="5" rx="2.5" fill="#c3c6d0"/>
+            <rect x="14" y="60" width="130" height="14" rx="3" fill="${PK}"/><g fill="#d3d6e0"><rect x="14" y="84" width="150" height="7" rx="3"/><rect x="14" y="98" width="140" height="7" rx="3"/><rect x="14" y="112" width="152" height="7" rx="3"/><rect x="14" y="126" width="110" height="7" rx="3"/></g>
+            <rect x="14" y="146" width="150" height="40" rx="5" fill="none" stroke="${NV}" stroke-width="2.5"/><rect x="182" y="60" width="104" height="126" rx="6" fill="${NV}"/><circle cx="234" cy="108" r="22" fill="${PK}"/>`;
+    } else if (type === 'doc') {
+        s += `<rect y="26" width="300" height="24" fill="#e2e5ef"/><g fill="#a3a8bc"><rect x="12" y="34" width="26" height="8" rx="2"/><rect x="46" y="34" width="26" height="8" rx="2"/><rect x="80" y="34" width="26" height="8" rx="2"/></g>
+            <rect y="50" width="300" height="150" fill="#eef0f5"/><rect x="62" y="60" width="176" height="140" fill="#fff"/>
+            <rect x="80" y="76" width="96" height="10" rx="2" fill="${NV}"/><g fill="#c3c6d0"><rect x="80" y="96" width="140" height="6" rx="3"/><rect x="80" y="108" width="132" height="6" rx="3"/><rect x="80" y="120" width="140" height="6" rx="3"/><rect x="80" y="132" width="100" height="6" rx="3"/><rect x="80" y="150" width="140" height="6" rx="3"/><rect x="80" y="162" width="120" height="6" rx="3"/></g>`;
+    } else if (type === 'files') {
+        const fold = (x, y, c) => `<path transform="translate(${x} ${y})" d="M0 5 a4 4 0 0 1 4-4 h12 l5 5 h19 a4 4 0 0 1 4 4 v22 a4 4 0 0 1-4 4 h-36 a4 4 0 0 1-4-4z" fill="${c}"/>`;
+        s += `<rect y="26" width="74" height="174" fill="${LT}"/><g fill="#c3c6d0"><rect x="12" y="40" width="48" height="7" rx="3"/><rect x="12" y="56" width="40" height="7" rx="3"/><rect x="12" y="72" width="50" height="7" rx="3"/><rect x="12" y="88" width="36" height="7" rx="3"/></g>
+            ${fold(96, 46, NV)}${fold(162, 46, PK)}${fold(228, 46, NV)}${fold(96, 112, NV)}${fold(162, 112, NV)}
+            <g fill="#c3c6d0"><rect x="96" y="88" width="44" height="6" rx="3"/><rect x="162" y="88" width="44" height="6" rx="3"/><rect x="228" y="88" width="44" height="6" rx="3"/><rect x="96" y="154" width="44" height="6" rx="3"/><rect x="162" y="154" width="44" height="6" rx="3"/></g>`;
+    } else if (type === 'calc') {
+        s += `<rect x="70" y="36" width="160" height="34" rx="4" fill="${LT}"/><rect x="170" y="46" width="48" height="14" rx="3" fill="${NV}"/>`;
+        for (let r = 0; r < 3; r++) for (let c = 0; c < 4; c++) s += `<rect x="${70 + c * 41}" y="${78 + r * 38}" width="37" height="33" rx="4" fill="${c === 3 ? (r === 2 ? PK : '#c3c6d0') : '#e2e5ef'}"/>`;
+    }
+    return s + `<rect width="300" height="200" rx="8" fill="none" stroke="${NV}" stroke-width="4"/>`;
+}
+const winPic = (type, name) => `<svg class="vis" viewBox="-6 -6 312 250" preserveAspectRatio="xMidYMid meet">${winArt(type)}<text x="150" y="236" text-anchor="middle" style="font:700 22px ${FONT}" fill="${NV}">${name}</text></svg>`;
+const winOnly = (type, extra = '') => `<svg class="vis" viewBox="-6 -6 312 212" preserveAspectRatio="xMidYMid meet">${winArt(type)}${extra}</svg>`;
+
+/* a web page with the cursor in its search box (from the checking for understanding page) */
+const searchPage = () => V(330, 300, `<rect width="330" height="300" fill="${LT}"/><rect x="0" y="0" width="330" height="58" fill="${NV}"/>
+    <rect x="20" y="13" width="290" height="32" rx="16" fill="#fff" stroke="${PK}" stroke-width="3"/>
+    <text x="42" y="35" style="font:600 17px ${FONT}" fill="${NV}">volcano facts</text><line x1="160" y1="20" x2="160" y2="38" stroke="${PK}" stroke-width="2.5"/>
+    <rect x="20" y="76" width="170" height="16" rx="3" fill="${PK}"/><g fill="#c3c6d0"><rect x="20" y="104" width="290" height="8" rx="4"/><rect x="20" y="120" width="270" height="8" rx="4"/><rect x="20" y="136" width="284" height="8" rx="4"/><rect x="20" y="152" width="200" height="8" rx="4"/></g>
+    <rect x="20" y="178" width="130" height="100" rx="6" fill="${NV}"/><path d="M36 262 L72 206 L92 236 L106 220 L134 262Z" fill="${PK}"/>
+    <g fill="#c3c6d0"><rect x="166" y="182" width="144" height="8" rx="4"/><rect x="166" y="198" width="130" height="8" rx="4"/><rect x="166" y="214" width="140" height="8" rx="4"/><rect x="166" y="230" width="110" height="8" rx="4"/></g>`);
+
+/* a 12-page assignment sheet */
+const sheetStack = () => V(300, 210, `<rect x="84" y="10" width="140" height="180" rx="6" fill="#e2e5ef" stroke="${NV}" stroke-width="3"/><rect x="74" y="18" width="140" height="178" rx="6" fill="#eef0f5" stroke="${NV}" stroke-width="3"/>
+    <rect x="64" y="26" width="140" height="170" rx="6" fill="#fff" stroke="${NV}" stroke-width="3"/><rect x="78" y="42" width="76" height="10" rx="2" fill="${NV}"/>
+    <g fill="#c3c6d0">${[64, 76, 88, 100, 120, 132, 144, 156, 168].map((y, i) => `<rect x="78" y="${y}" width="${i % 3 ? 112 : 94}" height="6" rx="3"/>`).join('')}</g>
+    <rect x="170" y="166" width="120" height="30" rx="15" fill="${NV}"/><text x="230" y="186" text-anchor="middle" style="font:700 14px ${FONT}" fill="#fff">Page 1 of 12</text>`);
+
+/* an essay with the cursor flashing at the end */
+const essay = () => winOnly('doc', `<line x1="203" y1="160" x2="203" y2="172" stroke="${PK}" stroke-width="2.5"/>`);
+
+/* ---------- deck icons ---------- */
+const bitRow = (x, y, bits, s = 17, g = 3) => bits.split('').map((b, i) => `<rect x="${x + i * (s + g)}" y="${y}" width="${s}" height="${s}" rx="3" fill="${b === '1' ? PK : '#fff'}" stroke="${b === '1' ? PK : NV}" stroke-width="2.5"/><text x="${x + i * (s + g) + s / 2}" y="${y + s * .74}" text-anchor="middle" style="font:800 ${s * .7}px ${FONT}" fill="${b === '1' ? '#fff' : NV}">${b}</text>`).join('');
+const ICON = {
+    shortcuts: `<svg viewBox="0 0 160 112">${keyCap(2, 30, 74, 52, 'Ctrl', { fs: 64 })}<text x="88" y="64" text-anchor="middle" style="font:800 26px ${FONT}" fill="${PK}">+</text>${keyCap(100, 30, 52, 52, 'C', { fs: 72, on: true })}</svg>`,
+    binary: `<svg viewBox="0 0 160 112">${bitRow(1, 22, '01101001', 17, 3)}${bitRow(1, 46, '10010110', 17, 3)}${bitRow(1, 70, '01011100', 17, 3)}</svg>`,
+    integers: `<svg viewBox="0 0 160 112">${[8, 4, 2, 1].map((v, i) => `<text x="${22 + i * 30}" y="30" text-anchor="middle" style="font:800 15px ${FONT}" fill="#9a9a9a">${v}</text>`).join('')}${bitRow(8, 38, '1101', 28, 2)}<text x="80" y="102" text-anchor="middle" style="font:900 22px ${FONT}" fill="${NV}">= 13</text></svg>`,
+    text: `<svg viewBox="0 0 160 112">${keyCap(4, 26, 50, 56, 'A', { fs: 74 })}<path d="M62 54h18M74 47l8 7-8 7" fill="none" stroke="${PK}" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><text x="122" y="66" text-anchor="middle" style="font:900 34px ${FONT}" fill="${NV}">65</text><text x="122" y="88" text-anchor="middle" style="font:700 11px ${FONT}" fill="#9a9a9a">01000001</text></svg>`,
+    audio: (() => { let p = '', bars = ''; for (let i = 0; i <= 64; i++) { const x = 8 + i * 2.25, y = 56 - 34 * Math.sin(i / 64 * Math.PI * 3) * (0.55 + 0.45 * Math.sin(i / 64 * Math.PI)); p += (i ? 'L' : 'M') + f1(x) + ' ' + f1(y); if (i % 4 === 0) bars += `<line x1="${f1(x)}" y1="56" x2="${f1(x)}" y2="${f1(y)}" stroke="${PK}" stroke-width="3" stroke-linecap="round"/><circle cx="${f1(x)}" cy="${f1(y)}" r="3" fill="${PK}"/>`; }
+        return `<svg viewBox="0 0 160 112"><line x1="6" y1="56" x2="154" y2="56" stroke="#c3c6d0" stroke-width="2"/>${bars}<path d="${p}" fill="none" stroke="${NV}" stroke-width="3"/></svg>`; })(),
+    networks: (() => { const N = [[24, 26], [80, 18], [136, 30], [40, 88], [120, 86], [80, 56]], E = [[0, 5], [1, 5], [2, 5], [3, 5], [4, 5], [0, 1], [1, 2], [3, 4], [0, 3], [2, 4]];
+        return `<svg viewBox="0 0 160 112">${E.map(([a, b]) => `<line x1="${N[a][0]}" y1="${N[a][1]}" x2="${N[b][0]}" y2="${N[b][1]}" stroke="${NV}" stroke-width="3"/>`).join('')}<line x1="80" y1="56" x2="136" y2="30" stroke="${PK}" stroke-width="5"/>${N.map(([x, y], i) => `<circle cx="${x}" cy="${y}" r="${i === 5 ? 13 : 10}" fill="${i === 5 || i === 2 ? PK : '#fff'}" stroke="${i === 5 || i === 2 ? PK : NV}" stroke-width="3.5"/>`).join('')}<rect x="102" y="38" width="12" height="9" rx="2" fill="#fff" stroke="${PK}" stroke-width="2.5" transform="rotate(-25 108 42)"/></svg>`; })()
+};
+const PATTERN = (() => { let s = ''; for (let r = 60; r < 900; r += 46) s += `<circle cx="600" cy="490" r="${r}" fill="none" stroke="${PK}" stroke-width="2" opacity="${(.55 - r / 2000).toFixed(2)}"/>`; return `<svg viewBox="0 0 584 470" preserveAspectRatio="xMidYMid slice">${s}<circle cx="600" cy="490" r="34" fill="${PK}"/></svg>`; })();
+
+/* ---------- animated scenes ---------- */
+const REPLAY = `<svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.4-5.7"/><path d="M4 4v5h5"/></svg>`;
+const SCENE = {
+    /* keys light up one at a time and are held, like a student pressing the shortcut */
+    keys(svg, c) {
+        let tok = 0;
+        const set = (code, on) => { const g = svg.querySelector(`[data-c="${code}"]`); if (!g) return; const kt = g.querySelector('.kt'), kf = g.querySelector('.kf'); kt.setAttribute('transform', on ? 'translate(0 6)' : ''); kf.setAttribute('fill', on ? PK : '#fff'); g.querySelectorAll('.lb text, .lb rect').forEach(n => n.setAttribute('fill', on ? '#fff' : NV)); };
+        const wait = (ms, my) => new Promise(r => setTimeout(() => r(my === tok && document.body.contains(svg)), ms));
+        const run = async hold => {
+            const my = ++tok;
+            c.codes.forEach(k => set(k, false));
+            if (!await wait(350, my)) return;
+            for (const k of c.codes) { set(k, true); if (!await wait(750, my)) return; }
+            if (hold) return;
+            if (!await wait(1400, my)) return;
+            c.codes.forEach(k => set(k, false));
+        };
+        return { intro: () => run(false), outcome: () => run(true) };
+    }
+};
+const ansRow = items => `<div class="arow">${items}</div>`;
+
+/* =========================================================
+   CURRICULUM
+   Decks appear on the home screen in this order. A deck with soon: true shows as a locked
+   "Coming soon" tile. To release a deck, add its SCs to SCT, list them in its sc array,
+   write its cards and remove soon.
+   ========================================================= */
+const LGS = [
+    { id: 'shortcuts', code: '01', short: 'Keyboard shortcuts', tag: 'Shortcuts', text: 'Keyboard shortcuts help us work faster and more accurately', sc: ['SC1', 'SC2', 'SC3'] },
+    { id: 'binary', code: '02', short: 'Binary', tag: 'Binary', text: 'Computers represent all data in binary', sc: [], soon: true },
+    { id: 'integers', code: '03', short: 'Integers', tag: 'Integers', text: 'Whole numbers can be represented in binary', sc: [], soon: true },
+    { id: 'text', code: '04', short: 'Text', tag: 'Text', text: 'Text can be represented as integers', sc: [], soon: true },
+    { id: 'audio', code: '05', short: 'Audio', tag: 'Audio', text: 'Sound can be represented as integers', sc: [], soon: true },
+    { id: 'networks', code: '06', short: 'Networks', tag: 'Networks', text: 'Data is transmitted and secured across networks', sc: [], soon: true }
+];
+const SCT = {
+    SC1: 'I can identify the keys used in keyboard shortcuts',
+    SC2: 'I can use keyboard shortcuts to select, copy, paste, find, switch windows and take screenshots',
+    SC3: 'I can choose the right keyboard shortcut for a task'
+};
+const LGOF = {}; LGS.forEach(l => l.sc.forEach(s => LGOF[s] = l.id));
+const DECK = {}; LGS.forEach(l => DECK[l.id] = l);
+
+/* Card factory. The first argument is the card's permanent buckle ID (see the maintenance guide at the top of this script).
+   The first option is the correct one unless ans is given. ordered keeps the options in the order written. */
+const C = (id, sc, label, q, opts, exp, x = {}) => ({ id, sc, lg: LGOF[sc], label, q, opts, exp, ans: 0, ...x });
+const kbBack = codes => kbSVG({ press: codes });
+const CARDS = [
+    /* SC1: keys used in shortcuts */
+    C('shortcuts-sc1-tap-the-ctrl-key', 'SC1', 'Tap the Ctrl key', 'The labels have worn off this keyboard. Tap the Ctrl key.', [], 'Ctrl is the key in the bottom-left corner. Your left little finger can hold it down while your other fingers reach the letter keys.', { kind: 'hotspot',
+        hsSVG: kbSVG({ noLabels: true, hs: true, cls: 'hsv kbhs' }), correct: [KIDX('ControlLeft')], instr: 'Tap a key on the keyboard.',
+        ansHTML: '<div class="ans">The bottom-left corner key</div>', backVis: kbBack(['ControlLeft']) }),
+    C('shortcuts-sc1-tap-the-windows-key', 'SC1', 'Tap the Windows key', `The labels have worn off again. Tap the Windows key you need for ${K('Win', 'Shift', 'S')}.`, [], 'The Windows key has the four-square logo on it. On most laptops it sits just to the left of Alt.', { kind: 'hotspot',
+        hsSVG: kbSVG({ noLabels: true, hs: true, cls: 'hsv kbhs' }), correct: [KIDX('MetaLeft')], instr: 'Tap a key on the keyboard.',
+        ansHTML: '<div class="ans">The key just left of Alt</div>', backVis: kbBack(['MetaLeft']) }),
+    C('shortcuts-sc1-mystery-keys-paste', 'SC1', 'Mystery keys: paste', 'The labels have worn off. Watch the keys light up. Which shortcut is being pressed?', [K('Ctrl', 'V'), K('Ctrl', 'C'), K('Alt', 'V'), K('Ctrl', 'B')], 'The corner key is Ctrl. Count along the bottom letter row from the left: Z, X, C, V. The fourth key is V, so this is Ctrl + V, which pastes.', { scene: 'keys', type: 'Watch the keys', codes: ['ControlLeft', 'KeyV'],
+        vis: kbSVG({ noLabels: true }), backVis: kbSVG(), say: 'Watch the keys light up, then choose your answer. Press <b>Replay</b> to watch again.' }),
+    C('shortcuts-sc1-mystery-keys-snip', 'SC1', 'Mystery keys: snip', 'The labels have worn off. Watch the keys light up. Which shortcut is being pressed?', [K('Win', 'Shift', 'S'), K('Ctrl', 'Shift', 'S'), K('Win', 'Shift', 'A'), K('Alt', 'Shift', 'S')], 'The key just left of Alt is Windows, the wide key above Ctrl is Shift, and S is the second key on the middle letter row. Win + Shift + S takes a screenshot.', { scene: 'keys', type: 'Watch the keys', codes: ['MetaLeft', 'ShiftLeft', 'KeyS'],
+        vis: kbSVG({ noLabels: true }), backVis: kbSVG(), say: 'Watch the keys light up, then choose your answer. Press <b>Replay</b> to watch again.' }),
+    C('shortcuts-sc1-hold-or-tap', 'SC1', 'Hold or tap', `How do you press ${K('Ctrl', 'C')}?`, ['Hold Ctrl down, then tap C', 'Tap Ctrl, let go, then tap C', 'Hold C down, then tap Ctrl', 'Tap C, then tap Ctrl'], 'Ctrl must still be held down when you tap C. If you let go of Ctrl first, the computer only sees the letter C.'),
+    C('shortcuts-sc1-why-ctrl-is-needed', 'SC1', 'Why Ctrl is needed', 'Why do shortcuts use a key like Ctrl together with a letter?', ['It tells the computer the letter is a command, not text to type', 'It makes the letter type as a capital', 'It makes the computer run faster', 'It saves your work before the letter is pressed'], 'On its own, C just types the letter c. Holding Ctrl changes what the next key does, so C becomes the copy command.'),
+    C('shortcuts-sc1-hold-keys-and-tap-keys', 'SC1', 'Hold keys and tap keys', 'Think about the shortcuts you know. Sort each key by whether you hold it down or tap it.', [], 'Ctrl, Alt, Shift and Windows are held down. They do very little on their own, but they change what the next key does. The letter keys and Tab are tapped to choose the action.', { kind: 'sort',
+        bins: [['Hold down', 'Changes what the next key does'], ['Tap', 'Chooses the action']], tileCls: 'ktile', poolCls: 'pool3',
+        items: [['Ctrl', 0], ['Alt', 0], ['Shift', 0], ['Win', 0], ['A', 1], ['C', 1], ['V', 1], ['F', 1], ['Tab', 1], ['S', 1]].map(([k, b]) => [k === 'Win' ? `${WINI}Win` : k, b]),
+        instr: 'Drag each key into a group, or tap a key then a group. Press <b>Check</b>.',
+        ansHTML: `<p class="actext"><b>Hold down:</b> ${K('Ctrl')} ${K('Alt')} ${K('Shift')} ${K('Win')}<br><b>Tap:</b> ${K('A')} ${K('C')} ${K('V')} ${K('F')} ${K('Tab')} ${K('S')}</p>` }),
+
+    /* SC2: what each shortcut does */
+    C('shortcuts-sc2-what-ctrl-a-does', 'SC2', 'What Ctrl + A does', 'What does this shortcut do? Pick the picture.', [pic('all'), pic('copy'), pic('find'), pic('paste')], 'Ctrl + A selects all. It grabs every word in a box, or every file in a folder, wherever your cursor is.', { pic: true, vis: keysSVG(['Ctrl', 'A']) }),
+    C('shortcuts-sc2-what-ctrl-f-does', 'SC2', 'What Ctrl + F does', 'What does this shortcut do? Pick the picture.', [pic('find'), pic('all'), pic('alttab'), pic('snip')], 'Ctrl + F opens a find box so you can search a long page for a word, then jump between the matches.', { pic: true, vis: keysSVG(['Ctrl', 'F']) }),
+    C('shortcuts-sc2-what-alt-tab-does', 'SC2', 'What Alt + Tab does', 'What does this shortcut do? Pick the picture.', [pic('alttab'), pic('copy'), pic('snip'), pic('find')], 'Alt + Tab shows your open windows. Each tap of Tab moves along one window, and letting go of Alt opens it.', { pic: true, vis: keysSVG(['Alt', 'Tab']) }),
+    C('shortcuts-sc2-what-win-shift-s-does', 'SC2', 'What Win + Shift + S does', 'What does this shortcut do? Pick the picture.', [pic('snip'), pic('all'), pic('alttab'), pic('paste')], 'Win + Shift + S lets you drag a box around part of the screen. A picture of it is copied, ready to paste with Ctrl + V.', { pic: true, vis: keysSVG(['Win', 'Shift', 'S']) }),
+    C('shortcuts-sc2-nothing-happened', 'SC2', 'Nothing happened?', `Lily highlights a paragraph and presses ${K('Ctrl', 'C')}. Nothing changes on the screen. What happened?`, ['A copy was saved, ready to paste', 'The shortcut didn’t work', 'The paragraph was deleted', 'The paragraph was pasted at the end of the page'], 'Copying saves the selection to the clipboard without changing anything you can see. You only see the result when you paste with Ctrl + V.'),
+    C('shortcuts-sc2-jump-to-the-next-match', 'SC2', 'Jump to the next match', `You pressed ${K('Ctrl', 'F')} and searched for “bus”. Four matches lit up. How do you jump to the next one?`, [`Press ${K('Enter')}`, `Press ${K('Ctrl', 'F')} again`, `Press ${K('Tab')}`, `Press ${K('Ctrl', 'A')}`], 'Each press of Enter jumps to the next match. Read each one until you find the part you need.', { vis: pic('find') }),
+    C('shortcuts-sc2-tab-twice', 'SC2', 'Tab twice', `The ${K('Alt', 'Tab')} picker shows your windows in this order. You are in Stile. You hold ${K('Alt')}, tap ${K('Tab')} twice, then let go. Which window opens?`, [winPic('browser', 'Stile (open now)'), winPic('doc', 'Word'), winPic('files', 'File Explorer'), winPic('calc', 'Calculator')], 'The first tap of Tab moves the highlight to Word. The second tap moves it to File Explorer. Letting go of Alt opens it.', { pic: true, ordered: true, ans: 2 }),
+    C('shortcuts-sc2-straight-back', 'SC2', 'Straight back', `You pressed ${K('Alt', 'Tab')} once to jump from Word to Stile. How do you get straight back to Word?`, [`Press ${K('Alt', 'Tab')} once more`, `Hold ${K('Alt')} and tap ${K('Tab')} three times`, `Press ${K('Ctrl', 'Tab')}`, `Press ${K('Alt', 'F4')}`], 'The picker lists your windows starting with the ones you used most recently. Word is now second in the list, so one quick Alt + Tab takes you straight back. Alt + F4 would close the window.'),
+
+    /* SC3: choosing the right shortcut */
+    C('shortcuts-sc3-last-thing-copied', 'SC3', 'Last thing copied', `Mia copies a website link. Then she copies her name. She clicks in a box and presses ${K('Ctrl', 'V')}. What gets pasted?`, ['Her name', 'The website link', 'The link and her name', 'Nothing'], 'The clipboard holds one thing at a time. Copying her name replaced the link.'),
+    C('shortcuts-sc3-select-all-in-a-search-box', 'SC3', 'Select all in a search box', `Ari’s cursor is in the search box of this web page. He presses ${K('Ctrl', 'A')}. What gets selected?`, ['Only the words in the search box', 'Everything on the web page', 'Every window he has open', 'Nothing, because it only works in Word'], 'Ctrl + A selects everything in the place your cursor is. Here, that is the search box.', { vis: searchPage() }),
+    C('shortcuts-sc3-change-every-font', 'SC3', 'Change every font', 'Your cursor is in your essay. You want to change the font of every word. Which shortcut do you need first?', [K('Ctrl', 'A'), K('Ctrl', 'C'), K('Ctrl', 'F'), K('Alt', 'Tab')], 'A new font only changes the words that are selected. Ctrl + A selects every word first, then you can choose the font.', { vis: essay() }),
+    C('shortcuts-sc3-find-the-due-date', 'SC3', 'Find the due date', 'The due date is somewhere in this 12-page assignment sheet. What is the fastest way to find it?', [`Press ${K('Ctrl', 'F')} and search for “due”`, 'Scroll and read every page', `Press ${K('Ctrl', 'A')} to select the whole sheet`, `Press ${K('Alt', 'Tab')} to flip through the pages`], 'Ctrl + F jumps straight to the words you search for, so you don’t have to read every line.', { vis: sheetStack() }),
+    C('shortcuts-sc3-back-up-the-photos', 'SC3', 'Back up the photos', 'You want to copy every file in this folder onto a USB drive. Which order of shortcuts works?', [`${K('Ctrl', 'A')}, ${K('Ctrl', 'C')}, then click the USB drive and press ${K('Ctrl', 'V')}`, `${K('Ctrl', 'C')}, ${K('Ctrl', 'A')}, then click the USB drive and press ${K('Ctrl', 'V')}`, `${K('Ctrl', 'A')}, then click the USB drive and press ${K('Ctrl', 'V')}`, `${K('Ctrl', 'A')}, ${K('Ctrl', 'V')}, then click the USB drive and press ${K('Ctrl', 'C')}`], 'Select everything first, then copy it while it is still selected. Only then switch to the USB drive and paste. Without the copy step there is nothing new to paste.', { vis: winOnly('files') }),
+    C('shortcuts-sc3-website-to-word', 'SC3', 'Website to Word', 'Both windows are open. Put the steps in order to copy paragraph 2 from a website into Word.', [], 'Highlight, copy, switch, click, paste. The same order works in almost every app.', { kind: 'order', seq: ['hl', 'c', 'at', 'cl', 'v'], cols: 1, rows: true,
+        tile: k => ({ hl: 'Highlight paragraph 2', c: `Press ${K('Ctrl', 'C')}`, at: `Press ${K('Alt', 'Tab')} to get to Word`, cl: 'Click on the Word page', v: `Press ${K('Ctrl', 'V')}` })[k], tileCls: 'otile', poolCls: 'poolc',
+        instr: 'Drag or tap each step into place, then press <b>Check</b>.',
+        ansHTML: `<div class="ans">Highlight, ${K('Ctrl', 'C')}, ${K('Alt', 'Tab')}, click, ${K('Ctrl', 'V')}</div>` }),
+    C('shortcuts-sc3-snip-into-a-report', 'SC3', 'Snip into a report', 'Complete the steps for putting a graph from a website into your report.', [], 'Win + Shift + S copies a picture of the part you drag around. It waits on the clipboard until you paste it with Ctrl + V.', { kind: 'cloze',
+        text: 'I press [] and drag a box around the graph. The snip is saved on the []. Then I click my report and press [] to put it in.',
+        answers: ['Win + Shift + S', 'clipboard', 'Ctrl + V'], bank: ['Win + Shift + S', 'clipboard', 'Ctrl + V', 'Ctrl + C', 'Alt + Tab', 'desktop'], tileHTML: KT,
+        instr: 'Drag or tap an answer into each gap, then press <b>Check</b>.',
+        ansHTML: `<p class="actext">I press ${K('Win', 'Shift', 'S')} and drag a box around the graph. The snip is saved on the <b>clipboard</b>. Then I click my report and press ${K('Ctrl', 'V')} to put it in.</p>`, backVis: pic('snip') })
+];
+const scNum = s => +s.slice(2);
+
+const nb = t => t.replace(/(\d) (cm|mm|m|km|AU|days|hours|years|months|year|month)\b/g, '$1\u00a0$2').replace(/(\d)-year-old/g, '$1\u2011year\u2011old').replace(/(\d) 700/g, '$1\u00a0700').replace(/ = /g, '\u00a0= ');
+CARDS.forEach(c => { c.q = nb(c.q); c.exp = nb(c.exp); if (!c.pic) c.opts = c.opts.map(nb); });
+
+/* ========================== Buckles (localStorage) ======================= */
+/* Same storage and rules as the other checking for understanding pages: one shared
+   'buckles-shared' record, keys namespaced by page, one buckle per question, awarded
+   the first time the question is answered correctly and never again. */
+const PAGE_ID = 'y7-digital-technologies-flashcards';   /* NEVER CHANGE: it namespaces every buckle this page has awarded */
+CARDS.forEach(c => { c.buckles = 1; });
+
+/* ---------- card ID registry (see the maintenance guide at the top of this script) ---------- */
+/* Every ID ever published. Add new IDs here when you publish new cards. Never remove an ID from this list. */
+const RELEASED_IDS = [
+    'shortcuts-sc1-tap-the-ctrl-key',
+    'shortcuts-sc1-tap-the-windows-key',
+    'shortcuts-sc1-mystery-keys-paste',
+    'shortcuts-sc1-mystery-keys-snip',
+    'shortcuts-sc1-hold-or-tap',
+    'shortcuts-sc1-why-ctrl-is-needed',
+    'shortcuts-sc1-hold-keys-and-tap-keys',
+    'shortcuts-sc2-what-ctrl-a-does',
+    'shortcuts-sc2-what-ctrl-f-does',
+    'shortcuts-sc2-what-alt-tab-does',
+    'shortcuts-sc2-what-win-shift-s-does',
+    'shortcuts-sc2-nothing-happened',
+    'shortcuts-sc2-jump-to-the-next-match',
+    'shortcuts-sc2-tab-twice',
+    'shortcuts-sc2-straight-back',
+    'shortcuts-sc3-last-thing-copied',
+    'shortcuts-sc3-select-all-in-a-search-box',
+    'shortcuts-sc3-change-every-font',
+    'shortcuts-sc3-find-the-due-date',
+    'shortcuts-sc3-back-up-the-photos',
+    'shortcuts-sc3-website-to-word',
+    'shortcuts-sc3-snip-into-a-report',
+];
+/* IDs of cards that have been deleted. Keep them here (and in RELEASED_IDS) so they are never reused. */
+const RETIRED_IDS = [];
+/* Only if an ID ever has to change: 'old-id': 'new-id'. Earned buckles are moved across once, never doubled. */
+const ID_ALIASES = {};
+const Buckles = {
+    key: 'buckles-shared',
+    ns(id) { return PAGE_ID + ':' + id; },
+    load() { try { const d = JSON.parse(localStorage.getItem(this.key)); return d && typeof d === 'object' && !Array.isArray(d) ? d : {}; } catch (e) { return {}; } },
+    save(d) { try { localStorage.setItem(this.key, JSON.stringify(d)); } catch (e) {} },
+    isDone(id) { return !!this.load()[this.ns(id)]; },
+    award(id, n) { const d = this.load(); const k = this.ns(id); if (!d[k]) { d[k] = n; this.save(d); } },
+    total() { return Object.values(this.load()).reduce((a, b) => a + (Number(b) || 0), 0); },
+    /* moves buckles saved under an old ID to its new ID, so a renamed card is never earned twice */
+    migrate() {
+        const d = this.load(); let changed = false;
+        Object.entries(ID_ALIASES).forEach(([from, to]) => {
+            const kf = this.ns(from), kt = this.ns(to);
+            if (d[kf] !== undefined) { if (d[kt] === undefined) d[kt] = d[kf]; delete d[kf]; changed = true; }
+        });
+        if (changed) this.save(d);
+    }
+};
+Buckles.migrate();
+const BK = '<img src="buckle.svg" alt="" onerror="this.style.display=\'none\'">';
+const earnedIn = list => list.filter(c => Buckles.isDone(c.id)).length;
+function refreshCount() { $('#buckleCount').textContent = Buckles.total(); }
+function celebrate(n) {
+    const a = $('#award');
+    $('#awardText').textContent = '+' + n + ' Buckle' + (n > 1 ? 's' : '') + '!';
+    a.classList.remove('hide'); a.classList.add('show');
+    burstConfetti();
+    setTimeout(() => { a.classList.remove('show'); a.classList.add('hide'); setTimeout(() => a.classList.remove('hide'), 360); }, 1100);
+}
+function burstConfetti() {
+    const canvas = document.createElement('canvas');
+    canvas.className = 'confetti-canvas';
+    document.body.appendChild(canvas);
+    const ctx = canvas.getContext('2d'), dpr = window.devicePixelRatio || 1;
+    canvas.width = innerWidth * dpr; canvas.height = innerHeight * dpr; ctx.scale(dpr, dpr);
+    const colors = ['#ea008a', '#1b1f45', '#f7a8d4', '#c3c6d0'], cx = innerWidth / 2, cy = innerHeight / 2, parts = [];
+    for (let i = 0; i < 150; i++) {
+        const angle = Math.random() * Math.PI * 2, speed = 4 + Math.random() * 10;
+        parts.push({ x: cx, y: cy, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed - 4, size: 5 + Math.random() * 7,
+            color: colors[Math.floor(Math.random() * colors.length)], rot: Math.random() * Math.PI, vrot: (Math.random() - .5) * .3, life: 0 });
+    }
+    const gravity = 0.22, drag = 0.992; let frame = 0;
+    (function tick() {
+        frame++;
+        ctx.clearRect(0, 0, innerWidth, innerHeight);
+        parts.forEach(p => {
+            p.vx *= drag; p.vy = p.vy * drag + gravity; p.x += p.vx; p.y += p.vy; p.rot += p.vrot; p.life++;
+            ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot); ctx.globalAlpha = Math.max(0, 1 - p.life / 95);
+            ctx.fillStyle = p.color; ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.6); ctx.restore();
+        });
+        if (frame < 95) requestAnimationFrame(tick); else canvas.remove();
+    })();
+}
+
+/* =========================================================
+   SCREENS
+   ========================================================= */
+let screen = 'home', S = null;
+function clearAll() { content.innerHTML = ''; btns.innerHTML = ''; document.querySelectorAll('.pt,.plus,.shock').forEach(e => e.remove()); }
+
+function home() {
+    screen = 'home'; S = null; clearAll();
+    counter.innerHTML = '<span><b>Year 7</b></span>';
+    progress.style.width = '0';
+    const g = el('div', 'decks');
+    LGS.forEach((lg, i) => {
+        const n = CARDS.filter(c => c.lg === lg.id).length;
+        const b = lg.soon
+            ? el('div', 'deck soon', `<div class="dface">${ICON[lg.id]}<div class="dcode">${lg.code}</div><div class="dname">${lg.short}</div><div class="dmeta"><span class="lock">${LOCK}Coming soon</span></div></div>`)
+            : el('button', 'deck', `<div class="dface">${ICON[lg.id]}<div class="dcode">${lg.code}</div><div class="dname">${lg.short}</div><div class="dmeta"><span>${lg.sc[0]} to ${lg.sc[lg.sc.length - 1]}</span><span>${n} cards</span></div><div class="bkmeta">${BK}${earnedIn(CARDS.filter(c => c.lg === lg.id))} <span>/ ${n} buckles</span></div></div>`);
+        if (lg.soon) b.setAttribute('aria-label', `${lg.short}: coming soon`); else b.onclick = () => deckScreen(lg);
+        g.appendChild(b);
+        A(b, [{ opacity: 0, transform: 'translateY(60px) rotate(4deg)' }, { opacity: 1, transform: 'none' }], { duration: 650, delay: 80 + i * 90 });
+    });
+    content.appendChild(g);
+    say('Choose a deck to see its success criteria.');
+    addBtn('Mix all decks', 'btn2', () => start(CARDS, 'All decks'));
+}
+
+function deckScreen(lg) {
+    screen = 'deck'; clearAll();
+    counter.innerHTML = `<b>${lg.code}</b>&nbsp;${lg.short}`;
+    const sel = new Set(lg.sc);
+    const wrap = el('div', 'dscreen');
+    const left = el('div', 'deck', `<div class="dface">${ICON[lg.id]}<div class="dcode">${lg.code}</div><div class="dname">${lg.short}</div><div class="dstate">${lg.text}</div></div>`);
+    const right = el('div', 'sccol');
+    const head = el('div', 'sch', '<span>Success criteria</span>');
+    const allBtn = el('button', '', 'Select all'); head.appendChild(allBtn);
+    const list = el('div', 'sclist');
+    const rows = lg.sc.map(sc => {
+        const n = CARDS.filter(c => c.sc === sc).length;
+        const r = el('button', 'scrow on', `<span class="box">${TICK}</span><span class="code">${sc}</span><span>${SCT[sc]}</span><span class="n">${n} cards</span><span class="bk">${BK}${earnedIn(CARDS.filter(c => c.sc === sc))}/${n}</span>`);
+        r.onclick = () => { sel.has(sc) ? sel.delete(sc) : sel.add(sc); r.classList.toggle('on', sel.has(sc)); upd(); };
+        list.appendChild(r); return r;
+    });
+    allBtn.onclick = () => { lg.sc.forEach(s => sel.add(s)); rows.forEach(r => r.classList.add('on')); upd(); };
+    right.append(head, list); wrap.append(left, right); content.appendChild(wrap);
+    A(left, [{ opacity: 0, transform: 'translateX(-40px) rotate(-3deg)' }, { opacity: 1, transform: 'none' }], { duration: 550 });
+    rows.forEach((r, i) => A(r, [{ opacity: 0, transform: 'translateY(16px)' }, { opacity: 1, transform: 'none' }], { duration: 400, delay: 120 + i * 45, fill: 'backwards' }));
+    say('Tap a success criterion to leave it out, then press <b>Start</b>.');
+    addBtn('Back', 'btn2', home);
+    const go = addBtn('', 'next', () => start(CARDS.filter(c => sel.has(c.sc)), lg.short));
+    function upd() { const n = CARDS.filter(c => sel.has(c.sc)).length; go.textContent = n ? `Start ${n} cards` : 'Start'; go.disabled = !n; }
+    upd();
+}
+
+/* ---------- play ---------- */
+function start(cards, label) {
+    screen = 'play'; clearAll();
+    S = { label, all: cards.slice(), cards: shuffle(cards), i: 0, res: [], newBk: 0, streak: 0, got: 0, rev: 0, tok: Math.random(), locked: true, busy: false };
+    counter.innerHTML = `<div class="piles"><div class="pile" id="pGot"><i></i><b>0</b>Got it</div><div class="pile rv" id="pRev"><i></i><b>0</b>Revise</div></div><div class="divv"></div><span id="cnum"></span>`;
+    const play = el('div', 'play');
+    const cw = el('div', 'cwrap');
+    const opts = el('div', 'optcol');
+    play.append(cw, opts); content.appendChild(play);
+    S.cw = cw; S.optcol = opts;
+    for (let k = 3; k >= 1; k--) { const s = el('div', 'stk'); s.style.transform = `translate(${k * 7}px, ${k * 7}px)`; s.dataset.k = k; cw.appendChild(s); }
+    deal();
+}
+function stackUpdate() {
+    const left = S.cards.length - S.i - 1;
+    S.cw.querySelectorAll('.stk').forEach(s => { const k = +s.dataset.k; s.style.opacity = k <= left ? 1 : 0; });
+}
+const KTYPE = { order: 'Put in order', sort: 'Sort', hotspot: 'Tap the keyboard', cloze: 'Fill the gaps' };
+const typeOf = c => c.type ? c.type : c.kind ? KTYPE[c.kind] : c.scene ? 'Predict' : c.pic ? 'Pick the picture' : c.calc ? 'Calculate' : c.vis ? 'Read the diagram' : 'Quick recall';
+const hasKZ = c => c.kind === 'order' || c.kind === 'sort' || c.kind === 'cloze';
+function frontHTML(c) {
+    const body = hasKZ(c) ? `<div class="fvis kz kz-${c.kind}"></div>` : c.vis ? `<div class="fvis">${c.vis}${c.scene ? `<button class="replay" aria-label="Replay">${REPLAY}<span>Replay</span></button>` : ''}</div>` : `<div class="ghost">${c.sc}</div>`;
+    return `<div class="fmeta"><span class="sctag">${c.sc}</span><span class="tchip">${typeOf(c)}</span>${Buckles.isDone(c.id) ? `<span class="bkchip">${BK}Earned</span>` : ''}<span class="lgc">${DECK[c.lg].tag}</span></div><div class="fq">${c.q}</div>${body}`;
+}
+function backHTML(c, ok) {
+    const ans = c.ansHTML || (c.pic ? `<div class="apic">${c.opts[c.ans]}</div>` : `<div class="ans">${c.opts[c.ans]}</div>`);
+    const bv = c.backVis || (c.vis && !c.pic ? c.vis : '');
+    const vis = bv ? `<div class="bvis">${bv}</div>` : '';
+    const plain = !bv && !c.pic && !c.ansHTML;
+    return `<div class="bhead ${ok ? 'ok' : 'no'}">${ok ? TICK : CROSS}<span>${ok ? 'Correct' : 'Not quite'}</span><span class="bsc">${c.sc}</span></div>${plain ? `<div class="ghost">${c.sc}</div>` : ''}<div class="bbody${plain ? ' nov' : ''}"><div class="alab">${ok ? 'Answer' : 'The answer is'}</div>${ans}<p class="exp">${c.exp}</p>${vis}</div>`;
+}
+function deal() {
+    const c = S.cur = S.cards[S.i]; S.locked = true; S.ctl = null; S.sc = null;
+    document.getElementById('cnum').innerHTML = `Card <b>${S.i + 1}</b> / ${S.cards.length}`;
+    progress.style.width = (S.i / S.cards.length * 100) + '%';
+    stackUpdate();
+    const card = el('div', 'card');
+    card.innerHTML = `<div class="face front${c.vis || hasKZ(c) ? '' : ' t'}">${frontHTML(c)}</div><div class="face back pat">${PATTERN}<div class="pcode">${DECK[c.lg].tag}</div></div>`;
+    S.cw.appendChild(card); S.card = card;
+    A(card, [
+        { transform: 'translate(21px, 21px) rotateY(180deg) scale(1)' },
+        { transform: 'translate(-8px, -22px) rotateY(90deg) scale(1.04)', offset: .45 },
+        { transform: 'translate(0px, 0px) rotateY(0deg) scale(1)' }
+    ], { duration: 720 });
+    tone([[520, .07, 'triangle', .05]]);
+    S.optcol.innerHTML = ''; S.optcol.style.height = '100%';
+    btns.innerHTML = '';
+    addBtn('Decks', 'btn2', home);
+    const front = card.querySelector('.front');
+    if (c.kind) {
+        S.ctl = KIND[c.kind](c, front, S.optcol);
+        S.els = [...S.optcol.children];
+        S.els.forEach((b, j) => A(b, [{ opacity: 0, transform: 'translateX(30px)' }, { opacity: 1, transform: 'none' }], { duration: 420, delay: 380 + j * 70, fill: 'backwards' }));
+        if (S.ctl.check) {
+            const cb = addBtn('Check', 'next', () => {
+                if (!S || S.locked || !S.ctl.ready()) return;
+                S.locked = true; cb.disabled = true;
+                const r = S.ctl.check();
+                finishKind(r.ok, r.anchor, 1100);
+            });
+            cb.id = 'chk';
+            S.refresh = () => { cb.disabled = !S.ctl.ready(); };
+            S.refresh();
+        }
+        say(c.instr + (Buckles.isDone(c.id) ? ' You’ve already earned this buckle.' : ''));
+    } else {
+        S.order = c.ordered ? [0, 1, 2, 3] : shuffle([0, 1, 2, 3]);
+        const box = el('div', 'opts');
+        let grid = box;
+        if (c.pic) { grid = el('div', 'pgrid'); box.appendChild(grid); }
+        const short = !c.pic && c.opts.every(o => o.length < 16);
+        S.els = S.order.map((oi, j) => {
+            const b = el('button', c.pic ? 'pcard' : 'opt' + (short ? ' short' : ''), c.pic ? `<span class="l">${'ABCD'[j]}</span>${c.opts[oi]}` : `<span class="l">${'ABCD'[j]}</span><span>${c.opts[oi]}</span>`);
+            b.onclick = () => choose(j);
+            b.style.opacity = 0;
+            grid.appendChild(b);
+            A(b, [{ opacity: 0, transform: 'translateX(30px)' }, { opacity: 1, transform: 'none' }], { duration: 420, delay: 380 + j * 70, fill: 'forwards' }).then(() => { b.style.opacity = ''; });
+            return b;
+        });
+        S.optcol.appendChild(box);
+        say((c.scene ? c.say : 'Choose the best answer. You can also press <b>1</b> to <b>4</b> on the keyboard.') + (Buckles.isDone(c.id) ? ' You’ve already earned this buckle.' : ''));
+    }
+    if (c.scene) {
+        const sv = front.querySelector('.fvis svg'), ctl = SCENE[c.scene](sv, c);
+        S.sc = ctl;
+        setTimeout(() => { if (S && S.cur === c) ctl.intro(); }, 760);
+        front.querySelector('.replay').onclick = () => ctl.intro();
+    }
+    setTimeout(() => { if (S && S.cur === c) S.locked = false; }, 450);
+}
+const PRAISE = ['Nailed it.', 'Spot on.', 'Great recall.', 'That’s it.', 'Exactly right.', 'Too easy.', 'Brilliant.'];
+function choose(j) {
+    if (!S || S.locked || S.cur.kind) return;
+    S.locked = true;
+    const c = S.cur, ok = S.order[j] === c.ans, b = S.els[j];
+    S.els.forEach((e, k) => {
+        e.disabled = true; e.style.opacity = '';
+        if (k === j) { e.classList.add(ok ? 'right' : 'wrong'); if (ok) e.querySelector('.l').innerHTML = TICK; }
+        else if (S.order[k] === c.ans) e.classList.add('reveal');
+        else e.classList.add('dim');
+    });
+    resolve(ok, b);
+}
+function finishKind(ok, anchor, delay) {
+    const c = S.cur;
+    if (ok && Buckles.isDone(c.id)) { const r = local(anchor.getBoundingClientRect()); burst(r.x + r.w / 2, r.y + r.h / 2, 26); tone([[784, .11], [1175, .24]]); }
+    setTimeout(() => { if (S && S.cur === c) resolve(ok, anchor, true); }, delay);
+}
+function resolve(ok, b, quiet) {
+    const c = S.cur;
+    S.res.push({ c, ok });
+    const back = S.card.querySelector('.back');
+    back.className = 'face back';
+    back.innerHTML = backHTML(c, ok);
+    A(S.card, [
+        { transform: 'translate(0px, 0px) rotateY(0deg) scale(1)' },
+        { transform: 'translate(0px, -14px) rotateY(-90deg) scale(1.04)', offset: .5 },
+        { transform: 'translate(0px, 0px) rotateY(-180deg) scale(1)' }
+    ], { duration: 640 });
+    if (c.scene) { const sv = back.querySelector('.bvis svg'); if (sv) { const ctl = SCENE[c.scene](sv, c); setTimeout(() => { if (S && S.cur === c) ctl.outcome(); }, 650); } }
+    if (ok) {
+        S.streak++;
+        const r = local(b.getBoundingClientRect());
+        /* one buckle per question, the first time it is answered correctly */
+        const fresh = !Buckles.isDone(c.id);
+        if (fresh) { Buckles.award(c.id, c.buckles); refreshCount(); celebrate(c.buckles); S.newBk++; tone([[784, .1], [988, .1], [1319, .26]]); }
+        else if (!quiet) { burst(r.x + r.w / 2, r.y + r.h / 2, S.streak >= 3 ? 34 : 24); tone(S.streak >= 3 ? [[784, .1], [988, .1], [1319, .26]] : [[784, .11], [1175, .24]]); }
+        if (!fresh || S.streak >= 3) plusOne(r.x + r.w / 2, r.y - 10, S.streak >= 3 ? `${S.streak} in a row` : '+1');
+        if (!quiet) A(b, [{ transform: 'scale(1)' }, { transform: 'scale(1.05)' }, { transform: 'scale(1)' }], { duration: 360, fill: 'none' });
+        say(`<b>${PRAISE[Math.floor(Math.random() * PRAISE.length)]}</b> ${fresh ? 'You earned a buckle.' : S.streak >= 3 ? `That’s ${S.streak} in a row.` : 'You’ve already earned this buckle.'}`);
+    } else {
+        S.streak = 0;
+        tone([[196, .22, 'triangle', .1]]);
+        say('<b class="no">Not quite.</b> Read the answer card so it sticks next time.');
+    }
+    btns.innerHTML = '';
+    addBtn('Decks', 'btn2', home);
+    const nb = addBtn(S.i === S.cards.length - 1 ? 'See results' : 'Next card', 'next', next);
+    nb.classList.add('pop-in');
+    setTimeout(() => nb.focus({ preventScroll: true }), 50);
+}
+
+/* ---------- drag and drop: drag a tile, or tap it ---------- */
+function dnd(pool, zones, onChange, o = {}) {
+    let sel = null;
+    const all = () => [pool, ...zones];
+    const zoneOf = t => all().find(z => z.box.contains(t));
+    const armAll = on => zones.forEach(z => z.el.classList.toggle('armed', on));
+    const deselect = () => { if (sel) sel.classList.remove('sel'); sel = null; armAll(false); };
+    function moveTo(t, z) {
+        t.style.transform = ''; t.classList.remove('wrong', 'drag');
+        z.box.appendChild(t);
+        A(t, [{ transform: 'scale(.82)' }, { transform: 'scale(1.06)', offset: .6 }, { transform: 'scale(1)' }], { duration: 300, fill: 'none' });
+        tone([[660, .05, 'triangle', .05]]);
+        deselect(); onChange();
+    }
+    function put(t, z) {
+        if (zoneOf(t) === z) { t.style.transform = ''; return; }
+        if (z.cap === 1) { const ex = z.box.querySelector('.tile'); if (ex) moveTo(ex, pool); }
+        moveTo(t, z);
+    }
+    const hit = (x, y) => all().find(z => { const r = z.el.getBoundingClientRect(); return x >= r.left && x <= r.right && y >= r.top && y <= r.bottom; });
+    zones.forEach(z => z.el.addEventListener('click', () => { if (sel && S && !S.locked) put(sel, z); }));
+    function tile(html, key, cls = '') {
+        const t = el('span', 'tile ' + cls, html);
+        t.k = key; t.tabIndex = 0; t.setAttribute('role', 'button');
+        const tap = () => {
+            if (!S || S.locked) return;
+            if (zoneOf(t) !== pool) { put(t, pool); return; }
+            if (o.auto) { const e = zones.find(z => !z.box.querySelector('.tile')); if (e) put(t, e); return; }
+            if (sel === t) { deselect(); return; }
+            deselect(); sel = t; t.classList.add('sel'); armAll(true);
+        };
+        t.addEventListener('click', e => e.stopPropagation());
+        t.addEventListener('pointerdown', e => {
+            if (!S || S.locked || e.button > 0) return;
+            e.preventDefault(); e.stopPropagation();
+            if (zoneOf(t) !== pool) { put(t, pool); return; }
+            t.setPointerCapture(e.pointerId);
+            const sx = e.clientX, sy = e.clientY; let moved = false;
+            const move = ev => {
+                const dx = ev.clientX - sx, dy = ev.clientY - sy;
+                if (!moved && Math.hypot(dx, dy) > 6) { moved = true; t.classList.add('drag'); deselect(); }
+                if (!moved) return;
+                t.style.transform = `translate(${dx / scaleK}px, ${dy / scaleK}px) rotate(-3deg) scale(1.05)`;
+                const h = hit(ev.clientX, ev.clientY);
+                all().forEach(z => z.el.classList.toggle('hover', z === h && z !== pool));
+            };
+            const up = ev => {
+                t.removeEventListener('pointermove', move); t.removeEventListener('pointerup', up); t.removeEventListener('pointercancel', up);
+                all().forEach(z => z.el.classList.remove('hover'));
+                if (!moved) { tap(); return; }
+                t.classList.remove('drag');
+                const h = hit(ev.clientX, ev.clientY);
+                if (h && h !== pool) put(t, h); else { t.style.transform = ''; }
+            };
+            t.addEventListener('pointermove', move); t.addEventListener('pointerup', up); t.addEventListener('pointercancel', up);
+        });
+        t.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); tap(); } });
+        return t;
+    }
+    return { tile };
+}
+const KIND = {
+    order(c, front, col) {
+        const kz = front.querySelector('.kz');
+        kz.innerHTML = `${c.ordTop ? `<div class="ordtop">${c.ordTop}</div>` : ''}<div class="ogrid${c.rows ? ' rows' : ''}" style="grid-template-columns:repeat(${c.cols}, 1fr)"></div>`;
+        const grid = kz.querySelector('.ogrid');
+        const slots = c.seq.map((k, i) => { const s = el('div', 'slot', `<b>${c.slotLab ? c.slotLab[i] : i + 1}</b><div class="sb"></div>`); grid.appendChild(s); return s; });
+        const pool = el('div', 'pool ' + (c.poolCls || '')); col.appendChild(pool);
+        const zones = slots.map(s => ({ el: s, box: s.querySelector('.sb'), cap: 1 }));
+        const D = dnd({ el: pool, box: pool }, zones, () => S.refresh && S.refresh(), { auto: true });
+        shuffle(c.seq).forEach(k => pool.appendChild(D.tile(c.tile(k), k, c.tileCls || '')));
+        return {
+            ready: () => !pool.querySelector('.tile'),
+            check() {
+                let ok = true;
+                zones.forEach((z, i) => { const t = z.box.querySelector('.tile'); const r = t.k === c.seq[i]; t.classList.add(r ? 'right' : 'wrong'); if (!r) ok = false; });
+                return { ok, anchor: grid };
+            }
+        };
+    },
+    sort(c, front, col) {
+        const kz = front.querySelector('.kz');
+        kz.innerHTML = `<div class="bins">${c.bins.map((b, i) => `<div class="bin${i ? '' : ' pk'}"><h3>${b[0]}</h3><div class="sub">${b[1]}</div><div class="area"></div></div>`).join('')}</div>`;
+        const bins = [...kz.querySelectorAll('.bin')];
+        const pool = el('div', 'pool ' + (c.poolCls || 'pool3')); col.appendChild(pool);
+        const zones = bins.map((b, i) => ({ el: b, box: b.querySelector('.area'), cap: Infinity, key: i }));
+        const D = dnd({ el: pool, box: pool }, zones, () => S.refresh && S.refresh());
+        shuffle(c.items).forEach(([html, k]) => pool.appendChild(D.tile(html, k, c.tileCls || 'mtile')));
+        return {
+            ready: () => !pool.querySelector('.tile'),
+            check() {
+                let ok = true;
+                zones.forEach(z => z.box.querySelectorAll('.tile').forEach(t => { const r = t.k === z.key; t.classList.add(r ? 'right' : 'wrong'); if (!r) ok = false; }));
+                return { ok, anchor: kz };
+            }
+        };
+    },
+    cloze(c, front, col) {
+        const kz = front.querySelector('.kz');
+        let i = 0;
+        kz.innerHTML = `<p class="ctext">${c.text.replace(/\[\]/g, () => `<span class="blank" data-i="${i++}"><span class="bb"></span></span>`)}</p>`;
+        const blanks = [...kz.querySelectorAll('.blank')];
+        const pool = el('div', 'pool poolw'); col.appendChild(pool);
+        const zones = blanks.map(b => ({ el: b, box: b.querySelector('.bb'), cap: 1 }));
+        const D = dnd({ el: pool, box: pool }, zones, () => S.refresh && S.refresh(), { auto: true });
+        shuffle(c.bank).forEach(w => pool.appendChild(D.tile(c.tileHTML ? c.tileHTML(w) : w, w, 'wtile')));
+        return {
+            ready: () => zones.every(z => z.box.querySelector('.tile')),
+            check() {
+                let ok = true;
+                zones.forEach((z, k) => { const t = z.box.querySelector('.tile'); const r = t.k === c.answers[k]; t.classList.add(r ? 'right' : 'wrong'); if (!r) ok = false; });
+                return { ok, anchor: kz };
+            }
+        };
+    },
+    hotspot(c, front, col) {
+        const w = el('div', 'hsw', c.hsSVG); col.appendChild(w);
+        const svg = w.querySelector('svg');
+        svg.querySelectorAll('.hs').forEach(g => {
+            const go = () => {
+                if (!S || S.locked) return;
+                S.locked = true;
+                const k = +g.dataset.k, ok = c.correct.includes(k);
+                svg.classList.add('done');
+                svg.querySelectorAll('.hs').forEach(h => { const kk = +h.dataset.k; if (c.correct.includes(kk)) h.classList.add('good'); else if (h !== g) h.classList.add('off'); });
+                g.classList.add(ok ? 'good' : 'bad');
+                const bul = svg.querySelector('.bulge');
+                if (bul) A(bul, [{ opacity: 0, transform: 'scale(.6, .8)' }, { opacity: 1, transform: 'scale(1, 1)' }], { duration: 900, delay: 150 });
+                finishKind(ok, g, 1500);
+            };
+            g.addEventListener('click', go);
+            g.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } });
+        });
+        return {};
+    }
+};
+
+
+async function next() {
+    if (!S || S.busy || !S.locked) return;
+    S.busy = true;
+    const tok = S.tok, last = S.res[S.res.length - 1], pile = document.getElementById(last.ok ? 'pGot' : 'pRev');
+    const pr = local(pile.querySelector('i').getBoundingClientRect()), cr = local(S.card.getBoundingClientRect());
+    const dx = pr.x + pr.w / 2 - (cr.x + cr.w / 2), dy = pr.y + pr.h / 2 - (cr.y + cr.h / 2);
+    btns.querySelectorAll('button').forEach(b => b.disabled = true);
+    S.els.forEach((e, k) => A(e, [{ opacity: getComputedStyle(e).opacity, transform: 'none' }, { opacity: 0, transform: 'translateX(-20px)' }], { duration: 260, delay: k * 30 }));
+    const card = S.card;
+    await A(card, [
+        { transform: 'translate(0px, 0px) rotateY(-180deg) scale(1) rotate(0deg)', opacity: 1 },
+        { transform: `translate(${dx}px, ${dy}px) rotateY(-180deg) scale(.05) rotate(${last.ok ? -14 : 14}deg)`, opacity: .7 }
+    ], { duration: 560, easing: 'cubic-bezier(.55,0,.8,.45)' });
+    if (!S || S.tok !== tok) return;
+    card.remove();
+    if (last.ok) S.got++; else S.rev++;
+    const num = pile.querySelector('b'); num.textContent = last.ok ? S.got : S.rev;
+    A(pile, [{ transform: 'scale(1)' }, { transform: 'scale(1.3)' }, { transform: 'scale(1)' }], { duration: 380, fill: 'none' });
+    if (last.ok) { const p = local(pile.getBoundingClientRect()); burst(pr.x + pr.w / 2, pr.y + pr.h / 2, 10, 70); }
+    S.i++;
+    S.busy = false;
+    if (S.i >= S.cards.length) results(); else deal();
+}
+
+/* ---------- feedback effects ---------- */
+function burst(x, y, n = 24, spread = 130) {
+    const sh = el('div', 'shock'); sh.style.cssText = `left:${x - 20}px;top:${y - 20}px;width:40px;height:40px`; stage.appendChild(sh);
+    A(sh, [{ transform: 'scale(.3)', opacity: 1 }, { transform: `scale(${spread / 22})`, opacity: 0 }], { duration: 600, easing: 'cubic-bezier(.1,.7,.3,1)' }).then(() => sh.remove());
+    for (let i = 0; i < n; i++) {
+        const p = el('i', 'pt'), sz = 7 + Math.random() * 9, a = Math.random() * Math.PI * 2, d = spread * (.45 + Math.random() * .75), col = [PK, PK, NV, '#ff7cc4'][i % 4];
+        const star = i % 5 === 0, round = i % 3 === 0;
+        p.style.cssText = `left:${x - sz / 2}px;top:${y - sz / 2}px;width:${star ? sz * 1.7 : sz}px;height:${star ? sz * 1.7 : sz}px;background:${col};border-radius:${round && !star ? '50%' : '2px'};${star ? 'clip-path:polygon(50% 0,61% 39%,100% 50%,61% 61%,50% 100%,39% 61%,0 50%,39% 39%)' : ''}`;
+        stage.appendChild(p);
+        A(p, [{ transform: 'translate(0,0) rotate(0deg) scale(1)', opacity: 1 }, { transform: `translate(${Math.cos(a) * d}px, ${Math.sin(a) * d + 50}px) rotate(${(Math.random() - .5) * 600}deg) scale(.3)`, opacity: 0 }],
+            { duration: 700 + Math.random() * 450, easing: 'cubic-bezier(.12,.7,.3,1)' }).then(() => p.remove());
+    }
+}
+function plusOne(x, y, t) {
+    const p = el('div', 'plus', t); stage.appendChild(p); p.style.left = (x - p.offsetWidth / 2) + 'px'; p.style.top = y + 'px';
+    A(p, [{ transform: 'translateY(10px) scale(.6)', opacity: 0 }, { transform: 'translateY(-26px) scale(1.1)', opacity: 1, offset: .3 }, { transform: 'translateY(-70px) scale(1)', opacity: 0 }], { duration: 1100, easing: 'cubic-bezier(.2,.8,.2,1)' }).then(() => p.remove());
+}
+
+/* ---------- results ---------- */
+function results() {
+    screen = 'results'; clearAll();
+    const res = S.res, N = res.length, n = res.filter(r => r.ok).length;
+    counter.innerHTML = `<b>${S.label}</b>&nbsp;complete`;
+    progress.style.width = '100%';
+    const wrap = el('div', 'res');
+    const left = el('div', 'rleft');
+    const C2 = 2 * Math.PI * 84;
+    left.innerHTML = `<div class="ringw"><svg viewBox="0 0 200 200"><circle cx="100" cy="100" r="84" fill="none" stroke="${LT}" stroke-width="18"/><circle class="rg" cx="100" cy="100" r="84" fill="none" stroke="${PK}" stroke-width="18" stroke-dasharray="${C2.toFixed(1)}" stroke-dashoffset="${C2.toFixed(1)}"/></svg><div class="rnum"><b id="rn">0</b><span>/ ${N}</span></div></div><div class="rlab">Cards correct</div><div class="rbk">${BK}<b>${earnedIn(S.all)} / ${S.all.length}</b><span>Buckles${S.newBk ? ` (+${S.newBk} new)` : ''}</span></div>`;
+    const missed = res.filter(r => !r.ok).map(r => r.c);
+    if (missed.length) { const b = el('button', 'next', `Revise ${missed.length} missed card${missed.length > 1 ? 's' : ''}`); b.onclick = () => start(missed, 'Revision'); left.appendChild(b); }
+    const ag = el('button', 'btn2', 'Play these cards again'); ag.onclick = () => start(S.all, S.label); left.appendChild(ag);
+    const hm = el('button', 'btn2', 'Choose another deck'); hm.onclick = home; left.appendChild(hm);
+
+    const scs = [...new Set(res.map(r => r.c.sc))].sort((a, b) => scNum(a) - scNum(b));
+    const compact = scs.length > 8;
+    const right = el('div', 'rright');
+    right.innerHTML = `<div class="rhead"><span>Your cards by success criterion</span><i><span class="chip y">${TICK}Correct</span><span class="chip n">${CROSS}Revise</span></i></div>`;
+    const list = el('div', 'rlist' + (compact ? ' three' : scs.length > 4 ? ' two' : ''));
+    const blocks = scs.map(sc => {
+        const rs = res.filter(r => r.c.sc === sc).sort((a, b) => b.ok - a.ok), k = rs.filter(r => r.ok).length, f = k / rs.length;
+        const tag = f === 1 ? '<span class="tag sec">Secure</span>' : f >= .5 ? '<span class="tag near">Nearly</span>' : '<span class="tag rev">Revise</span>';
+        const chips = rs.map(r => compact && r.ok ? `<span class="chip y dot" title="${r.c.label}">${TICK}</span>` : `<span class="chip ${r.ok ? 'y' : 'n'}">${r.ok ? TICK : CROSS}${r.c.label}</span>`).join('');
+        const b = el('div', 'rblock', `<div class="rbh"><span class="rsc">${sc}</span>${tag}<b>${k} / ${rs.length}</b></div>${compact ? '' : `<div class="rtx">${SCT[sc]}</div>`}<div class="chips">${chips}</div>`);
+        list.appendChild(b); return b;
+    });
+    right.appendChild(list);
+    wrap.append(left, right); content.appendChild(wrap);
+    let rsz = 1;
+    while (list.scrollHeight > list.clientHeight + 1 && rsz > .62) { rsz -= .03; list.style.setProperty('--rs', rsz.toFixed(2)); }
+    blocks.forEach((b, i) => A(b, [{ opacity: 0, transform: 'translateY(14px)' }, { opacity: 1, transform: 'none' }], { duration: 420, delay: 250 + i * 60, fill: 'backwards' }));
+    say('Take a screenshot of this screen and paste it into Stile as evidence of your work.');
+    const ring = left.querySelector('.rg'), frac = N ? n / N : 0;
+    A(ring, [{ strokeDashoffset: C2 }, { strokeDashoffset: C2 * (1 - frac) }], { duration: 1300, delay: 200, easing: 'cubic-bezier(.3,.7,.2,1)' });
+    const rn = left.querySelector('#rn'), t0 = performance.now() + 200, tok = S.tok;
+    const tick = t => { if (!S || S.tok !== tok || screen !== 'results') return; const k = Math.max(0, Math.min(1, (t - t0) / 1300)); rn.textContent = Math.round(n * (1 - Math.pow(1 - k, 3))); if (k < 1) requestAnimationFrame(tick); else if (frac >= .8) ringCelebrate(); };
+    requestAnimationFrame(tick);
+    tone([[523, .1], [659, .1], [784, .1], [1047, .3]]);
+}
+function ringCelebrate() {
+    const r = local(document.querySelector('.ringw').getBoundingClientRect());
+    burst(r.x + r.w / 2, r.y + r.h / 2, 40, 200);
+}
+
+/* keyboard */
+document.addEventListener('keydown', e => {
+    if (screen !== 'play' || !S) return;
+    const k = '1234'.indexOf(e.key) >= 0 ? '1234'.indexOf(e.key) : 'abcd'.indexOf(e.key.toLowerCase());
+    if (k >= 0 && !S.locked && e.key.length === 1) { e.preventDefault(); choose(k); }
+});
+
+/* ---------- scale to window ---------- */
+function fit() {
+    scaleK = Math.min(window.innerWidth / 1280, window.innerHeight / 720);
+    stage.style.transform = `scale(${scaleK})`;
+    stage.style.margin = `${(720 * scaleK - 720) / 2}px ${(1280 * scaleK - 1280) / 2}px`;
+}
+window.addEventListener('resize', fit);
+fit();
+/* ---------- data check: runs on every load and reports problems before students find them ---------- */
+function validateCards() {
+    const err = [], warn = [], seen = new Map(), labels = new Set(), idRx = /^[a-z0-9]+(-[a-z0-9]+)*$/;
+    const released = new Set(RELEASED_IDS), retired = new Set(RETIRED_IDS);
+    CARDS.forEach((c, i) => {
+        const at = `Card ${i + 1} (${c.id || 'no id'})`;
+        if (typeof c.id !== 'string' || !idRx.test(c.id)) err.push(`${at}: the ID must use lowercase letters, numbers and hyphens only.`);
+        if (seen.has(c.id)) err.push(`${at}: duplicate ID, also used by card ${seen.get(c.id) + 1}. Both would share one buckle.`); else seen.set(c.id, i);
+        if (retired.has(c.id)) err.push(`${at}: this ID was retired and must not be reused. Choose a new ID.`);
+        if (!released.has(c.id)) warn.push(`${at}: new ID. Add '${c.id}' to RELEASED_IDS when you publish this card.`);
+        if (!SCT[c.sc] || !LGOF[c.sc]) err.push(`${at}: ${c.sc} is not listed in SCT and LGS.`);
+        if (!c.label || !c.q || !c.exp) err.push(`${at}: label, question and explanation are all required.`);
+        const lk = c.sc + '|' + c.label; if (labels.has(lk)) warn.push(`${at}: another ${c.sc} card has the label "${c.label}", which makes the results screen confusing.`); labels.add(lk);
+        if (c.scene && (!SCENE[c.scene] || !c.vis)) err.push(`${at}: scene "${c.scene}" needs a matching SCENE entry and a vis.`);
+        if (c.kind) {
+            if (!KIND[c.kind]) { err.push(`${at}: unknown kind "${c.kind}".`); return; }
+            if (!c.instr) warn.push(`${at}: add an instr line so students know what to do.`);
+            if (c.kind === 'order' && (!Array.isArray(c.seq) || c.seq.length < 2 || typeof c.tile !== 'function')) err.push(`${at}: order cards need seq (2 or more) and a tile function.`);
+            if (c.kind === 'sort' && (!Array.isArray(c.bins) || c.bins.length !== 2 || !Array.isArray(c.items) || c.items.some(it => !(it[1] === 0 || it[1] === 1)))) err.push(`${at}: sort cards need 2 bins and items tagged 0 or 1.`);
+            if (c.kind === 'cloze') {
+                const gaps = (c.text.match(/\[\]/g) || []).length, bank = (c.bank || []).slice();
+                if (gaps !== (c.answers || []).length) err.push(`${at}: the text has ${gaps} gaps but ${(c.answers || []).length} answers.`);
+                (c.answers || []).forEach(a => { const k = bank.indexOf(a); if (k < 0) err.push(`${at}: the answer "${a}" is missing from the word bank.`); else bank.splice(k, 1); });
+            }
+            if (c.kind === 'hotspot' && (!c.hsSVG || !Array.isArray(c.correct) || !c.correct.length)) err.push(`${at}: hotspot cards need hsSVG and a correct list.`);
+        } else {
+            if (!Array.isArray(c.opts) || c.opts.length !== 4) err.push(`${at}: multiple choice cards need exactly 4 options.`);
+            if (!Number.isInteger(c.ans) || c.ans < 0 || c.ans > 3) err.push(`${at}: ans must be 0, 1, 2 or 3.`);
+        }
+    });
+    RELEASED_IDS.forEach(id => { if (!seen.has(id) && !retired.has(id) && !ID_ALIASES[id]) err.push(`Released ID '${id}' is missing. If the card was deleted, add it to RETIRED_IDS. If it was renamed, restore the old ID or add an ID_ALIASES entry.`); });
+    Object.entries(ID_ALIASES).forEach(([a, b]) => { if (!seen.has(b)) err.push(`ID_ALIASES points '${a}' to '${b}', but no card has the ID '${b}'.`); });
+    if (err.length || warn.length) {
+        console.group(`Card data check: ${err.length} problem${err.length === 1 ? '' : 's'}, ${warn.length} reminder${warn.length === 1 ? '' : 's'}`);
+        err.forEach(m => console.error(m)); warn.forEach(m => console.warn(m)); console.groupEnd();
+        const b = el('button', 'devcheck' + (err.length ? ' bad' : ''), `Card data check: ${err.length ? `${err.length} problem${err.length === 1 ? '' : 's'}` : `${warn.length} reminder${warn.length === 1 ? '' : 's'}`}. Open the browser console for details.`);
+        b.title = 'Click to hide'; b.onclick = () => b.remove(); stage.appendChild(b);
+    }
+    return { err, warn };
+}
+window.addEventListener('storage', e => { if (e.key === 'buckles-shared') refreshCount(); });
+refreshCount();
+validateCards();
+(document.fonts ? document.fonts.ready : Promise.resolve()).then(() => { fit(); refreshCount(); home(); });
+</script>
+</body>
+</html>
