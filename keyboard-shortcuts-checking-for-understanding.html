@@ -1,0 +1,1725 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Keyboard Shortcuts: Checking for Understanding</title>
+<link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="%231b1f45"/><path d="M15 31 L27 43 L49 19" fill="none" stroke="%23ea008a" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/><rect x="12" y="52" width="40" height="5" rx="2.5" fill="%23fff" opacity=".25"/><rect x="12" y="52" width="26" height="5" rx="2.5" fill="%23fff"/></svg>'>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700;800;900&family=Barlow+Condensed:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --navy: #1b1f45;
+        --pink: #ea008a;
+        --mid-grey: #9a9a9a;
+        --light-grey: #e8e8e8;
+        --blank: #f0f3f6;
+        --tint: #e9ecf5;
+        --cond: 'Barlow Condensed', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        --ease: cubic-bezier(.2,.8,.2,1);
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; }
+    body { font-family: 'Barlow', 'Helvetica Neue', Helvetica, Arial, sans-serif; background: #eaeaea; color: var(--navy);
+        display: flex; align-items: center; justify-content: center; overflow: hidden; -webkit-user-select: none; user-select: none; }
+    .stage { width: 1280px; height: 720px; background: #fff; border-top: 6px solid var(--navy); position: relative; padding: 36px 64px 0; flex-shrink: 0; overflow: hidden; transform-origin: center; }
+    .top { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 4px solid var(--navy); padding-bottom: 12px; }
+    .sheet-title { font-family: var(--cond); font-size: 44px; font-weight: 900; text-transform: uppercase; letter-spacing: .01em; margin: 0; line-height: 1; }
+    .sheet-title span { color: var(--pink); }
+    .counter { font-family: var(--cond); font-size: 22px; font-weight: 800; letter-spacing: .08em; color: var(--mid-grey); text-transform: uppercase; }
+    .counter b { color: var(--navy); }
+    .content { position: absolute; left: 64px; right: 64px; top: 124px; bottom: 108px; }
+    .caption { position: absolute; left: 64px; right: 64px; bottom: 28px; min-height: 60px; display: flex; align-items: center; gap: 16px; font-size: 25px; font-weight: 500; line-height: 1.32; }
+    .caption::before { content: ''; width: 10px; height: 10px; background: var(--pink); flex-shrink: 0; }
+    .caption .txt { flex: 1; }
+    .caption b { color: var(--pink); font-weight: 800; }
+    .caption b.no { color: var(--navy); }
+    .caption .in { animation: capIn .45s var(--ease); display: block; }
+    @keyframes capIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+    .progress { position: absolute; left: 0; bottom: 0; height: 6px; background: var(--pink); width: 0; transition: width .6s var(--ease); }
+
+    .next { font-family: var(--cond); font-size: 26px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; background: var(--pink); color: #fff;
+        border: none; border-radius: 8px; padding: 12px 30px; cursor: pointer; flex-shrink: 0; }
+    .next[hidden] { display: none; }
+    .next:disabled { background: #c3c6d0; cursor: default; }
+    button:focus-visible, [tabindex]:focus-visible { outline: 3px solid var(--pink); outline-offset: 3px; }
+    .next:focus-visible { outline-color: var(--navy); }
+    .pop-in { animation: capIn .45s var(--ease); }
+    @keyframes shake { 20%, 60% { transform: translateX(-8px); } 40%, 80% { transform: translateX(8px); } }
+    @keyframes popIn { from { opacity: 0; transform: scale(.6); } to { opacity: 1; transform: none; } }
+
+    /* key caps in text */
+    kbd { display: inline-block; font-family: inherit; font-size: .8em; font-weight: 700; line-height: 1.15; color: var(--navy); background: #fff; border: 2px solid var(--navy); border-bottom-width: 4px;
+        border-radius: 6px; padding: .06em .42em .02em; white-space: nowrap; vertical-align: .08em; }
+    kbd svg { display: inline-block; vertical-align: -.06em; margin-right: .28em; }
+    .kc { white-space: nowrap; }
+    .kc i { font-style: normal; font-weight: 700; margin: 0 .18em; }
+
+    /* question frame */
+    .q { display: flex; flex-direction: column; height: 100%; }
+    .qhead { display: flex; align-items: center; gap: 18px; }
+    .qtitle { font-size: 40px; font-weight: 800; line-height: 1.15; }
+    .tchip { font-family: var(--cond); font-size: 20px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--pink); border: 3px solid var(--pink); border-radius: 6px; padding: 3px 12px 2px; }
+    .sctag { margin-left: auto; font-family: var(--cond); font-size: 20px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--navy); box-shadow: inset 0 0 0 3px var(--navy); border-radius: 6px; padding: 6px 12px 5px; line-height: 1; }
+    .prompt { font-size: 28px; font-weight: 600; margin-top: 6px; line-height: 1.3; }
+    .body { flex: 1; min-height: 0; margin-top: 14px; display: flex; align-items: center; justify-content: center; gap: 30px; }
+    .body.top { align-items: stretch; }
+    .center { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; }
+    .dlbl { font-family: var(--cond); font-size: 20px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: var(--mid-grey); }
+    svg { overflow: visible; display: block; }
+
+    /* keyboard */
+    .kbd { overflow: hidden; }
+    .kl { font-family: 'Barlow', 'Helvetica Neue', Helvetica, Arial, sans-serif; font-weight: 600; fill: var(--navy); }
+    .bn { font-family: var(--cond); font-size: 34px; font-weight: 900; fill: #fff; }
+    .dock { position: relative; flex-shrink: 0; }
+    .kwrap { position: relative; border: 3px solid var(--navy); border-radius: 8px; overflow: hidden; background: #e3e6ee; }
+    .replay { position: absolute; right: 10px; top: 10px; display: flex; align-items: center; gap: 6px; font-family: var(--cond); font-size: 19px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase;
+        background: #fff; color: var(--navy); border: 3px solid var(--navy); border-radius: 6px; padding: 5px 12px 4px 9px; cursor: pointer; z-index: 3; }
+    .replay svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+    .replay:hover { background: var(--blank); }
+    .replay[hidden] { display: none; }
+    .scene .replay { top: auto; bottom: 10px; }
+
+    /* steps */
+    .steps { display: flex; flex-direction: column; gap: 8px; }
+    .steps.row { flex-direction: row; gap: 22px; }
+    .steps.row .step { white-space: nowrap; }
+    .step { display: flex; align-items: center; gap: 12px; font-size: 21px; font-weight: 600; color: #a3a8bc; transition: color .25s; }
+    .step .n { width: 32px; height: 32px; border-radius: 50%; border: 3px solid #c3c6d0; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+        font-family: var(--cond); font-size: 19px; font-weight: 900; color: #a3a8bc; transition: background-color .25s, border-color .25s, color .25s; }
+    .step kbd { color: #a3a8bc; border-color: #c3c6d0; transition: color .25s, border-color .25s; }
+    .step.now { color: var(--navy); }
+    .step.now .n { border-color: var(--pink); color: var(--pink); }
+    .step.now kbd, .step.done kbd { color: var(--navy); border-color: var(--navy); }
+    .step.done { color: var(--navy); }
+    .step.done .n { background: var(--pink); border-color: var(--pink); color: #fff; }
+
+    /* panels and text boxes */
+    .row3 { justify-content: space-between; align-items: stretch; gap: 26px; }
+    .panel { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+    .ph { font-family: var(--cond); font-size: 20px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--mid-grey); }
+    .tbox { flex: 1; font-family: inherit; font-size: 22px; font-weight: 500; line-height: 1.4; color: var(--navy); border: 3px solid var(--navy); border-radius: 8px; padding: 12px 14px;
+        resize: none; outline: none; -webkit-user-select: text; user-select: text; background: #fff; transition: border-color .2s, box-shadow .2s, background-color .2s; }
+    .tbox:focus { border-color: var(--pink); box-shadow: 0 0 0 4px rgba(234,0,138,.15); }
+    .tbox::selection { background: #f9b9dc; color: var(--navy); }
+    .tbox::placeholder { color: #b5b9c6; }
+    .tbox.right, .pbox.right { border-color: var(--pink); border-style: solid; background: #fff5fa; }
+
+    /* mock browser with find */
+    .bro { position: relative; flex: 1; height: 100%; border: 3px solid var(--navy); border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; background: #fff; }
+    .bbar { background: var(--blank); border-bottom: 2px solid #d7dae2; display: flex; align-items: center; gap: 12px; padding: 8px 12px; flex-shrink: 0; }
+    .bnav { display: flex; gap: 10px; }
+    .bnav svg { width: 18px; height: 18px; fill: none; stroke: #8b90a8; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+    .burl { flex: 1; background: #fff; border: 2px solid #d7dae2; border-radius: 20px; padding: 3px 14px; font-size: 16px; font-weight: 500; color: #6b7090; }
+    .bpage { flex: 1; overflow-y: auto; position: relative; padding: 18px 34px 30px; -webkit-user-select: text; user-select: text; }
+    .doc h2 { font-size: 28px; font-weight: 800; margin: 0 0 4px; }
+    .doc .sub { font-size: 17px; color: #6b7090; margin-bottom: 8px; }
+    .doc h3 { font-size: 20px; font-weight: 800; margin: 18px 0 4px; color: var(--pink); }
+    .doc p { font-size: 18px; line-height: 1.5; margin: 0 0 8px; }
+    mark.hit { background: #fbd1e8; color: inherit; border-radius: 3px; padding: 0 1px; }
+    mark.hit.on { background: var(--pink); color: #fff; }
+    .fbar { position: absolute; right: 16px; top: 58px; background: #fff; border: 2px solid #c3c6d0; border-radius: 8px; box-shadow: 0 10px 24px rgba(27,31,69,.2);
+        display: flex; align-items: center; gap: 4px; padding: 6px 6px 6px 8px; animation: capIn .3s var(--ease); z-index: 4; }
+    .fbar[hidden] { display: none; }
+    .fbar input { width: 210px; font-family: inherit; font-size: 18px; font-weight: 600; color: var(--navy); border: 2px solid var(--pink); border-radius: 6px; padding: 4px 8px; outline: none; -webkit-user-select: text; user-select: text; }
+    .fbar .fc { font-size: 16px; font-weight: 600; color: #6b7090; min-width: 52px; text-align: center; }
+    .fbar button { width: 32px; height: 32px; border: none; background: none; cursor: pointer; border-radius: 6px; display: flex; align-items: center; justify-content: center; padding: 0; }
+    .fbar button svg { width: 18px; height: 18px; fill: none; stroke: var(--navy); stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+    .fbar button:hover { background: var(--blank); }
+    .fcol { display: flex; flex-direction: column; justify-content: center; gap: 16px; width: 316px; flex-shrink: 0; }
+    .ans { display: flex; align-items: center; gap: 12px; font-size: 22px; font-weight: 700; }
+    .ain { width: 150px; font-family: inherit; font-size: 24px; font-weight: 700; color: var(--navy); border: 3px solid var(--navy); border-radius: 8px; padding: 6px 10px; text-align: center; outline: none;
+        -webkit-user-select: text; user-select: text; transition: border-color .2s, background-color .2s, color .2s; }
+    .ain:focus { border-color: var(--pink); }
+    .ain.right { background: var(--pink); border-color: var(--pink); color: #fff; }
+    .ain.wrong { border-style: dashed; animation: shake .4s; }
+
+    /* scenes */
+    .scene { position: relative; border: 3px solid var(--navy); border-radius: 8px; overflow: hidden; flex-shrink: 0; background: #fff; }
+    .scene > svg { overflow: hidden; }
+    .wl { font-family: 'Barlow', 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 15px; font-weight: 700; fill: var(--navy); }
+    .wl.w { fill: #fff; }
+
+    /* snip */
+    .snipcard { flex: 1; border: 3px solid var(--navy); border-radius: 8px; display: flex; align-items: center; justify-content: center; background: var(--blank); }
+    .pbox { flex: 1; border: 3px dashed #c3c6d0; border-radius: 8px; display: flex; align-items: center; justify-content: center; padding: 14px; cursor: pointer; outline: none; overflow: hidden;
+        transition: border-color .2s, background-color .2s, box-shadow .2s; text-align: center; font-size: 21px; font-weight: 600; color: #8b90a8; line-height: 1.5; }
+    .pbox:focus { border-color: var(--pink); box-shadow: 0 0 0 4px rgba(234,0,138,.15); color: var(--navy); }
+    .pbox img { max-width: 100%; max-height: 100%; object-fit: contain; display: block; animation: popIn .45s var(--ease); }
+
+    /* file explorer */
+    .fxw { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .fx { border: 3px solid var(--navy); border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; height: 300px; background: #fff; outline: none; cursor: default; transition: border-color .2s, box-shadow .2s; }
+    .fx:focus { border-color: var(--pink); box-shadow: 0 0 0 4px rgba(234,0,138,.15); outline: none; }
+    .fxh { background: var(--blank); padding: 7px 12px; display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 19px; border-bottom: 2px solid #d7dae2; }
+    .fxh svg { width: 26px; height: 22px; flex-shrink: 0; }
+    .fxh svg.wc { margin-left: auto; width: 58px; height: 13px; }
+    .fxp { font-size: 14px; font-weight: 500; color: #6b7090; padding: 5px 12px; border-bottom: 1px solid #e6e8ef; }
+    .fxg { flex: 1; min-height: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; padding: 6px 8px; align-content: start; }
+    .file { display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 5px 2px 3px; border-radius: 6px; border: 2px solid transparent; font-size: 14px; font-weight: 600; }
+    .file.sel { background: var(--tint); border-color: #8f98c8; }
+    .file.new { animation: popIn .4s var(--ease) both; }
+    .file svg { width: 76px; height: 54px; border-radius: 4px; }
+    .fxempty { grid-column: 1 / -1; color: #a3a8bc; text-align: center; margin-top: 66px; font-size: 18px; font-weight: 600; }
+    .fxs { font-size: 14px; font-weight: 600; color: #6b7090; padding: 5px 12px; border-top: 1px solid #e6e8ef; min-height: 29px; }
+
+    /* quick fire */
+    .qf { flex: 1; height: 100%; border: 3px solid var(--navy); border-radius: 8px; display: flex; flex-direction: column; overflow: hidden; }
+    .qfh { display: flex; align-items: center; gap: 10px; padding: 12px 18px; background: var(--navy); color: #fff; font-family: var(--cond); font-size: 22px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+    .qfh .rd { display: flex; gap: 8px; margin-left: auto; }
+    .qfh .rd span { width: 22px; height: 22px; border-radius: 4px; border: 3px solid #fff; transition: background-color .25s, border-color .25s; }
+    .qfh .rd span.y { background: var(--pink); border-color: var(--pink); }
+    .qfb { flex: 1; display: flex; align-items: center; gap: 24px; padding: 14px 22px; }
+    .qft { flex: 1; font-size: 30px; font-weight: 700; line-height: 1.3; }
+    .qft.in { animation: capIn .45s var(--ease); }
+    .qf.wrong { animation: shake .4s; }
+
+    /* multiple choice */
+    .opts { display: grid; gap: 10px; }
+    .col .opt { font-size: 23px; padding: 9px 18px; }
+    .opts.col .opt { font-size: inherit; min-height: 74px; }
+    .opts.g2 { grid-template-columns: 1fr 1fr; gap: 18px; width: 100%; }
+    .opt { display: flex; align-items: center; gap: 16px; border: 3px solid var(--navy); border-radius: 8px; background: #fff; padding: 12px 20px;
+        font-family: inherit; font-size: 25px; font-weight: 600; color: var(--navy); text-align: left; line-height: 1.25; cursor: pointer;
+        transition: background-color .2s, border-color .2s, color .2s, opacity .2s; }
+    .opts.g2 .opt { min-height: 104px; font-size: 28px; font-weight: 700; padding: 16px 24px; }
+    .opt .l { flex-shrink: 0; width: 40px; height: 40px; border-radius: 50%; background: var(--navy); color: #fff; font-family: var(--cond); font-size: 24px; font-weight: 900;
+        display: flex; align-items: center; justify-content: center; transition: background-color .2s, color .2s; }
+    .opt:hover:not(:disabled) { background: #f6f7fb; }
+    .opt.sel { background: var(--tint); }
+    .opt.sel .l { background: var(--pink); }
+    .opt.right, .opt.right:hover { background: var(--pink); border-color: var(--pink); color: #fff; opacity: 1; }
+    .opt.right .l { background: #fff; color: var(--pink); }
+    .opt.wrong { border-style: dashed; opacity: .5; animation: shake .4s; cursor: default; }
+    .opt:disabled { cursor: default; }
+
+    /* picture choices */
+    .pgrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; width: 100%; }
+    .pcard { position: relative; border: 3px solid var(--navy); border-radius: 8px; background: #fff; padding: 16px 8px 12px; cursor: pointer;
+        display: flex; flex-direction: column; align-items: center; gap: 8px; font-family: inherit; color: var(--navy); transition: background-color .2s, border-color .2s, opacity .2s; }
+    .pcard .l { position: absolute; left: 10px; top: 10px; width: 38px; height: 38px; border-radius: 50%; background: var(--navy); color: #fff; font-family: var(--cond); font-size: 23px; font-weight: 900;
+        display: flex; align-items: center; justify-content: center; transition: background-color .2s; z-index: 2; }
+    .pcard .cap { font-size: 21px; font-weight: 700; line-height: 1.2; text-align: center; }
+    .pcard:hover:not(:disabled) { background: #f6f7fb; }
+    .pcard.sel { background: var(--tint); }
+    .pcard.sel .l { background: var(--pink); }
+    .pcard.right, .pcard.right:hover { border-color: var(--pink); background: #fff; box-shadow: 0 0 0 5px rgba(234,0,138,.18); opacity: 1; }
+    .pcard.right .l { background: var(--pink); }
+    .pcard.wrong { border-style: dashed; opacity: .45; animation: shake .4s; cursor: default; }
+    .pcard:disabled { cursor: default; }
+    .swbg { background: #2a2f5c; border-radius: 12px; padding: 22px; width: 100%; }
+    .swbg .pcard { border-color: #fff; padding-top: 56px; }
+
+    /* quote */
+    .quote { border-left: 8px solid var(--pink); padding: 4px 0 4px 20px; font-size: 25px; font-weight: 600; font-style: italic; line-height: 1.3; margin-bottom: 14px; }
+    .col { display: flex; flex-direction: column; }
+
+    /* drag tiles */
+    .tile { font-family: inherit; font-size: 24px; font-weight: 700; color: var(--navy); background: #fff; border: 3px solid var(--navy); border-radius: 8px; padding: 6px 16px; line-height: 1.25;
+        cursor: grab; touch-action: none; position: relative; z-index: 2; transition: transform .3s var(--ease), box-shadow .2s, border-color .2s; box-shadow: 0 4px 0 #c3c6d0; white-space: nowrap; text-align: center; }
+    .tile.sm { font-size: 21px; padding: 6px 12px; }
+    .tile.sel { border-color: var(--pink); box-shadow: 0 0 0 4px rgba(234,0,138,.22); }
+    .tile.drag { transition: none; cursor: grabbing; z-index: 30; box-shadow: 0 14px 30px rgba(27,31,69,.25); border-color: var(--pink); }
+    .tile.right { background: var(--pink); color: #fff; border-color: var(--pink); box-shadow: none; cursor: default; }
+    .tile.right kbd { border-color: #fff; }
+    .tile.wrong { border-style: dashed; background: var(--tint); box-shadow: none; animation: shake .4s; }
+    .pool { background: var(--blank); border-radius: 8px; padding: 14px; display: flex; flex-wrap: wrap; gap: 10px; align-content: center; justify-content: center; transition: background-color .2s; }
+    .pool.hover { background: #e3e7ee; }
+    .pool.col1 { flex-direction: column; flex-wrap: nowrap; align-items: center; justify-content: center; gap: 10px; }
+    .slot { height: 50px; border: 3px dashed #c3c6d0; border-radius: 8px; display: flex; align-items: center; justify-content: flex-start; padding: 0 3px; transition: border-color .2s, background-color .2s; }
+    .slot.hover, .slot.armed:hover { border-color: var(--pink); background: rgba(234,0,138,.06); }
+    .slot.armed { border-color: #e7a3c9; cursor: pointer; }
+    .slot.filled { border-color: transparent; background: none; }
+    .slot.wrong { animation: shake .4s; }
+    .slot .tile { box-shadow: none; padding: 4px 14px; }
+    .lrow { display: flex; align-items: center; gap: 12px; }
+    .lrow .num { width: 40px; height: 40px; border-radius: 50%; background: var(--pink); color: #fff; font-family: var(--cond); font-size: 24px; font-weight: 900; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .lrow .slot { flex: 1; }
+    .lrow .num.nv { background: var(--navy); }
+
+
+    /* watch demo button */
+    .wdemo { margin-left: auto; display: flex; align-items: center; gap: 7px; font-family: var(--cond); font-size: 19px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase;
+        color: var(--pink); background: #fff; border: 3px solid var(--pink); border-radius: 6px; padding: 5px 12px 4px 9px; cursor: pointer; }
+    .wdemo svg { width: 17px; height: 17px; fill: currentColor; }
+    .wdemo:hover { background: #fff5fa; }
+    .wdemo + .sctag { margin-left: 0; }
+
+    /* demo window */
+    .modal { position: absolute; inset: 0; z-index: 50; background: rgba(27,31,69,.62); display: flex; align-items: center; justify-content: center; animation: fadeIn .3s; transition: opacity .25s; }
+    .modal[hidden] { display: none; }
+    .modal.out { opacity: 0; }
+    @keyframes fadeIn { from { opacity: 0; } }
+    .mbox { width: 1010px; background: #fff; border-radius: 14px; overflow: hidden; box-shadow: 0 30px 70px rgba(0,0,0,.35); animation: popIn .35s var(--ease); display: flex; flex-direction: column; }
+    .mhead { display: flex; align-items: center; gap: 14px; background: var(--navy); color: #fff; padding: 16px 22px; }
+    .mtag { font-family: var(--cond); font-size: 18px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; background: var(--pink); padding: 4px 10px 3px; border-radius: 5px; }
+    .mtitle { font-size: 26px; font-weight: 800; }
+    .mx { margin-left: auto; background: none; border: none; width: 44px; height: 44px; cursor: pointer; border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+    .mx svg { width: 24px; height: 24px; fill: none; stroke: #fff; stroke-width: 3; stroke-linecap: round; }
+    .mx:hover { background: rgba(255,255,255,.12); }
+    .mmain { display: flex; gap: 22px; padding: 20px 22px 0; align-items: center; }
+    .mscene { position: relative; width: 560px; height: 330px; border: 3px solid var(--navy); border-radius: 10px; overflow: hidden; background: #fff; flex-shrink: 0; }
+    .mkb { flex: 1; display: flex; justify-content: center; }
+    .mkb .kbd { border: 3px solid var(--navy); border-radius: 10px; }
+    .mcap { padding: 14px 24px 4px; min-height: 146px; }
+    .mstep { font-family: var(--cond); font-size: 20px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--pink); min-height: 24px; }
+    .mtext { font-size: 28px; font-weight: 700; line-height: 1.3; margin-top: 2px; }
+    .mres { font-size: 23px; font-weight: 500; color: #4b5078; margin-top: 6px; min-height: 30px; }
+    .mtext .in, .mres .in { display: block; animation: capIn .45s var(--ease); }
+    .mres .nxt { font-size: 20px; font-weight: 600; color: var(--pink); margin-top: 6px; }
+    .mres .nxt b { color: var(--pink); }
+    .mfoot { display: flex; align-items: center; gap: 14px; padding: 10px 22px 20px; }
+    .mprog { flex: 1; display: flex; gap: 6px; }
+    .mprog span { flex: 1; height: 8px; border-radius: 4px; background: #e2e5ef; transition: background-color .3s; }
+    .mprog span.now { background: #f7a8d4; }
+    .mprog span.done { background: var(--pink); }
+    .mbtn { font-family: var(--cond); font-size: 22px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; border-radius: 8px; padding: 9px 22px 8px; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+    .mbtn svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2.8; stroke-linecap: round; stroke-linejoin: round; }
+    .mreplay { background: #fff; color: var(--navy); border: 3px solid var(--navy); }
+    .mreplay:hover { background: var(--blank); }
+    .mgo { background: var(--pink); color: #fff; border: 3px solid var(--pink); }
+    .mnext { background: var(--navy); color: #fff; border: 3px solid var(--navy); }
+    .mnext.pulse { animation: pulseN 1.3s ease-in-out infinite; }
+    @keyframes pulseN { 50% { box-shadow: 0 0 0 9px rgba(27,31,69,.18); } }
+    .mbtn:disabled { background: #e2e5ef; border-color: #e2e5ef; color: #a3a8bc; cursor: default; animation: none; box-shadow: none; }
+    .mgo.pulse { animation: pulse 1.3s ease-in-out infinite; }
+    @keyframes pulse { 50% { box-shadow: 0 0 0 9px rgba(234,0,138,.2); } }
+
+    /* inside the demo scene */
+    .ghost { position: absolute; left: 0; top: 0; z-index: 20; pointer-events: none; opacity: 0; transition: opacity .3s; }
+    .ghost.on { opacity: 1; }
+    .ghost svg { position: absolute; filter: drop-shadow(0 3px 4px rgba(27,31,69,.35)); }
+    .ghost .g-arrow { left: -3px; top: -3px; }
+    .ghost .g-cross { left: -20px; top: -20px; display: none; }
+    .ghost[data-m="cross"] .g-arrow { display: none; }
+    .ghost[data-m="cross"] .g-cross { display: block; }
+    .ripple { position: absolute; width: 18px; height: 18px; margin: -9px 0 0 -9px; border-radius: 50%; border: 3px solid var(--pink); z-index: 19; pointer-events: none; animation: rip .7s var(--ease) forwards; }
+    @keyframes rip { from { transform: scale(.4); opacity: 1; } to { transform: scale(3.2); opacity: 0; } }
+    .ds { position: absolute; inset: 0; padding: 16px 18px 18px; display: flex; gap: 18px; }
+    .ds .dp { flex: 1; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+    .ds .ph { font-size: 17px; }
+    .dbox { flex: 1; border: 3px solid var(--navy); border-radius: 8px; padding: 12px 14px; font-size: 21px; font-weight: 500; line-height: 1.45; transition: border-color .25s, box-shadow .25s; }
+    .dbox.focus, .mscene .pbox.focus, .mscene .fx.focus { border-color: var(--pink); box-shadow: 0 0 0 4px rgba(234,0,138,.15); }
+    .tx { -webkit-box-decoration-break: slice; box-decoration-break: slice; }
+    .pasted { animation: popIn .45s var(--ease); display: inline-block; }
+    .dtag { position: absolute; right: 10px; bottom: 10px; background: var(--pink); color: #fff; font-weight: 700; font-size: 18px; padding: 6px 14px; border-radius: 18px; animation: popIn .35s var(--ease); z-index: 5; }
+    .mscene .bro { position: absolute; inset: 0; border: none; border-radius: 0; height: auto; }
+    .mscene .bpage { padding: 12px 24px; }
+    .mscene .doc h2 { font-size: 22px; } .mscene .doc h3 { font-size: 17px; margin-top: 12px; } .mscene .doc p { font-size: 15px; }
+    .mscene .fbar input { width: 150px; }
+    .mscene .snipcard { flex: 1; }
+    .mscene .pbox { flex: 1; cursor: default; }
+    .mscene .fx { flex: 1; height: auto; }
+    .mscene .fxh { font-size: 16px; }
+    .mscene .fxg { gap: 4px; padding: 10px 8px; }
+    .mscene .file { font-size: 12px; }
+    .mscene .file svg { width: 66px; height: 47px; }
+    .mscene .file.sel { background: var(--tint); border-color: #8f98c8; }
+    .oscene { display: flex; align-items: center; justify-content: center; background: #3a4073; }
+    .mscene .oscene { position: absolute; inset: 0; }
+    .sdim { position: absolute; inset: 0; z-index: 15; background: rgba(27,31,69,.5); pointer-events: none; animation: fadeIn .3s; }
+    .sdim.drag { background: transparent; }
+    .marq { position: absolute; display: none; border: 2px solid #fff; box-shadow: 0 0 0 3000px rgba(27,31,69,.5); }
+    .sdim.drag .marq { display: block; }
+    .sbar { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; background: #fff; border-radius: 10px; padding: 6px; box-shadow: 0 8px 20px rgba(0,0,0,.25); }
+    .sbar span { width: 42px; height: 34px; border-radius: 6px; display: flex; align-items: center; justify-content: center; }
+    .sbar span.on { background: #fde6f3; }
+    .toast { position: absolute; right: 14px; bottom: 14px; z-index: 16; background: #fff; border: 2px solid #c3c6d0; border-radius: 10px; box-shadow: 0 12px 28px rgba(27,31,69,.25);
+        padding: 10px 16px 10px 10px; display: flex; gap: 12px; align-items: center; animation: toastIn .4s var(--ease); }
+    .toast .tt { font-weight: 700; font-size: 18px; }
+    .toast .tb { font-size: 14px; font-weight: 500; color: #6b7090; }
+    @keyframes toastIn { from { transform: translateY(30px); opacity: 0; } }
+
+    /* page layouts */
+    .tbox.src { overflow: auto; cursor: text; }
+    .tbox ::selection, .tbox::selection { background: #f9b9dc; color: var(--navy); }
+    .tbox { font-size: 24px; }
+    .arr { align-self: center; flex-shrink: 0; }
+    .frow { display: flex; align-items: center; justify-content: space-between; gap: 20px; margin-top: 4px; }
+    .bigcol { display: flex; flex-direction: column; align-items: center; gap: 22px; }
+    .bigwrap { display: flex; gap: 28px; }
+    .bigstep { width: 420px; border: 3px dashed #c3c6d0; border-radius: 12px; padding: 24px 28px; display: flex; flex-direction: column; align-items: flex-start; gap: 12px; transition: border-color .3s, background-color .3s; }
+    .bigstep .bn2 { width: 44px; height: 44px; border-radius: 50%; background: #c3c6d0; color: #fff; font-family: var(--cond); font-size: 26px; font-weight: 900; display: flex; align-items: center; justify-content: center; transition: background-color .3s; }
+    .bigstep .bt { font-size: 28px; font-weight: 800; }
+    .bigstep .bk { font-size: 34px; }
+    .bigstep .bs { font-family: var(--cond); font-size: 20px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--mid-grey); }
+    .bigstep.now { border: 3px solid var(--navy); }
+    .bigstep.now .bn2 { background: var(--navy); }
+    .bigstep.now .bs { color: var(--pink); }
+    .bigstep.done { border: 3px solid var(--pink); background: #fff5fa; }
+    .bigstep.done .bn2 { background: var(--pink); }
+    .bigstep.done .bs { color: var(--pink); }
+    .tip { font-size: 21px; font-weight: 500; color: #4b5078; }
+    .tile.sm { white-space: normal; max-width: 270px; }
+
+    /* end */
+    .scorecard { border: 3px solid var(--pink); border-radius: 8px; padding: 22px 60px 26px; text-align: center; display: flex; flex-direction: column; align-items: center; }
+    .scorecard .big { font-family: var(--cond); font-size: 96px; font-weight: 900; color: var(--pink); line-height: 1; margin-top: 8px; }
+    .scorecard .dlbl { margin-top: 8px; }
+    .dots { display: flex; gap: 8px; justify-content: center; margin-top: 22px; }
+    .dots span { width: 34px; height: 34px; border-radius: 6px; border: 3px solid var(--navy); font-family: var(--cond); font-size: 17px; font-weight: 800; display: flex; align-items: center; justify-content: center; }
+    .dots span.y { background: var(--pink); border-color: var(--pink); color: #fff; }
+    .again { margin-top: 26px; font-family: var(--cond); font-size: 22px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase;
+        background: #fff; color: var(--navy); border: 3px solid var(--navy); border-radius: 8px; padding: 8px 22px; cursor: pointer; }
+
+    /* buckles */
+    .hright { display: flex; align-items: flex-end; gap: 28px; }
+    .bcount { display: flex; align-items: center; gap: 10px; }
+    .counter-icon { width: 34px; height: 34px; display: block; }
+    .bcount .num { font-family: var(--cond); font-size: 34px; font-weight: 900; line-height: 1; }
+    .bcount .lbl { font-family: var(--cond); font-size: 18px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: var(--mid-grey); }
+    .done-buckle { width: 90px; height: 90px; }
+    .scorecard .sub { margin-top: 22px; }
+    .award { position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%) scale(.8); opacity: 0; pointer-events: none; z-index: 30;
+        background: #fff; border: 3px solid var(--pink); border-radius: 12px; padding: 24px 40px; display: flex; flex-direction: column; align-items: center; gap: 10px;
+        box-shadow: 0 20px 50px rgba(27,31,69,.25); transition: opacity .3s, transform .35s var(--ease); }
+    .award.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    .award.hide { opacity: 0; transform: translate(-50%, -60%) scale(.95); }
+    .award-img { width: 140px; height: auto; }
+    .award-text { font-family: var(--cond); font-size: 40px; font-weight: 900; color: var(--pink); text-transform: uppercase; letter-spacing: .04em; }
+    .confetti-canvas { position: fixed; inset: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 29; }
+</style>
+</head>
+<body>
+<div class="stage" id="stage">
+    <div class="top">
+        <h1 class="sheet-title">Checking <span>shortcuts</span></h1>
+        <div class="hright">
+            <div class="counter" id="counter"></div>
+            <div class="bcount" title="Buckles earned">
+                <img src="buckle.svg" alt="" class="counter-icon" onerror="this.style.visibility='hidden'">
+                <div class="num" id="buckleCount">0</div>
+                <div class="lbl">Buckles</div>
+            </div>
+        </div>
+    </div>
+    <div class="content" id="content"></div>
+    <div class="caption"><div class="txt" id="cap"></div><button class="next" id="next" hidden>Check</button></div>
+    <div class="progress" id="progress"></div>
+    <div class="modal" id="modal" hidden role="dialog" aria-modal="true" aria-labelledby="mtitle">
+        <div class="mbox">
+            <div class="mhead"><span class="mtag">Watch how</span><span class="mtitle" id="mtitle"></span></div>
+            <div class="mmain"><div class="mscene" id="mscene"></div><div class="mkb" id="mkb"></div></div>
+            <div class="mcap"><div class="mstep" id="mstep"></div><div class="mtext" id="mtext"></div><div class="mres" id="mres"></div></div>
+            <div class="mfoot"><div class="mprog" id="mprog"></div>
+                <button class="mbtn mreplay" id="mreplay"><svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.4-5.7"/><path d="M4 4v5h5"/></svg>Start again</button>
+                <button class="mbtn mnext" id="mnext">Next step<svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button>
+                <button class="mbtn mgo" id="mgo">Try it myself</button></div>
+        </div>
+    </div>
+</div>
+
+<div class="award" id="award" role="status" aria-live="polite">
+    <img src="penguin-with-buckle.svg" alt="" class="award-img" onerror="this.style.display='none'">
+    <div class="award-text" id="awardText">+1 Buckle!</div>
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+const content = $('#content'), cap = $('#cap'), btn = $('#next'), counter = $('#counter'), progress = $('#progress');
+const NS = 'http://www.w3.org/2000/svg', PK = '#ea008a', NV = '#1b1f45', GR = '#c9ccd6', LT = '#f0f3f6', U = 100;
+let scaleK = 1;
+function el(tag, cls, html) { const e = document.createElement(tag); if (cls) e.className = cls; if (html !== undefined) e.innerHTML = html; return e; }
+function sel(tag, attrs = {}, html) { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (html !== undefined) e.innerHTML = html; return e; }
+function say(html) { cap.innerHTML = `<span class="in">${html}</span>`; }
+
+/* ---------- animation helpers ---------- */
+let runId = 0;
+const easeOut = t => 1 - (1 - t) * (1 - t), easeInOut = t => t < .5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+function play(dur, step, guard) {
+    const id = runId, ok = guard || (() => id === runId);
+    return new Promise(res => {
+        const st = performance.now();
+        const f = n => { if (!ok()) return; const t = Math.min(1, (n - st) / dur); step(t); if (t < 1) requestAnimationFrame(f); else res(); };
+        requestAnimationFrame(f);
+    });
+}
+function wait(ms) { const id = runId; return new Promise(r => setTimeout(() => { if (id === runId) r(); }, ms)); }
+
+/* ---------- per-question listeners (removed on every new question) ---------- */
+let offs = [];
+function listen(t, ev, fn, opt) { t.addEventListener(ev, fn, opt); offs.push(() => t.removeEventListener(ev, fn, opt)); }
+function cleanup() { offs.forEach(f => f()); offs = []; liveKbs = []; }
+const KB = (() => {
+    const m = {};
+    const add = (row, y, h) => { let x = 0; row.forEach(([c, l, w = 1]) => { m[c] = { c, l, x, y, w, h }; x += w; }); };
+    add([['Escape', 'Esc', 1.5], ...[...Array(12)].map((_, i) => ['F' + (i + 1), 'F' + (i + 1)]), ['Delete', 'Del', 1.5]], 0, .62);
+    add([['Backquote', '`'], ...'1234567890'.split('').map(d => ['Digit' + d, d]), ['Minus', '-'], ['Equal', '='], ['Backspace', 'Backspace', 2]], .62, 1);
+    add([['Tab', 'Tab', 1.5], ...'QWERTYUIOP'.split('').map(c => ['Key' + c, c]), ['BracketLeft', '['], ['BracketRight', ']'], ['Backslash', '\\', 1.5]], 1.62, 1);
+    add([['CapsLock', 'Caps Lock', 1.75], ...'ASDFGHJKL'.split('').map(c => ['Key' + c, c]), ['Semicolon', ';'], ['Quote', '\''], ['Enter', 'Enter', 2.25]], 2.62, 1);
+    add([['ShiftLeft', 'Shift', 2.25], ...'ZXCVBNM'.split('').map(c => ['Key' + c, c]), ['Comma', ','], ['Period', '.'], ['Slash', '/'], ['ShiftRight', 'Shift', 2.75]], 3.62, 1);
+    add([['ControlLeft', 'Ctrl', 1.25], ['Fn', 'Fn'], ['MetaLeft', '', 1.25], ['AltLeft', 'Alt', 1.25], ['Space', '', 4.75], ['AltRight', 'Alt', 1.25], ['ControlRight', 'Ctrl', 1.25]], 4.62, 1);
+    m.ArrowLeft = { c: 'ArrowLeft', l: '\u2190', x: 12, y: 5.12, w: 1, h: .5 };
+    m.ArrowUp = { c: 'ArrowUp', l: '\u2191', x: 13, y: 4.62, w: 1, h: .5 };
+    m.ArrowDown = { c: 'ArrowDown', l: '\u2193', x: 13, y: 5.12, w: 1, h: .5 };
+    m.ArrowRight = { c: 'ArrowRight', l: '\u2192', x: 14, y: 5.12, w: 1, h: .5 };
+    return m;
+})();
+const kc = c => { const k = KB[c]; return [k.x + k.w / 2, k.y + k.h / 2]; };
+
+/* ---------- laptop keyboard ---------- */
+const CROPS = { left: [-.6, -.6, 9.05, 6.75], deck: [-.6, -.6, 16.2, 6.75] };
+const WINLOGO = (cx, cy, c) => [[-1, -1], [1, -1], [-1, 1], [1, 1]].map(([sx, sy]) => `<rect x="${cx + (sx < 0 ? -15 : 2)}" y="${cy + (sy < 0 ? -15 : 2)}" width="13" height="13" fill="${c}"/>`).join('');
+let liveKbs = [];
+function keyboard(o = {}) {
+    const [vx, vy, vw, vh] = CROPS[o.crop || 'left'], blank = new Set(o.blank || []);
+    const svg = sel('svg', { viewBox: `${vx * U} ${vy * U} ${vw * U} ${vh * U}`, width: o.width, height: Math.round(o.width * vh / vw), class: 'kbd', role: 'img', 'aria-label': 'Laptop keyboard' });
+    svg.innerHTML = `<rect x="${-.6 * U}" y="${-.7 * U}" width="${16.2 * U}" height="${12 * U}" rx="40" fill="#e3e6ee"/>
+        <rect x="${-.24 * U}" y="${-.24 * U}" width="${15.48 * U}" height="${6.1 * U}" rx="22" fill="${NV}"/>
+        <rect x="${5 * U}" y="${6.55 * U}" width="${5 * U}" height="${3.4 * U}" rx="22" fill="#d9dce6"/>
+        <g class="keys"></g><g class="badges"></g>`;
+    const kg = svg.querySelector('.keys'), keys = {};
+    const labelSVG = (k, cx, cy, txt) => {
+        if (k.c === 'MetaLeft') return WINLOGO(cx, cy, NV);
+        const fs = k.h < .7 ? 20 : txt.length === 1 ? 34 : txt.length > 5 ? 21 : 25;
+        return `<text x="${cx}" y="${cy + fs * .36}" text-anchor="middle" class="kl" style="font-size:${fs}px">${txt.replace('&', '&amp;').replace('<', '&lt;')}</text>`;
+    };
+    Object.values(KB).forEach(k => {
+        const x = k.x * U + 7, y = k.y * U + 6, w = k.w * U - 14, h = k.h * U - 19, cx = x + w / 2, cy = y + h / 2;
+        const g = sel('g', { 'data-c': k.c });
+        const lab = o.noLabels || blank.has(k.c) ? '' : labelSVG(k, cx, cy, k.l);
+        g.innerHTML = `<rect x="${x}" y="${y + 7}" width="${w}" height="${h}" rx="11" fill="#a3a8bc"/><g class="kt"><rect class="kf" x="${x}" y="${y}" width="${w}" height="${h}" rx="11" fill="#fff" stroke-width="7"/><g class="lb">${lab}</g></g>`;
+        kg.appendChild(g);
+        keys[k.c] = { k, g, kt: g.querySelector('.kt'), kf: g.querySelector('.kf'), lb: g.querySelector('.lb'), cx, cy };
+    });
+    const live = new Set(), demo = new Set(), marks = new Set();
+    function paint(c) {
+        const k = keys[c]; if (!k) return;
+        const on = live.has(c) || demo.has(c), mk = marks.has(c);
+        k.kt.setAttribute('transform', on ? 'translate(0 6)' : '');
+        k.kf.setAttribute('fill', on ? PK : mk ? '#fde6f3' : '#fff');
+        k.kf.setAttribute('stroke', mk && !on ? PK : 'none');
+        k.lb.querySelectorAll('text,rect').forEach(n => n.setAttribute('fill', on ? '#fff' : mk ? PK : NV));
+    }
+    const api = {
+        svg, keys,
+        live(c, on) { if (c === 'MetaRight') c = 'MetaLeft'; if (!keys[c]) return; on ? live.add(c) : live.delete(c); paint(c); },
+        clearLive() { [...live].forEach(c => { live.delete(c); paint(c); }); },
+        demoKey(c, on) { on ? demo.add(c) : demo.delete(c); paint(c); },
+        demoClear() { [...demo].forEach(c => { demo.delete(c); paint(c); }); },
+        mark(codes) { [...marks].forEach(c => { marks.delete(c); paint(c); }); (codes || []).forEach(c => { marks.add(c); paint(c); }); },
+        label(c, txt) { const k = keys[c]; k.lb.innerHTML = labelSVG(k.k, k.cx, k.cy, txt); paint(c); },
+    };
+    if (o.live !== false) liveKbs.push(api);
+    return api;
+}
+/* every keyboard on screen lights up the keys the student is pressing */
+document.addEventListener('keydown', e => liveKbs.forEach(k => k.live(e.code, true)), true);
+document.addEventListener('keyup', e => {
+    liveKbs.forEach(k => { k.live(e.code, false); if (!e.ctrlKey && !e.altKey && !e.shiftKey && !e.metaKey) k.clearLive(); });
+}, true);
+window.addEventListener('blur', () => liveKbs.forEach(k => k.clearLive()));
+
+/* ---------- shortcuts ---------- */
+const WINI = `<svg viewBox="0 0 16 16" width=".78em" height=".78em"><rect width="7.2" height="7.2" fill="currentColor"/><rect x="8.8" width="7.2" height="7.2" fill="currentColor"/><rect y="8.8" width="7.2" height="7.2" fill="currentColor"/><rect x="8.8" y="8.8" width="7.2" height="7.2" fill="currentColor"/></svg>`;
+const K = (...ks) => `<span class="kc">${ks.map(k => k === 'Win' ? `<kbd>${WINI}Win</kbd>` : `<kbd>${k}</kbd>`).join('<i>+</i>')}</span>`;
+const SHORT = {
+    all: { k: K('Ctrl', 'A'), codes: ['ControlLeft', 'KeyA'] },
+    copy: { k: K('Ctrl', 'C'), codes: ['ControlLeft', 'KeyC'] },
+    paste: { k: K('Ctrl', 'V'), codes: ['ControlLeft', 'KeyV'] },
+    find: { k: K('Ctrl', 'F'), codes: ['ControlLeft', 'KeyF'] },
+    alttab: { k: K('Alt', 'Tab'), codes: ['AltLeft', 'Tab'] },
+    snip: { k: K('Win', 'Shift', 'S'), codes: ['MetaLeft', 'ShiftLeft', 'KeyS'] }
+};
+const playIcon = `<svg viewBox="0 0 24 24"><path d="M8 5.5v13l10.5-6.5z"/></svg>`;
+function dock(o = {}) {
+    const d = el('div', 'dock'), kw = el('div', 'kwrap');
+    const kb = keyboard({ crop: 'left', width: o.width || 310, noLabels: o.noLabels, live: o.live });
+    kw.appendChild(kb.svg); d.appendChild(kw);
+    return { el: d, kb };
+}
+function steps(list) {
+    const items = list.map((t, i) => el('div', 'step', `<span class="n">${i + 1}</span><span>${t}</span>`));
+    return { items, set(n) { items.forEach((e, j) => { e.classList.toggle('done', j < n); e.classList.toggle('now', j === n); e.querySelector('.n').textContent = j < n ? '\u2713' : j + 1; }); } };
+}
+
+/* =========================================================
+   DEMO WINDOW: a pop-up tutorial that plays before students try
+   ========================================================= */
+const modal = $('#modal'), mScene = $('#mscene'), mKb = $('#mkb'), mTitle = $('#mtitle'), mStep = $('#mstep'), mText = $('#mtext'), mRes = $('#mres'), mProg = $('#mprog'), mGo = $('#mgo'), mReplay = $('#mreplay'), mNext = $('#mnext');
+let nextResolve = null;
+const GHOST = `<svg class="g-arrow" viewBox="0 0 24 34" width="26" height="36"><path d="M2 2 L2 27 L8.5 21 L13 31.5 L17.5 29.5 L13 19.5 L21.5 19.5 Z" fill="#fff" stroke="${NV}" stroke-width="2.4" stroke-linejoin="round"/></svg>
+    <svg class="g-cross" viewBox="0 0 40 40" width="40" height="40"><g stroke="${NV}" stroke-width="3" stroke-linecap="round"><line x1="20" y1="2" x2="20" y2="15"/><line x1="20" y1="25" x2="20" y2="38"/><line x1="2" y1="20" x2="15" y2="20"/><line x1="25" y1="20" x2="38" y2="20"/></g><circle cx="20" cy="20" r="2.5" fill="${PK}"/></svg>`;
+let demoOn = false, demoTok = 0, demoDef = null, demoAfter = null;
+function openDemo(def, after) {
+    demoDef = def; demoAfter = after; demoOn = true;
+    modal.hidden = false; modal.classList.remove('out');
+    startDemo();
+}
+function closeDemo() {
+    if (!demoOn) return;
+    demoTok++; demoOn = false;
+    modal.classList.add('out');
+    setTimeout(() => { if (!demoOn) modal.hidden = true; }, 260);
+    if (demoAfter) demoAfter();
+}
+function killDemo() { demoTok++; demoOn = false; modal.hidden = true; }
+function startDemo() {
+    const tok = ++demoTok, ok = () => tok === demoTok, def = demoDef, n = def.steps;
+    mScene.innerHTML = ''; mKb.innerHTML = ''; mTitle.innerHTML = def.title; mGo.textContent = def.go || 'Try it myself'; mGo.classList.remove('pulse'); mGo.disabled = true; mNext.disabled = true; mNext.classList.remove('pulse'); nextResolve = null;
+    const kb = keyboard({ crop: 'left', width: 370, live: false }); mKb.appendChild(kb.svg);
+    const ctx = def.build(mScene);
+    const gh = el('div', 'ghost', GHOST); mScene.appendChild(gh);
+    let gp = { x: 600, y: 360 };
+    const place = p => { gp = { x: p.x, y: p.y }; gh.style.transform = `translate(${p.x.toFixed(1)}px, ${p.y.toFixed(1)}px)`; };
+    place(gp);
+    mProg.innerHTML = Array.from({ length: n }, () => '<span></span>').join('');
+    const segs = [...mProg.children];
+    const SP = .75, W = ms => new Promise(r => setTimeout(() => { if (ok()) r(); }, ms * SP));
+    const P = (dur, fn) => play(dur * SP, fn, ok);
+    const xy = (node, fx = .5, fy = .5) => { const s = mScene.getBoundingClientRect(), r = node.getBoundingClientRect(); return { x: (r.left - s.left + r.width * fx) / scaleK, y: (r.top - s.top + r.height * fy) / scaleK }; };
+    const D = {
+        kb, ctx, W, P, xy,
+        async step(i, html) {
+            if (i > 0) {
+                mRes.insertAdjacentHTML('beforeend', '<span class="in nxt">Press <b>Next step</b> when you are ready.</span>');
+                mNext.disabled = false; mNext.classList.add('pulse'); mNext.focus({ preventScroll: true });
+                await new Promise(r => { nextResolve = () => { if (ok()) r(); }; });
+                nextResolve = null; mNext.disabled = true; mNext.classList.remove('pulse');
+            }
+            segs.forEach((s, j) => { s.className = j < i ? 'done' : j === i ? 'now' : ''; });
+            mStep.textContent = `Step ${i + 1} of ${n}`;
+            mText.innerHTML = `<span class="in">${html}</span>`; mRes.innerHTML = '';
+        },
+        result(html) { mRes.innerHTML = `<span class="in">${html}</span>`; },
+        show(on = true) { gh.classList.toggle('on', on); },
+        mode(m) { gh.dataset.m = m; },
+        move(node, fx, fy, dur = 1100, each) { const a = { ...gp }, b = node.nodeType ? xy(node, fx, fy) : node; return P(dur, k => { const e = easeInOut(k); place({ x: a.x + (b.x - a.x) * e, y: a.y + (b.y - a.y) * e }); if (each) each(gp); }); },
+        click() { const r = el('div', 'ripple'); r.style.left = gp.x + 'px'; r.style.top = gp.y + 'px'; mScene.appendChild(r); setTimeout(() => r.remove(), 700); return W(450); },
+        async press(codes, gap = 850) { for (const c of codes) { kb.demoKey(c, true); await W(gap); } },
+        release(codes) { codes.forEach(c => kb.demoKey(c, false)); },
+        async tap(c) { kb.demoKey(c, true); await W(350); kb.demoKey(c, false); }
+    };
+    mStep.textContent = ''; mText.innerHTML = ''; mRes.innerHTML = '';
+    (async () => {
+        await W(500);
+        await def.run(D);
+        if (!ok()) return;
+        D.show(false);
+        segs.forEach(s => s.className = 'done');
+        mStep.textContent = 'Finished';
+        mText.innerHTML = `<span class="in">${def.end || 'Now it\u2019s your turn.'}</span>`; mRes.innerHTML = '';
+        mGo.disabled = false; mGo.classList.add('pulse'); mGo.focus({ preventScroll: true });
+    })();
+}
+mReplay.onclick = () => { if (demoOn) startDemo(); };
+mGo.onclick = () => { if (!mGo.disabled) closeDemo(); };
+mNext.onclick = () => { if (nextResolve) nextResolve(); };
+document.addEventListener('keydown', e => {
+    if (!demoOn) return;
+    if (e.key === 'Escape') { e.preventDefault(); return; }
+    if (e.ctrlKey || e.altKey || e.metaKey) e.preventDefault();
+}, true);
+const hlSweep = (tx, p) => { tx.style.backgroundImage = p ? 'linear-gradient(#f9b9dc, #f9b9dc)' : ''; tx.style.backgroundRepeat = 'no-repeat'; tx.style.backgroundSize = `${p * 100}% 100%`; };
+function findHits(doc, orig, term) {
+    doc.innerHTML = orig; const hits = [], t = term.trim();
+    if (t.length < 2) return hits;
+    const re = new RegExp(t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'), tw = document.createTreeWalker(doc, NodeFilter.SHOW_TEXT), nodes = [];
+    while (tw.nextNode()) nodes.push(tw.currentNode);
+    nodes.forEach(nd => {
+        const s = nd.nodeValue; re.lastIndex = 0; if (!re.test(s)) return; re.lastIndex = 0;
+        const frag = document.createDocumentFragment(); let last = 0, m;
+        while ((m = re.exec(s))) { frag.append(s.slice(last, m.index)); const mk = document.createElement('mark'); mk.className = 'hit'; mk.textContent = m[0]; frag.append(mk); hits.push(mk); last = m.index + m[0].length; }
+        frag.append(s.slice(last)); nd.replaceWith(frag);
+    });
+    return hits;
+}
+
+/* ---------- window artwork (drawn at 300 x 200) ---------- */
+function winArt(type) {
+    const ctl = `<g stroke="#8b90a8" stroke-width="2.5" stroke-linecap="round"><line x1="236" y1="13" x2="246" y2="13"/><rect x="258" y="8" width="9" height="9" fill="none"/><line x1="279" y1="8" x2="288" y2="17"/><line x1="288" y1="8" x2="279" y2="17"/></g>`;
+    let s = `<rect width="300" height="200" rx="8" fill="#fff"/><rect width="300" height="26" rx="8" fill="${LT}"/><rect y="18" width="300" height="8" fill="${LT}"/>${ctl}`;
+    if (type === 'browser') {
+        s += `<rect x="10" y="5" width="96" height="21" rx="5" fill="#fff"/><rect x="18" y="12" width="60" height="6" rx="3" fill="#c3c6d0"/>
+            <rect x="10" y="33" width="280" height="15" rx="7.5" fill="${LT}"/><rect x="22" y="38" width="90" height="5" rx="2.5" fill="#c3c6d0"/>
+            <rect x="14" y="60" width="130" height="14" rx="3" fill="${PK}"/><g fill="#d3d6e0"><rect x="14" y="84" width="150" height="7" rx="3"/><rect x="14" y="98" width="140" height="7" rx="3"/><rect x="14" y="112" width="152" height="7" rx="3"/><rect x="14" y="126" width="110" height="7" rx="3"/></g>
+            <rect x="14" y="146" width="150" height="40" rx="5" fill="none" stroke="${NV}" stroke-width="2.5"/><rect x="182" y="60" width="104" height="126" rx="6" fill="${NV}"/><circle cx="234" cy="108" r="22" fill="${PK}"/>`;
+    } else if (type === 'doc') {
+        s += `<rect y="26" width="300" height="24" fill="#e2e5ef"/><g fill="#a3a8bc"><rect x="12" y="34" width="26" height="8" rx="2"/><rect x="46" y="34" width="26" height="8" rx="2"/><rect x="80" y="34" width="26" height="8" rx="2"/></g>
+            <rect y="50" width="300" height="150" fill="#eef0f5"/><rect x="62" y="60" width="176" height="140" fill="#fff"/>
+            <rect x="80" y="76" width="96" height="10" rx="2" fill="${NV}"/><g fill="#c3c6d0"><rect x="80" y="96" width="140" height="6" rx="3"/><rect x="80" y="108" width="132" height="6" rx="3"/><rect x="80" y="120" width="140" height="6" rx="3"/><rect x="80" y="132" width="100" height="6" rx="3"/><rect x="80" y="150" width="140" height="6" rx="3"/><rect x="80" y="162" width="120" height="6" rx="3"/></g>`;
+    } else if (type === 'files') {
+        const fold = (x, y, c) => `<path transform="translate(${x} ${y})" d="M0 5 a4 4 0 0 1 4-4 h12 l5 5 h19 a4 4 0 0 1 4 4 v22 a4 4 0 0 1-4 4 h-36 a4 4 0 0 1-4-4z" fill="${c}"/>`;
+        s += `<rect y="26" width="74" height="174" fill="${LT}"/><g fill="#c3c6d0"><rect x="12" y="40" width="48" height="7" rx="3"/><rect x="12" y="56" width="40" height="7" rx="3"/><rect x="12" y="72" width="50" height="7" rx="3"/><rect x="12" y="88" width="36" height="7" rx="3"/></g>
+            ${fold(96, 46, NV)}${fold(162, 46, PK)}${fold(228, 46, NV)}${fold(96, 112, NV)}${fold(162, 112, NV)}
+            <g fill="#c3c6d0"><rect x="96" y="88" width="44" height="6" rx="3"/><rect x="162" y="88" width="44" height="6" rx="3"/><rect x="228" y="88" width="44" height="6" rx="3"/><rect x="96" y="154" width="44" height="6" rx="3"/><rect x="162" y="154" width="44" height="6" rx="3"/></g>`;
+    } else if (type === 'calc') {
+        s += `<rect x="70" y="36" width="160" height="34" rx="4" fill="${LT}"/><rect x="170" y="46" width="48" height="14" rx="3" fill="${NV}"/>`;
+        for (let r = 0; r < 3; r++) for (let c = 0; c < 4; c++) s += `<rect x="${70 + c * 41}" y="${78 + r * 38}" width="37" height="33" rx="4" fill="${c === 3 ? (r === 2 ? PK : '#c3c6d0') : '#e2e5ef'}"/>`;
+    }
+    return s + `<rect width="300" height="200" rx="8" fill="none" stroke="${NV}" stroke-width="4"/>`;
+}
+const WINNAME = { browser: 'Stile', doc: 'Word', files: 'File Explorer', calc: 'Calculator' };
+const thumb = (type, w) => `<svg viewBox="-4 -4 308 208" width="${w}" height="${Math.round(w * 208 / 308)}">${winArt(type)}</svg>`;
+
+/* camp photo thumbnails */
+function photo(i) {
+    const P = [
+        `<rect width="76" height="54" fill="#cfe0f5"/><circle cx="58" cy="15" r="7" fill="${PK}"/><path d="M0 54 L22 22 L38 40 L50 28 L76 54Z" fill="${NV}"/>`,
+        `<rect width="76" height="54" fill="#dfe8f5"/><rect y="32" width="76" height="22" fill="#7f8ab8"/><path d="M14 36 Q38 46 62 36 L58 32 L18 32Z" fill="${PK}"/><line x1="38" y1="18" x2="38" y2="34" stroke="${NV}" stroke-width="2.5"/>`,
+        `<rect width="76" height="54" fill="${NV}"/><path d="M28 48 L38 20 L48 48Z" fill="${PK}"/><path d="M33 48 L38 32 L43 48Z" fill="#ffd5ec"/><rect x="22" y="46" width="32" height="5" rx="2" fill="#8b6a4e"/>`,
+        `<rect width="76" height="54" fill="#e6efe2"/><path d="M18 30 L38 14 L58 30Z" fill="${PK}"/><rect x="22" y="30" width="32" height="20" fill="${NV}"/><rect x="34" y="38" width="8" height="12" fill="#fff"/>`,
+        `<rect width="76" height="54" fill="#f2e6ee"/><g fill="${NV}">${[12, 26, 40, 54, 66].map((x, j) => `<circle cx="${x}" cy="${24 + (j % 2) * 4}" r="5"/><rect x="${x - 5}" y="${30 + (j % 2) * 4}" width="10" height="16" rx="4"/>`).join('')}</g>`,
+        `<rect width="76" height="54" fill="#dbe9d6"/><path d="M0 54 Q30 30 76 40 L76 54Z" fill="#8fae86"/><path d="M30 54 Q40 40 60 34" fill="none" stroke="#fff" stroke-width="4" stroke-dasharray="5 4"/><path d="M8 40 L14 22 L20 40Z" fill="${NV}"/>`
+    ];
+    return `<svg viewBox="0 0 76 54">${P[i % P.length]}</svg>`;
+}
+const folderIco = `<svg viewBox="0 0 26 22"><path d="M1 4 a2.5 2.5 0 0 1 2.5-2.5 h6 l3 3 h10 a2.5 2.5 0 0 1 2.5 2.5 v11 a2.5 2.5 0 0 1-2.5 2.5 h-19 a2.5 2.5 0 0 1-2.5-2.5z" fill="${PK}"/></svg>`;
+const usbIco = `<svg viewBox="0 0 26 22"><rect x="2" y="6" width="17" height="11" rx="2.5" fill="${NV}"/><rect x="19" y="8" width="5" height="7" rx="1" fill="none" stroke="${NV}" stroke-width="2"/></svg>`;
+
+
+/* ---------- badge to snip ---------- */
+function BADGE(w) {
+    const cap = (x, cw, t) => `<rect x="${x}" y="103" width="${cw}" height="40" rx="7" fill="#a3a8bc"/><rect x="${x}" y="96" width="${cw}" height="40" rx="7" fill="#fff"/><text x="${x + cw / 2}" y="123" text-anchor="middle" class="kl" style="font-size:20px">${t}</text>`;
+    return `<svg viewBox="0 0 260 250" width="${w}" height="${Math.round(w * 250 / 260)}"><rect x="8" y="8" width="244" height="234" rx="22" fill="${NV}"/><circle cx="130" cy="112" r="84" fill="none" stroke="${PK}" stroke-width="10"/>
+        ${cap(68, 58, 'Ctrl')}${cap(134, 58, 'C')}<text x="130" y="74" text-anchor="middle" fill="${PK}" textLength="74" lengthAdjust="spacingAndGlyphs" style="font:900 22px var(--cond)">YEAR 7</text>
+        <text x="130" y="226" text-anchor="middle" fill="#fff" textLength="196" lengthAdjust="spacingAndGlyphs" style="font:900 30px var(--cond)">SHORTCUT PRO</text></svg>`;
+}
+const SNIPI = [
+    `<svg viewBox="0 0 24 24" width="22" height="22"><rect x="3" y="5" width="18" height="14" rx="1" fill="none" stroke="${NV}" stroke-width="2.2" stroke-dasharray="3 2.5"/></svg>`,
+    `<svg viewBox="0 0 24 24" width="22" height="22"><path d="M4 14c0-6 6-10 11-8s5 9-1 11-9 1-10-3z" fill="none" stroke="${NV}" stroke-width="2.2" stroke-dasharray="3 2.5"/></svg>`,
+    `<svg viewBox="0 0 24 24" width="22" height="22"><rect x="3" y="5" width="18" height="14" rx="2" fill="none" stroke="${NV}" stroke-width="2.2"/><line x1="3" y1="9" x2="21" y2="9" stroke="${NV}" stroke-width="2.2"/></svg>`,
+    `<svg viewBox="0 0 24 24" width="22" height="22"><path d="M3 8V4h4M17 4h4v4M21 16v4h-4M7 20H3v-4" fill="none" stroke="${NV}" stroke-width="2.2"/></svg>`
+];
+
+/* ---------- quick fire artwork: what each shortcut does ---------- */
+const DOCLINES = [[80, 96, 140], [80, 108, 132], [80, 120, 140], [80, 132, 100], [80, 150, 140], [80, 162, 120]];
+const ARTS = {
+    essay: {
+        svg: `<svg viewBox="-4 -4 308 208" width="280" height="189">${winArt('doc')}<g class="hl">${[[80, 76, 96, 10], ...DOCLINES.map(([x, y, w]) => [x, y, w, 6])].map(([x, y, w, h]) => `<rect x="${x - 2}" y="${y - 3}" width="0" data-w="${w + 4}" height="${h + 6}" fill="${PK}" opacity=".3"/>`).join('')}</g><line x1="203" y1="160" x2="203" y2="172" stroke="${PK}" stroke-width="2.5"/></svg>`,
+        async win(s) { const rs = [...s.querySelectorAll('.hl rect')]; for (const r of rs) await play(110, k => r.setAttribute('width', (+r.dataset.w * k).toFixed(1))); }
+    },
+    pdf: {
+        svg: `<svg viewBox="0 0 280 200" width="280" height="200"><rect x="64" y="10" width="140" height="180" rx="6" fill="#e2e5ef" stroke="${NV}" stroke-width="3"/><rect x="54" y="18" width="140" height="178" rx="6" fill="#eef0f5" stroke="${NV}" stroke-width="3"/>
+            <rect x="44" y="26" width="140" height="170" rx="6" fill="#fff" stroke="${NV}" stroke-width="3"/><rect x="58" y="42" width="76" height="10" rx="2" fill="${NV}"/>
+            <g fill="#c3c6d0">${[64, 76, 88, 100, 120, 132, 144, 156, 168].map((y, i) => `<rect x="58" y="${y}" width="${i % 3 ? 112 : 94}" height="6" rx="3"/>`).join('')}</g>
+            <rect class="hit" x="56" y="129" width="72" height="12" rx="2" fill="${PK}" opacity="0"/>
+            <g class="fb" opacity="0"><rect x="118" y="4" width="150" height="34" rx="6" fill="#fff" stroke="#c3c6d0" stroke-width="2"/><rect x="126" y="11" width="92" height="20" rx="4" fill="#fff" stroke="${PK}" stroke-width="2"/><text class="ft" x="132" y="26" class="wl" style="font:600 13px Barlow, Helvetica, Arial, sans-serif" fill="${NV}"></text><text x="244" y="26" text-anchor="middle" style="font:600 12px Barlow, Helvetica, Arial, sans-serif" fill="#6b7090">1/1</text></g>
+            <rect x="150" y="164" width="120" height="30" rx="15" fill="${NV}"/><text class="pl" x="210" y="184" text-anchor="middle" class="wl" style="font:700 14px Barlow, Helvetica, Arial, sans-serif" fill="#fff">Page 1 of 12</text></svg>`,
+        async win(s) {
+            const fb = s.querySelector('.fb'), ft = s.querySelector('.ft');
+            await play(250, k => fb.setAttribute('opacity', k));
+            for (const ch of 'due date') { ft.textContent += ch; await wait(80); }
+            await wait(300); s.querySelector('.pl').textContent = 'Page 7 of 12';
+            const h = s.querySelector('.hit'); await play(300, k => h.setAttribute('opacity', .35 * k));
+        }
+    },
+    list: {
+        svg: `<svg viewBox="-4 -4 308 228" width="280" height="200">${winArt('doc')}<rect x="76" y="92" width="152" height="80" rx="2" fill="${PK}" opacity=".28"/>
+            <g class="cp" opacity="0"><rect x="96" y="196" width="112" height="28" rx="14" fill="${PK}"/><text x="152" y="215" text-anchor="middle" style="font:700 14px Barlow, Helvetica, Arial, sans-serif" fill="#fff">Copied!</text></g></svg>`,
+        async win(s) { const c = s.querySelector('.cp'); await play(350, k => { c.setAttribute('opacity', k); c.setAttribute('transform', `translate(0 ${(1 - easeOut(k)) * 14})`); }); }
+    },
+    answer: {
+        svg: `<svg viewBox="0 0 300 220" width="290" height="213"><rect x="2" y="2" width="296" height="178" rx="8" fill="#fff" stroke="${NV}" stroke-width="4"/><rect x="4" y="4" width="292" height="24" rx="6" fill="${LT}"/>
+            <rect x="18" y="42" width="100" height="12" rx="3" fill="${PK}"/><g fill="#c3c6d0"><rect x="18" y="64" width="240" height="7" rx="3"/><rect x="18" y="78" width="200" height="7" rx="3"/></g>
+            <text x="18" y="108" style="font:700 13px Barlow, Helvetica, Arial, sans-serif" fill="${NV}">Your answer</text>
+            <rect x="18" y="116" width="264" height="44" rx="6" fill="#fff" stroke="${PK}" stroke-width="3"/><text class="lk" x="30" y="143" style="font:600 15px Barlow, Helvetica, Arial, sans-serif" fill="${NV}"></text>
+            <line class="cr" x1="30" y1="126" x2="30" y2="150" stroke="${PK}" stroke-width="2.5"/>
+            <g transform="translate(18 188)"><rect width="264" height="30" rx="6" fill="${LT}"/><rect x="8" y="6" width="14" height="18" rx="2" fill="#fff" stroke="${NV}" stroke-width="2"/><rect x="11" y="3" width="8" height="5" rx="1.5" fill="${PK}"/>
+            <text x="30" y="20" style="font:600 13px Barlow, Helvetica, Arial, sans-serif" fill="#6b7090">On the clipboard: volcano-facts.org</text></g></svg>`,
+        async win(s) { const t = s.querySelector('.lk'), c = s.querySelector('.cr'); t.textContent = 'volcano-facts.org'; await play(250, k => t.setAttribute('opacity', k)); c.setAttribute('x1', 156); c.setAttribute('x2', 156); }
+    }
+};
+
+/* ---------- website and Word scene for the ordering question ---------- */
+function orderScene() {
+    const para = (y, n, w) => `<circle cx="22" cy="${y + 10}" r="9" fill="${NV}"/><text x="22" y="${y + 15}" text-anchor="middle" style="font:800 12px Barlow, Helvetica, Arial, sans-serif" fill="#fff">${n}</text>
+        <g fill="#c3c6d0"><rect x="40" y="${y}" width="${w[0]}" height="7" rx="3"/><rect x="40" y="${y + 13}" width="${w[1]}" height="7" rx="3"/><rect x="40" y="${y + 26}" width="${w[2]}" height="7" rx="3"/></g>`;
+    const ctl = `<g stroke="#8b90a8" stroke-width="2.2" stroke-linecap="round"><line x1="282" y1="14" x2="291" y2="14"/><rect x="301" y="9" width="9" height="9" fill="none"/><line x1="320" y1="9" x2="328" y2="17"/><line x1="328" y1="9" x2="320" y2="17"/></g>`;
+    const web = `<g class="wweb"><rect width="340" height="230" rx="8" fill="#fff"/><rect width="340" height="28" rx="8" fill="${LT}"/><rect y="20" width="340" height="8" fill="${LT}"/>
+        <rect x="10" y="6" width="150" height="22" rx="5" fill="#fff"/><text x="20" y="21" style="font:700 13px Barlow, Helvetica, Arial, sans-serif" fill="${NV}">Website: Volcano facts</text>${ctl}
+        <text x="40" y="54" style="font:800 17px Barlow, Helvetica, Arial, sans-serif" fill="${NV}">All about volcanoes</text>
+        <rect class="hl2" x="34" y="110" width="0" height="40" rx="3" fill="#f9b9dc"/>
+        ${para(70, 1, [270, 250, 180])}${para(116, 2, [280, 260, 220])}${para(162, 3, [270, 240, 150])}
+        <rect width="340" height="230" rx="8" fill="none" stroke="${NV}" stroke-width="4"/></g>`;
+    const word = `<g class="wword"><rect width="340" height="230" rx="8" fill="#eef0f5"/><rect width="340" height="28" rx="8" fill="${LT}"/><rect y="20" width="340" height="8" fill="${LT}"/>
+        <text x="270" y="19" text-anchor="end" style="font:800 14px Barlow, Helvetica, Arial, sans-serif" fill="${NV}">Word</text>${ctl}
+        <rect y="28" width="340" height="20" fill="#e2e5ef"/><rect x="40" y="58" width="260" height="172" fill="#fff"/>
+        <text x="58" y="84" style="font:800 15px Barlow, Helvetica, Arial, sans-serif" fill="${NV}">My notes</text>
+        <line class="wcr" x1="58" y1="96" x2="58" y2="112" stroke="${PK}" stroke-width="2.5" opacity="0"/>
+        <g class="pst" opacity="0"><rect x="52" y="94" width="236" height="44" rx="3" fill="#f9b9dc" class="pfl"/><g fill="#8b90a8"><rect x="58" y="100" width="220" height="7" rx="3"/><rect x="58" y="113" width="204" height="7" rx="3"/><rect x="58" y="126" width="172" height="7" rx="3"/></g></g>
+        <rect width="340" height="230" rx="8" fill="none" stroke="${NV}" stroke-width="4"/></g>`;
+    return `<svg viewBox="0 0 430 330" width="430" height="330"><rect width="430" height="330" fill="#3a4073"/><circle cx="380" cy="30" r="90" fill="#454b80"/>
+        <g class="pw" transform="translate(140 92) scale(.82)">${word}</g><g class="pb" transform="translate(10 20) scale(.82)">${web}</g></svg>`;
+}
+
+/* more quick fire artwork */
+const FONT = 'Barlow, Helvetica, Arial, sans-serif';
+const tag = (x, y, t, fill = NV) => `<g><rect x="${x}" y="${y}" width="${t.length * 8 + 18}" height="22" rx="11" fill="${fill}"/><text x="${x + 9}" y="${y + 16}" style="font:700 13px ${FONT}" fill="#fff">${t}</text></g>`;
+Object.assign(ARTS, {
+    alt: {
+        svg: `<svg viewBox="-6 -6 312 226" width="280" height="203"><g class="ws" transform="translate(0 24) scale(.8)">${winArt('browser')}${tag(150, 2, 'Stile')}</g>
+            <g class="wd" transform="translate(58 0) scale(.8)">${winArt('doc')}${tag(150, 2, 'Word')}</g></svg>`,
+        async win(s) { const ws = s.querySelector('.ws'); await play(250, k => ws.setAttribute('opacity', 1 - .5 * k)); s.appendChild(ws); await play(300, k => ws.setAttribute('opacity', .5 + .5 * k)); }
+    },
+    graph: {
+        svg: `<svg viewBox="0 0 300 210" width="280" height="196"><rect x="2" y="2" width="296" height="206" rx="8" fill="#fff" stroke="${NV}" stroke-width="4"/><rect x="4" y="4" width="292" height="22" rx="6" fill="${LT}"/>
+            <text x="16" y="48" style="font:800 15px ${FONT}" fill="${NV}">Plant growth</text>
+            <line x1="40" y1="64" x2="40" y2="178" stroke="${NV}" stroke-width="2.5"/><line x1="40" y1="178" x2="262" y2="178" stroke="${NV}" stroke-width="2.5"/>
+            ${[[56, 70], [100, 98], [144, 60], [188, 86], [232, 40]].map(([x, h], i) => `<rect x="${x}" y="${178 - h}" width="28" height="${h}" fill="${i % 2 ? PK : NV}"/>`).join('')}
+            <rect class="dim" x="0" y="0" width="300" height="210" fill="${NV}" opacity="0"/>
+            <rect class="mq" x="28" y="56" width="0" height="0" fill="#fff" fill-opacity=".14" stroke="#fff" stroke-width="2.5"/>
+            <g class="cp" opacity="0">${tag(84, 90, 'Snip copied!', PK)}</g></svg>`,
+        async win(s) {
+            const d = s.querySelector('.dim'), m = s.querySelector('.mq'), c = s.querySelector('.cp');
+            await play(250, k => d.setAttribute('opacity', .45 * k));
+            await play(650, k => { m.setAttribute('width', 244 * easeOut(k)); m.setAttribute('height', 132 * easeOut(k)); });
+            await wait(250); d.setAttribute('opacity', 0); m.setAttribute('width', 0);
+            await play(300, k => c.setAttribute('opacity', k));
+        }
+    },
+    folder: {
+        svg: `<svg viewBox="0 0 300 210" width="280" height="196"><rect x="2" y="2" width="296" height="206" rx="8" fill="#fff" stroke="${NV}" stroke-width="4"/><rect x="4" y="4" width="292" height="26" rx="6" fill="${LT}"/>
+            <path transform="translate(14 9) scale(.7)" d="M1 4 a2.5 2.5 0 0 1 2.5-2.5 h6 l3 3 h10 a2.5 2.5 0 0 1 2.5 2.5 v11 a2.5 2.5 0 0 1-2.5 2.5 h-19 a2.5 2.5 0 0 1-2.5-2.5z" fill="${PK}"/>
+            <text x="38" y="22" style="font:700 13px ${FONT}" fill="${NV}">Science project</text>
+            ${['report.docx', 'data.xlsx', 'photo1.jpg', 'photo2.jpg', 'notes.txt', 'slides.pptx'].map((nm, i) => { const x = 22 + (i % 3) * 92, y = 44 + Math.floor(i / 3) * 80;
+                return `<rect class="fs" x="${x - 8}" y="${y - 4}" width="80" height="74" rx="6" fill="${LT}" stroke="#8f98c8" stroke-width="2" opacity="0"/><path d="M${x + 18} ${y} h22 l10 10 v34 h-32z" fill="#fff" stroke="${NV}" stroke-width="2.5" stroke-linejoin="round"/><path d="M${x + 40} ${y} v10 h10" fill="none" stroke="${NV}" stroke-width="2.5"/><text x="${x + 32}" y="${y + 60}" text-anchor="middle" style="font:600 11px ${FONT}" fill="${NV}">${nm}</text>`; }).join('')}</svg>`,
+        async win(s) { for (const r of s.querySelectorAll('.fs')) { r.setAttribute('opacity', 1); await wait(90); } }
+    },
+    recipe: {
+        svg: `<svg viewBox="0 0 300 210" width="280" height="196"><rect x="2" y="2" width="296" height="206" rx="8" fill="#fff" stroke="${NV}" stroke-width="4"/><rect x="4" y="4" width="292" height="24" rx="6" fill="${LT}"/>
+            <text x="18" y="54" style="font:800 17px ${FONT}" fill="${NV}">Pancakes</text>
+            <rect class="hit" x="14" y="111" width="212" height="20" rx="3" fill="${PK}" opacity="0"/>
+            ${['Sift 2 cups of flour into a bowl.', 'Pour in the milk and stir well.', 'Add 2 eggs and whisk until smooth.', 'Heat a pan with a little butter.', 'Cook until bubbles form, then flip.', 'Serve warm with fruit.'].map((t, i) => `<text x="18" y="${80 + i * 21}" style="font:500 13px ${FONT}" fill="#4b5078">${t}</text>`).join('')}
+            <g class="fb" opacity="0"><rect x="150" y="32" width="140" height="30" rx="6" fill="#fff" stroke="#c3c6d0" stroke-width="2"/><rect x="157" y="38" width="86" height="18" rx="4" fill="#fff" stroke="${PK}" stroke-width="2"/><text class="ft" x="163" y="51" style="font:600 12px ${FONT}" fill="${NV}"></text><text x="268" y="51" text-anchor="middle" style="font:600 11px ${FONT}" fill="#6b7090">1/1</text></g></svg>`,
+        async win(s) { const fb = s.querySelector('.fb'), ft = s.querySelector('.ft'); await play(250, k => fb.setAttribute('opacity', k)); for (const ch of 'eggs') { ft.textContent += ch; await wait(90); } const h = s.querySelector('.hit'); await play(300, k => h.setAttribute('opacity', .3 * k)); }
+    },
+    snippaste: {
+        svg: `<svg viewBox="0 0 300 220" width="290" height="213"><rect x="2" y="2" width="296" height="178" rx="8" fill="#fff" stroke="${NV}" stroke-width="4"/><rect x="4" y="4" width="292" height="24" rx="6" fill="${LT}"/>
+            <rect x="18" y="42" width="120" height="12" rx="3" fill="${PK}"/><rect x="18" y="64" width="230" height="7" rx="3" fill="#c3c6d0"/>
+            <text x="18" y="92" style="font:700 13px ${FONT}" fill="${NV}">Your answer</text>
+            <rect x="18" y="100" width="264" height="66" rx="6" fill="#fff" stroke="${PK}" stroke-width="3"/><line class="cr" x1="30" y1="110" x2="30" y2="134" stroke="${PK}" stroke-width="2.5"/>
+            <g class="im" opacity="0"><rect x="30" y="106" width="88" height="54" rx="3" fill="${LT}" stroke="${NV}" stroke-width="2"/><circle cx="56" cy="133" r="12" fill="${PK}"/><path d="M74 150 L92 118 L110 150Z" fill="${NV}"/></g>
+            <g transform="translate(18 188)"><rect width="264" height="30" rx="6" fill="${LT}"/><rect x="8" y="6" width="14" height="18" rx="2" fill="#fff" stroke="${NV}" stroke-width="2"/><rect x="11" y="3" width="8" height="5" rx="1.5" fill="${PK}"/>
+            <text x="30" y="20" style="font:600 13px ${FONT}" fill="#6b7090">On the clipboard: your snip of a diagram</text></g></svg>`,
+        async win(s) { s.querySelector('.cr').setAttribute('opacity', 0); await play(300, k => s.querySelector('.im').setAttribute('opacity', k)); }
+    },
+    email: {
+        svg: `<svg viewBox="0 0 300 220" width="280" height="205"><rect x="2" y="2" width="296" height="206" rx="8" fill="#fff" stroke="${NV}" stroke-width="4"/><rect x="4" y="4" width="292" height="24" rx="6" fill="${LT}"/>
+            <text x="14" y="21" style="font:700 12px ${FONT}" fill="${NV}">Outlook</text>
+            <circle cx="34" cy="56" r="14" fill="${NV}"/><text x="34" y="61" text-anchor="middle" style="font:800 13px ${FONT}" fill="#fff">S</text>
+            <text x="56" y="52" style="font:700 14px ${FONT}" fill="${NV}">Sam Lee</text>
+            <rect x="54" y="58" width="128" height="18" rx="2" fill="${PK}" opacity=".3"/><text x="58" y="72" style="font:500 13px ${FONT}" fill="${NV}">sam.lee@email.com</text>
+            <g fill="#c3c6d0"><rect x="20" y="96" width="250" height="7" rx="3"/><rect x="20" y="110" width="236" height="7" rx="3"/><rect x="20" y="124" width="180" height="7" rx="3"/></g>
+            <g class="cp" opacity="0">${tag(110, 160, 'Copied!', PK)}</g></svg>`,
+        async win(s) { const c = s.querySelector('.cp'); await play(350, k => { c.setAttribute('opacity', k); c.setAttribute('transform', `translate(0 ${(1 - easeOut(k)) * 12})`); }); }
+    }
+});
+
+/* ---------- shared desktop picture for Alt + Tab ---------- */
+function desktop(sv) {
+    const POS = { browser: [150, 22, 1.22], doc: [24, 44, 1.02], files: [330, 60, .96] };
+    let order = ['browser', 'doc', 'files'], sw = false, hl = 0;
+    const draw = () => {
+        let s = `<rect width="640" height="290" fill="#3a4073"/><circle cx="560" cy="40" r="120" fill="#454b80"/><circle cx="80" cy="260" r="90" fill="#454b80"/>`;
+        order.slice().reverse().forEach(w => { const [x, y, k] = POS[w]; s += `<g transform="translate(${x} ${y}) scale(${k})">${winArt(w)}</g>`; });
+        s += `<rect y="262" width="640" height="28" fill="#eef0f5"/>`;
+        ['browser', 'doc', 'files'].forEach((w, i) => { const x = 278 + i * 34; s += `<rect x="${x}" y="268" width="18" height="16" rx="3" fill="${w === 'browser' ? PK : NV}"/>${order[0] === w ? `<rect x="${x + 3}" y="286" width="12" height="3" rx="1.5" fill="${PK}"/>` : ''}`; });
+        if (sw) {
+            s += `<rect width="640" height="290" fill="${NV}" opacity=".45"/><rect x="66" y="66" width="508" height="150" rx="14" fill="#2a2f5c" opacity=".96"/>`;
+            order.forEach((w, i) => {
+                const x = 90 + i * 160, y = 106;
+                s += `<text class="wl w" x="${x}" y="${y - 12}">${WINNAME[w]}</text><g transform="translate(${x} ${y}) scale(.45)">${winArt(w)}</g>`;
+                if (i === hl) s += `<rect x="${x - 10}" y="${y - 34}" width="155" height="130" rx="10" fill="none" stroke="${PK}" stroke-width="5"/>`;
+            });
+        }
+        sv.innerHTML = s;
+    };
+    draw();
+    return {
+        tab() { if (!sw) { sw = true; hl = 1; } else hl = (hl + 1) % order.length; draw(); },
+        letGo() { if (!sw) return; const pick = order[hl]; order = [pick, ...order.filter(w => w !== pick)]; sw = false; draw(); }
+    };
+}
+
+const DEMO_TEXT = 'Library books are due back on Monday. Please return them to the front desk.';
+const DEMOS = {
+    copypaste: {
+        title: 'Select all, copy and paste', steps: 3,
+        build(sc) {
+            sc.innerHTML = `<div class="ds"><div class="dp"><div class="ph">Email</div><div class="dbox"><span class="tx">${DEMO_TEXT}</span></div></div>
+                <div class="dp"><div class="ph">Answer box</div><div class="dbox"></div></div></div>`;
+            const b = sc.querySelectorAll('.dbox'); return { src: b[0], dst: b[1], tx: sc.querySelector('.tx') };
+        },
+        async run(D) {
+            const { src, dst, tx } = D.ctx, A = SHORT.all.codes, C = SHORT.copy.codes, V = SHORT.paste.codes;
+            await D.step(0, `Click inside the box. Then hold ${K('Ctrl')} and tap ${K('A')}.`);
+            await D.W(1500); D.show(); await D.move(src, .5, .45); await D.click(); src.classList.add('focus'); await D.W(700);
+            await D.press(A); await D.P(800, k => hlSweep(tx, easeOut(k)));
+            D.result('Everything in the box is now selected.'); await D.W(3000); D.release(A); await D.W(1000);
+            await D.step(1, `Keep it selected. Hold ${K('Ctrl')} and tap ${K('C')}.`);
+            await D.W(1800); await D.press(C);
+            const tag = el('div', 'dtag', 'Copied!'); src.parentNode.style.position = 'relative'; src.parentNode.appendChild(tag);
+            D.result('A copy is saved, ready to paste. The screen hardly changes, so this step is easy to miss!'); await D.W(3800); D.release(C); tag.remove(); await D.W(1000);
+            await D.step(2, `Click inside the answer box. Then hold ${K('Ctrl')} and tap ${K('V')}.`);
+            await D.W(1600); await D.move(dst, .45, .4); await D.click(); src.classList.remove('focus'); hlSweep(tx, 0); dst.classList.add('focus'); await D.W(700);
+            await D.press(V); dst.innerHTML = `<span class="tx pasted">${DEMO_TEXT}</span>`;
+            D.result('The copied text appears in the answer box.'); await D.W(3500); D.release(V);
+        }
+    },
+    find: {
+        title: 'Find words on a page', steps: 3,
+        build(sc) {
+            sc.innerHTML = `<div class="bro"><div class="bbar"><div class="bnav">${navIco}</div><div class="burl">school portal / Camp letter</div></div><div class="bpage"><div class="doc">${CAMP}</div></div>
+                <div class="fbar" hidden><input type="text" tabindex="-1" readonly><span class="fc"></span><button tabindex="-1">${upIco}</button><button tabindex="-1">${downIco}</button><button tabindex="-1">${xIco}</button></div></div>`;
+            const doc = sc.querySelector('.doc');
+            return { page: sc.querySelector('.bpage'), doc, orig: doc.innerHTML, fbar: sc.querySelector('.fbar'), fin: sc.querySelector('.fbar input'), fc: sc.querySelector('.fc') };
+        },
+        async run(D) {
+            const { page, doc, orig, fbar, fin, fc } = D.ctx, F = SHORT.find.codes;
+            let hits = [], at = 0;
+            const go = async i => { at = i; hits.forEach((h, j) => h.classList.toggle('on', j === at)); fc.textContent = `${at + 1}/${hits.length}`; const from = page.scrollTop, to = Math.max(0, hits[at].offsetTop - page.clientHeight * .4); await D.P(600, k => page.scrollTop = from + (to - from) * easeInOut(k)); };
+            await D.step(0, `Hold ${K('Ctrl')} and tap ${K('F')}.`);
+            await D.W(1500); await D.press(F); fbar.hidden = false;
+            D.result('A find box opens in the top corner of the page.'); await D.W(3000); D.release(F); await D.W(800);
+            await D.step(1, 'Type a key word into the find box. This example types <b>pack</b>.');
+            await D.W(1500); D.show(); await D.move(fin, .3, .6, 900); await D.W(500);
+            for (const ch of 'pack') { fin.value += ch; await D.W(350); }
+            hits = findHits(doc, orig, 'pack'); await go(0);
+            D.result(`Every match lights up. It found ${hits.length} matches and jumped to the first one.`); await D.W(3500);
+            await D.step(2, `Press ${K('Enter')} to jump to the next match.`);
+            await D.W(1600);
+            for (let i = 1; i < hits.length; i++) { await go(i); await D.W(1800); }
+            D.result(`Keep pressing ${K('Enter')} and read each match until you find what you need.`); await D.W(3200);
+        }
+    },
+    alttab: {
+        title: 'Switch windows', steps: 4,
+        build(sc) { sc.innerHTML = `<svg viewBox="0 0 640 290" width="560" height="254" style="margin:38px 0 0"></svg>`; sc.style.background = '#3a4073'; return { sim: desktop(sc.querySelector('svg')) }; },
+        async run(D) {
+            const { sim } = D.ctx;
+            await D.step(0, `Hold down ${K('Alt')} and keep holding it.`);
+            await D.W(1500); await D.press(['AltLeft']); D.result('Nothing happens yet. Keep holding it down.'); await D.W(2600);
+            await D.step(1, `While you hold ${K('Alt')}, tap ${K('Tab')}.`);
+            await D.W(1500); await D.tap('Tab'); sim.tab();
+            D.result('A picker shows all your open windows. A pink box marks one of them.'); await D.W(3300);
+            await D.tap('Tab'); sim.tab(); D.result(`Each tap of ${K('Tab')} moves the pink box along one window.`); await D.W(3300);
+            await D.step(2, `Let go of ${K('Alt')}.`);
+            await D.W(1500); D.release(['AltLeft']); sim.letGo(); D.result('The window in the pink box opens in front.'); await D.W(3300);
+            await D.step(3, `To go back, press ${K('Alt', 'Tab')} just once.`);
+            await D.W(1500); await D.press(['AltLeft'], 600); await D.tap('Tab'); sim.tab(); await D.W(1300); D.release(['AltLeft']); sim.letGo();
+            D.result('One quick tap takes you back to the window you used last.'); await D.W(3300);
+        }
+    },
+    snip: {
+        title: 'Take a screenshot', steps: 3,
+        build(sc) {
+            sc.innerHTML = `<div class="ds"><div class="dp"><div class="ph">Badge</div><div class="snipcard">${BADGE(150)}</div></div><div class="dp"><div class="ph">Paste box</div><div class="pbox"></div></div></div>`;
+            return { card: sc.querySelector('.snipcard'), pb: sc.querySelector('.pbox') };
+        },
+        async run(D) {
+            const { card, pb } = D.ctx, S = SHORT.snip.codes, V = SHORT.paste.codes, sc = mScene;
+            await D.step(0, `Hold ${K('Win')} and ${K('Shift')}, then tap ${K('S')}.`);
+            await D.W(1500); await D.press(S, 900);
+            const dim = el('div', 'sdim', `<div class="sbar"><span class="on">${SNIPI[0]}</span><span>${SNIPI[1]}</span><span>${SNIPI[2]}</span><span>${SNIPI[3]}</span></div><div class="marq"></div>`); sc.appendChild(dim);
+            D.result('The screen goes dark and a snipping bar appears at the top.'); await D.W(3000); D.release(S); await D.W(600);
+            await D.step(1, 'Drag a box around the part you want to keep.');
+            const bs = card.querySelector('svg'), a = D.xy(bs, -.06, -.06), b = D.xy(bs, 1.06, 1.06), marq = dim.querySelector('.marq');
+            await D.W(1300); D.mode('cross'); D.show(); await D.move(a, 0, 0, 1000); await D.W(600);
+            dim.classList.add('drag');
+            await D.move(b, 0, 0, 1900, p => { marq.style.left = a.x + 'px'; marq.style.top = a.y + 'px'; marq.style.width = Math.max(0, p.x - a.x) + 'px'; marq.style.height = Math.max(0, p.y - a.y) + 'px'; });
+            await D.W(700); dim.remove(); D.mode('arrow');
+            const t = el('div', 'toast', `<div class="tth">${BADGE(44)}</div><div><div class="tt">Snip copied to clipboard</div><div class="tb">Snipping Tool</div></div>`); sc.appendChild(t);
+            D.result('Let go of the mouse. Your snip is copied, ready to paste.'); await D.W(3500); t.remove(); await D.W(500);
+            await D.step(2, `Click the paste box. Then hold ${K('Ctrl')} and tap ${K('V')}.`);
+            await D.W(1500); await D.move(pb, .5, .5); await D.click(); pb.classList.add('focus'); await D.W(700);
+            await D.press(V); pb.innerHTML = `<div class="pasted">${BADGE(130)}</div>`;
+            D.result('Your snip is pasted in as a picture.'); await D.W(3500); D.release(V);
+        }
+    },
+    files: {
+        title: 'Copy files', steps: 3,
+        build(sc) {
+            const win = (t, ico) => `<div class="fx"><div class="fxh">${ico}<span>${t}</span></div><div class="fxg"></div></div>`;
+            sc.innerHTML = `<div class="ds">${win('Camp photos', folderIco)}${win('USB drive (E:)', usbIco)}</div>`;
+            const w = sc.querySelectorAll('.fx'), ga = w[0].querySelector('.fxg');
+            const names = ['bushwalk', 'canoes', 'campfire', 'cabin', 'group', 'trail'];
+            const items = names.map((nm, i) => { const f = el('div', 'file', `${photo(i)}<span>${nm}.jpg</span>`); ga.appendChild(f); return f; });
+            w[1].querySelector('.fxg').innerHTML = '<div class="fxempty">This folder is empty.</div>';
+            return { A: w[0], B: w[1], items, names };
+        },
+        async run(D) {
+            const { A, B, items, names } = D.ctx, Aa = SHORT.all.codes, C = SHORT.copy.codes, V = SHORT.paste.codes;
+            await D.step(0, `Click inside the Camp photos window. Then hold ${K('Ctrl')} and tap ${K('A')}.`);
+            await D.W(1500); D.show(); await D.move(A, .5, .9); await D.click(); A.classList.add('focus'); await D.W(700);
+            await D.press(Aa); for (const f of items) { f.classList.add('sel'); await D.W(110); }
+            D.result('Every file in the window is selected.'); await D.W(3000); D.release(Aa); await D.W(1000);
+            await D.step(1, `Keep them selected. Hold ${K('Ctrl')} and tap ${K('C')}.`);
+            await D.W(1800); await D.press(C);
+            const tag = el('div', 'dtag', 'Copied 6 files'); A.style.position = 'relative'; A.appendChild(tag);
+            D.result('A copy of all 6 photos is saved, ready to paste.'); await D.W(3500); D.release(C); tag.remove(); await D.W(1000);
+            await D.step(2, `Click inside the USB drive window. Then hold ${K('Ctrl')} and tap ${K('V')}.`);
+            await D.W(1600); await D.move(B, .5, .75); await D.click(); A.classList.remove('focus'); B.classList.add('focus'); items.forEach(f => f.classList.remove('sel')); await D.W(700);
+            await D.press(V); const gb = B.querySelector('.fxg'); gb.innerHTML = '';
+            for (let i = 0; i < names.length; i++) { gb.appendChild(el('div', 'file new', `${photo(i)}<span>${names[i]}.jpg</span>`)); await D.W(150); }
+            D.result('A copy of every photo is pasted onto the USB drive.'); await D.W(3500); D.release(V);
+        }
+    },
+    order: {
+        title: 'Website to Word', steps: 5, go: 'Close', end: 'That\u2019s the whole job, using only shortcuts and one click.',
+        build(sc) { sc.innerHTML = `<div class="oscene">${orderScene()}</div>`; sc.style.background = '#3a4073'; return { svg: sc.querySelector('svg') }; },
+        async run(D) {
+            const svg = D.ctx.svg, P = (x, y) => D.xy(svg, x / 430, y / 330);
+            const pw = svg.querySelector('.pw'), pbw = svg.querySelector('.pb'), hl2 = svg.querySelector('.hl2'), wcr = svg.querySelector('.wcr'), pst = svg.querySelector('.pst');
+            await D.step(0, 'Drag the mouse over paragraph 2 to highlight it.');
+            await D.W(1500); D.show(); await D.move(P(42, 115), 0, 0, 1000); await D.W(500);
+            await D.move(P(272, 142), 0, 0, 1800, p => { const sx = (p.x - P(0, 0).x) / (P(1, 0).x - P(0, 0).x); hl2.setAttribute('width', Math.max(0, Math.min(296, (sx - 10) / .82 - 30))); });
+            D.result('Paragraph 2 is highlighted.'); await D.W(2600);
+            await D.step(1, `Hold ${K('Ctrl')} and tap ${K('C')} to copy it.`);
+            await D.W(1300); await D.press(SHORT.copy.codes); D.result('A copy of the paragraph is saved.'); await D.W(2800); D.release(SHORT.copy.codes); await D.W(700);
+            await D.step(2, `Press ${K('Alt', 'Tab')} to switch to Word.`);
+            await D.W(1300); await D.press(['AltLeft'], 700); await D.tap('Tab'); await D.W(600); D.release(['AltLeft']);
+            svg.appendChild(pw); D.result('Word comes to the front.'); await D.W(2800);
+            await D.step(3, 'Click on the Word page where the paragraph should go.');
+            await D.W(1300); await D.move(P(222, 177), 0, 0, 1000); await D.click(); wcr.setAttribute('opacity', 1); D.result('A flashing cursor shows where it will go.'); await D.W(2800);
+            await D.step(4, `Hold ${K('Ctrl')} and tap ${K('V')} to paste.`);
+            await D.W(1300); await D.press(SHORT.paste.codes); wcr.setAttribute('opacity', 0); pst.setAttribute('opacity', 1);
+            D.result('Paragraph 2 is now in your Word document.'); await D.W(3200); D.release(SHORT.paste.codes);
+        }
+    }
+};
+
+/* =========================================================
+   QUESTIONS
+   ========================================================= */
+const CAMP = `<h2>Year 7 Camp</h2><div class="sub">Information for students and families</div>
+<h3>Welcome</h3><p>We are excited to welcome Year 7 to camp at the Lakeside Outdoor Education Centre. Camp is a chance to make new friends, try new challenges and learn to work as a team. Please read this whole letter carefully with your family.</p>
+<h3>Dates</h3><p>Camp runs from Wednesday 4 March to Friday 6 March. Permission forms and medical forms are due by Friday 20 February. Late forms may mean a student cannot attend.</p>
+<h3>Getting there</h3><p>Students should arrive at the school hall by 7:15 am on Wednesday for roll call. Buses leave the front gate at 7:40 am sharp. The trip takes about two hours, with a short rest stop at 8:50 am.</p>
+<h3>What to pack</h3><p>Pack a sleeping bag, pillow, torch, rain jacket, two pairs of closed shoes, a hat, sunscreen, a refillable water bottle and enough clothes for three days. Please label every item with your name. Leave valuables at home.</p>
+<h3>Medication</h3><p>Any medication must be handed to the camp nurse in a labelled zip-lock bag at roll call. Include written instructions from a parent or doctor.</p>
+<h3>Activities</h3><p>Groups will rotate through canoeing, high ropes, orienteering, archery and a night walk. On Thursday, a bus takes groups to the canoe launch at 9:30 am. All activities are run by qualified outdoor instructors.</p>
+<h3>Meals</h3><p>Breakfast is served at 7:30 am, lunch at 12:30 pm and dinner at 6:00 pm. Please tell us about any dietary needs on the medical form. Snacks are provided, so there is no need to pack food.</p>
+<h3>Phones and devices</h3><p>Phones will be collected at roll call and kept safely by staff. They will be returned at 2:30 pm on Friday. Students may bring a book or a deck of cards for quiet time.</p>
+<h3>Coming home</h3><p>Buses return to the front gate at 2:50 pm on Friday. Please collect your daughter from the hall by 3:15 pm. If you are running late, call the school office.</p>
+<h3>Contact</h3><p>The school office is open from 8:00 am to 4:00 pm. During camp, urgent messages can be passed on by the office to the camp coordinator.</p>`;
+
+const QS = [
+    { kind: 'label', title: 'Label the keys', sc: 'SC1', prompt: 'Shortcuts use these special keys. Drag each name to its number.',
+      targets: [['Tab', 'Tab'], ['ShiftLeft', 'Shift'], ['ControlLeft', 'Ctrl'], ['Fn', 'Fn'], ['MetaLeft', 'Windows'], ['AltLeft', 'Alt']],
+      hints: { Tab: 'Tab is the wide key on the left of Q.', Shift: 'Shift is the wide key on the left of Z.', Ctrl: 'Ctrl is the key in the bottom-left corner.',
+          Fn: 'On most laptops, Fn sits between Ctrl and the Windows key.', Windows: 'The Windows key has the four-square Windows logo on it. It sits just left of Alt.', Alt: 'Alt is the key just left of the space bar.' },
+      msg: 'These keys do very little on their own. A shortcut holds one down while you press another key.' },
+
+    { kind: 'copypaste', title: 'Copy the reminder', sc: 'SC2', prompt: 'Copy Ms Rossi\u2019s whole reminder into your answer box. Use shortcuts only.',
+      from: 'Ms Rossi\u2019s email', to: 'Your Stile answer',
+      text: 'Science excursion on Friday! Bring a hat, a water bottle and a pencil case. The bus leaves the front gate at 8:15 am.',
+      msg: `${K('Ctrl', 'A')} grabbed every word, ${K('Ctrl', 'C')} copied it and ${K('Ctrl', 'V')} pasted it. No retyping needed.` },
+
+    { kind: 'find', title: 'Find it fast', sc: 'SC2', prompt: `Use ${K('Ctrl', 'F')} to find when the buses leave school on Wednesday.`,
+      url: 'school portal / Year 7 / Camp letter', doc: CAMP, ask: 'Buses leave at',
+      accept: v => /^0?7[:.]?40(\s*am)?$/i.test(v.replace(/\s+/g, ' ').trim()),
+      hint: v => /2[:.]?50/.test(v) ? 'That\u2019s when the buses come back on Friday. Check the other matches.'
+          : /9[:.]?30/.test(v) ? 'That bus goes to the canoe launch on Thursday. Check the other matches.'
+          : /7[:.]?15/.test(v) ? 'That\u2019s when students arrive for roll call. Read the next sentence.'
+          : /8[:.]?50/.test(v) ? 'That\u2019s the rest stop. When do the buses leave?'
+          : 'Search for <b>bus</b> and press <kbd>Enter</kbd> to jump between the matches.',
+      msg: `${K('Ctrl', 'F')} jumps straight to the words you need, so you don\u2019t have to read every line.` },
+
+    { kind: 'alttab', title: 'Switch windows', sc: 'SC2', prompt: `Use ${K('Alt', 'Tab')} to switch to another window, then use it again to come back here.`,
+      msg: `Hold ${K('Alt')} and tap ${K('Tab')} to move through your open windows. Let go to switch.` },
+
+    { kind: 'snip', title: 'Snip it', sc: 'SC2', prompt: `Use ${K('Win', 'Shift', 'S')} to snip the badge, then paste your snip into the box.`,
+      msg: `${K('Win', 'Shift', 'S')} copies your snip, so ${K('Ctrl', 'V')} can paste it straight into your work.` },
+
+    { kind: 'files', title: 'Back up the photos', sc: 'SC3', prompt: 'Copy every camp photo onto the USB drive. Shortcuts work on files too!',
+      files: ['bushwalk.jpg', 'canoes.jpg', 'campfire.jpg', 'cabin.jpg', 'group.jpg', 'trail.jpg'],
+      msg: `${K('Ctrl', 'A')} selects everything in the place you are working, whether that is words or files.` },
+
+    { kind: 'press', title: 'Quick fire', sc: 'SC3', prompt: 'Rapid fire! Read each task, then press the shortcut you need on your keyboard.',
+      rounds: [
+          { want: 'all', t: 'Your cursor is in your essay. You want to change the font of every word. Press the shortcut you need first.', art: 'essay', hint: 'You need to grab every word at once.' },
+          { want: 'find', t: 'The due date is somewhere in this 12-page assignment sheet. Press the shortcut that jumps you straight to it.', art: 'pdf', hint: 'You need to search for a word.' },
+          { want: 'copy', t: 'Ms Rossi\u2019s homework list is already highlighted. You want it in your planner too. Press the shortcut you need now.', art: 'list', hint: 'The list is already highlighted. What has to happen before you can paste it?' },
+          { want: 'paste', t: 'A website link is already on your clipboard. Your cursor is flashing in the answer box. Press the shortcut that puts the link in the box.', art: 'answer', hint: 'The link is already copied. Now it needs to go in.' },
+          { want: 'alttab', t: 'You\u2019re typing in Word. Stile is open behind it and you need to check the task. Get to Stile without the mouse.', art: 'alt', hint: 'You need to switch to another open window.' },
+          { want: 'snip', t: 'You want a picture of this graph to put in your science report. Press the shortcut that lets you grab it.', art: 'graph', hint: 'You need a picture of part of the screen.' },
+          { want: 'all', t: 'You\u2019re in your Science project folder. Your teacher wants every file on a USB. Press the shortcut you need first.', art: 'folder', hint: 'Before you can copy the files, you need all of them selected.' },
+          { want: 'find', t: 'This recipe page is very long. You only need the part that mentions eggs. Press the shortcut you need.', art: 'recipe', hint: 'You need to search the page for a word.' },
+          { want: 'paste', t: 'You just snipped a diagram. Your cursor is in the Stile answer box. Put the diagram in.', art: 'snippaste', hint: 'The snip is already on your clipboard. Now it needs to go in.' },
+          { want: 'copy', t: 'Sam\u2019s email address is highlighted. You want to put it in the To box of a new email. Press the shortcut you need now.', art: 'email', hint: 'It\u2019s highlighted already. What has to happen before you can paste it?' }],
+      msg: 'You matched all 10 tasks to the right shortcut.' },
+
+    { kind: 'mchand', title: 'Mystery keys', sc: 'SC1', prompt: 'The labels have worn off this keyboard! Watch the pink keys. Which shortcut is being pressed?', short: 'paste',
+      opts: [
+          { t: K('Ctrl', 'C'), hint: 'Count along the bottom letter row from the left: Z, X, C, V. Which key lights up?' },
+          { t: K('Ctrl', 'V'), hint: '' },
+          { t: K('Alt', 'V'), hint: 'One pink key is in the bottom-left corner. That key is Ctrl, not Alt.' },
+          { t: K('Ctrl', 'B'), hint: 'B is one key further right than the pink letter key.' }],
+      answer: 1, msg: `The pink keys are ${K('Ctrl')} in the corner and ${K('V')}, the fourth key along the bottom letter row.` },
+
+    { kind: 'mc', title: 'Last thing copied', sc: 'SC3', prompt: `Mia copies a website link. Then she copies her name. She clicks in a box and presses ${K('Ctrl', 'V')}. What gets pasted?`,
+      opts: [
+          { t: 'The website link', hint: 'The clipboard only holds one thing. Copying her name replaced the link.' },
+          { t: 'Her name', hint: '' },
+          { t: 'The link and her name', hint: 'The clipboard only holds one thing at a time. Each new copy replaces the last one.' },
+          { t: 'Nothing', hint: 'She copied something, so the clipboard isn\u2019t empty.' }],
+      answer: 1, msg: 'The clipboard holds one thing at a time. Each new copy replaces the one before.' },
+
+    { kind: 'mcside', title: 'Select all where?', sc: 'SC3', prompt: `Ari\u2019s cursor is in the search box of a web page. He presses ${K('Ctrl', 'A')}. What gets selected?`,
+      opts: [
+          { t: 'Everything on the web page', hint: 'His cursor is inside the search box, so the shortcut works there.' },
+          { t: 'Only the words in the search box', hint: '' },
+          { t: 'Every window he has open', hint: 'Shortcuts work in the place you are using. They don\u2019t reach into other windows.' },
+          { t: 'Nothing. It only works in Word.', hint: `${K('Ctrl', 'A')} works in almost every app, including web browsers.` }],
+      answer: 1, msg: `${K('Ctrl', 'A')} selects everything in the place your cursor is. Here, that is the search box.` },
+
+    { kind: 'switcher', title: 'Tab, tab', sc: 'SC3', prompt: `You\u2019re in Stile. You hold ${K('Alt')}, tap ${K('Tab')} twice, then let go. Which window opens?`,
+      wins: ['browser', 'doc', 'files', 'calc'],
+      opts: [
+          { hint: 'That\u2019s the window you\u2019re already in. Each tap of Tab moves one window to the right.' },
+          { hint: 'One tap of Tab lands here. You tapped twice.' },
+          { hint: '' },
+          { hint: 'That would take three taps of Tab.' }],
+      answer: 2, msg: 'Each tap of Tab moves the highlight one window along. Letting go of Alt opens it.' },
+
+    { kind: 'mc', title: 'After the snip', sc: 'SC3', prompt: `You used ${K('Win', 'Shift', 'S')} to snip a graph. What\u2019s the fastest way to get it into your Stile answer?`,
+      opts: [
+          { t: `Click the answer box, then press ${K('Ctrl', 'V')}`, hint: '' },
+          { t: `Press ${K('Ctrl', 'F')} to find the snip`, hint: `${K('Ctrl', 'F')} searches for words on a page. It can\u2019t fetch a picture.` },
+          { t: `Press ${K('Alt', 'Tab')} until the snip appears`, hint: `${K('Alt', 'Tab')} switches windows. Your snip is waiting on the clipboard.` },
+          { t: `Press ${K('Ctrl', 'C')} to copy the snip`, hint: 'The snip is already copied. You only need to paste it.' }],
+      answer: 0, msg: 'A snip goes straight onto the clipboard, ready to paste.' },
+
+    { kind: 'order', title: 'Website to Word', sc: 'SC3', prompt: 'Both windows are open. Order the steps to copy paragraph 2 into Word.',
+      tiles: [['hl', 'Highlight paragraph 2'], ['c', K('Ctrl', 'C')], ['at', `${K('Alt', 'Tab')} to Word`], ['cl', 'Click on the Word page'], ['v', K('Ctrl', 'V')]],
+      order: ['hl', 'c', 'at', 'cl', 'v'],
+      hints: { hl: 'Start by choosing what you want to copy. Highlight the paragraph first.', c: 'Copy while you are still on the website, straight after highlighting.',
+          at: 'Switch to Word once the paragraph is on your clipboard.', cl: 'Click on the Word page to put your cursor in place, just before pasting.', v: 'Pasting is the very last step.' },
+      msg: 'Highlight, copy, switch, click, paste. That order works in almost every app.' }
+];
+const TOTAL = QS.length;
+const CHIP = { label: 'Drag and drop', copypaste: 'Try it', find: 'Try it', alttab: 'Try it', snip: 'Try it', files: 'Try it', press: 'Press it',
+    mchand: 'Multiple choice', mc: 'Multiple choice', mcside: 'Multiple choice', switcher: 'Multiple choice', order: 'Put in order' };
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+
+/* ========================== Buckles (localStorage) ======================= */
+const PAGE_ID = 'keyboard-shortcuts-cfu';
+QS.forEach(q => { q.id = q.title.toLowerCase().replace(/[^a-z0-9]+/g, '-'); q.buckles = 1; });
+const Buckles = {
+    key: 'buckles-shared',
+    posKey: 'pos-' + PAGE_ID,
+    ns(id) { return PAGE_ID + ':' + id; },
+    load() { try { return JSON.parse(localStorage.getItem(this.key)) || {}; } catch (e) { return {}; } },
+    save(d) { try { localStorage.setItem(this.key, JSON.stringify(d)); } catch (e) {} },
+    isDone(id) { return !!this.load()[this.ns(id)]; },
+    award(id, n) { const d = this.load(); const k = this.ns(id); if (!d[k]) { d[k] = n; this.save(d); } },
+    total() { return Object.values(this.load()).reduce((a, b) => a + b, 0); },
+    setPos(i) { try { localStorage.setItem(this.posKey, String(i)); } catch (e) {} },
+    getPos() { try { const v = parseInt(localStorage.getItem(this.posKey), 10); return isNaN(v) ? 0 : v; } catch (e) { return 0; } }
+};
+function refreshCount() { $('#buckleCount').textContent = Buckles.total(); }
+function celebrate(n) {
+    const a = $('#award');
+    $('#awardText').textContent = '+' + n + ' Buckle' + (n > 1 ? 's' : '') + '!';
+    a.classList.remove('hide'); a.classList.add('show');
+    burstConfetti();
+    setTimeout(() => { a.classList.remove('show'); a.classList.add('hide'); setTimeout(() => a.classList.remove('hide'), 360); }, 1100);
+}
+function burstConfetti() {
+    const canvas = document.createElement('canvas');
+    canvas.className = 'confetti-canvas';
+    document.body.appendChild(canvas);
+    const ctx = canvas.getContext('2d'), dpr = window.devicePixelRatio || 1;
+    canvas.width = innerWidth * dpr; canvas.height = innerHeight * dpr; ctx.scale(dpr, dpr);
+    const colors = ['#ea008a', '#1b1f45', '#f7a8d4', '#c3c6d0'], cx = innerWidth / 2, cy = innerHeight / 2, parts = [];
+    for (let i = 0; i < 150; i++) {
+        const angle = Math.random() * Math.PI * 2, speed = 4 + Math.random() * 10;
+        parts.push({ x: cx, y: cy, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed - 4, size: 5 + Math.random() * 7,
+            color: colors[Math.floor(Math.random() * colors.length)], rot: Math.random() * Math.PI, vrot: (Math.random() - .5) * .3, life: 0 });
+    }
+    const gravity = 0.22, drag = 0.992; let frame = 0;
+    (function tick() {
+        frame++;
+        ctx.clearRect(0, 0, innerWidth, innerHeight);
+        parts.forEach(p => {
+            p.vx *= drag; p.vy = p.vy * drag + gravity; p.x += p.vx; p.y += p.vy; p.rot += p.vrot; p.life++;
+            ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot); ctx.globalAlpha = Math.max(0, 1 - p.life / 95);
+            ctx.fillStyle = p.color; ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.6); ctx.restore();
+        });
+        if (frame < 95) requestAnimationFrame(tick); else canvas.remove();
+    })();
+}
+
+/* ---------- flow ---------- */
+let qi = 0, firstTry = [], tries = 0, mode = 'check', cur = null;
+function render() {
+    runId++; cleanup(); killDemo();
+    content.innerHTML = ''; tries = 0; mode = 'check';
+    const q = QS[qi];
+    counter.innerHTML = `Question <b>${qi + 1}</b> / ${TOTAL}`;
+    Buckles.setPos(qi);
+    progress.style.width = (qi / TOTAL * 100) + '%';
+    const wrap = el('div', 'q');
+    wrap.appendChild(el('div', 'qhead', `<div class="qtitle">${q.title}</div><div class="tchip">${CHIP[q.kind]}</div><div class="sctag">${q.sc}</div>`));
+    wrap.appendChild(el('div', 'prompt', q.prompt));
+    const body = el('div', 'body'); wrap.appendChild(body); content.appendChild(wrap);
+    cur = KINDS[q.kind](q, body);
+    say(Buckles.isDone(q.id) ? `${cur.instr} You\u2019ve already earned this buckle.` : cur.instr);
+    if (cur.demo) {
+        const c = cur, b = el('button', 'wdemo', `${playIcon}<span>Watch demo</span>`);
+        const after = () => { if (cur === c && mode === 'check') say(`<b>Your turn.</b> ${c.turn()}`); };
+        b.onclick = () => openDemo(c.demo, after);
+        wrap.querySelector('.qhead').insertBefore(b, wrap.querySelector('.sctag'));
+        const id = runId; setTimeout(() => { if (id === runId) openDemo(c.demo, after); }, 600);
+    }
+    btn.hidden = false; btn.textContent = 'Check';
+    refresh();
+}
+function refresh() { if (mode === 'check') btn.disabled = !cur.ready(); }
+function autoCheck() { const id = runId; setTimeout(() => { if (id === runId && mode === 'check' && cur.ready()) check(); }, 450); }
+function check() {
+    tries++;
+    const r = cur.check();
+    if (r.ok) {
+        if (tries === 1 && !cur.missed) firstTry[qi] = true;
+        { const q = QS[qi]; if (!Buckles.isDone(q.id)) { Buckles.award(q.id, q.buckles); refreshCount(); celebrate(q.buckles); } }
+        say(`<b>Correct.</b> ${QS[qi].msg}`);
+        mode = 'next'; btn.disabled = false; btn.textContent = qi === TOTAL - 1 ? 'Finish' : 'Next';
+        btn.classList.remove('pop-in'); void btn.offsetWidth; btn.classList.add('pop-in');
+        if (cur.done) cur.done();
+        btn.focus({ preventScroll: true });
+    } else {
+        say(`<b class="no">Not quite.</b> ${r.hint}`);
+        refresh();
+    }
+}
+btn.onclick = () => {
+    if (btn.disabled) return;
+    if (mode === 'check') check();
+    else if (qi === TOTAL - 1) finish();
+    else { qi++; render(); }
+};
+const enterSubmits = inp => inp.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); if (!btn.disabled && mode === 'check') check(); } });
+function finish() {
+    runId++; cleanup(); killDemo();
+    content.innerHTML = '';
+    btn.hidden = true;
+    counter.innerHTML = '<b>Complete</b>';
+    progress.style.width = '100%';
+    const n = firstTry.filter(Boolean).length;
+    Buckles.setPos(TOTAL);
+    say('Take a screenshot of this screen and paste it into Stile as evidence of your work.');
+    const c = el('div', 'center');
+    const dots = QS.map((_, i) => `<span class="${firstTry[i] ? 'y' : ''}">${i + 1}</span>`).join('');
+    const earned = QS.filter(q => Buckles.isDone(q.id)).length;
+    const card = el('div', 'scorecard pop-in', `<img src="buckle.svg" alt="" class="done-buckle" onerror="this.style.display='none'"><div class="big">${earned} / ${TOTAL}</div><div class="dlbl">Buckles earned</div>
+        <div class="dlbl sub">Correct on the first try: ${n} / ${TOTAL}</div><div class="dots">${dots}</div>`);
+    const again = el('button', 'again', 'Start again');
+    again.onclick = () => { qi = 0; firstTry = []; Buckles.setPos(0); render(); };
+    c.append(card, again); content.appendChild(c);
+}
+
+/* ---------- multiple choice core ---------- */
+function mcCore(els, q, extra = {}) {
+    let s = null;
+    els.forEach((b, i) => b.onclick = () => {
+        if (mode !== 'check' || b.classList.contains('wrong')) return;
+        els.forEach(x => x.classList.remove('sel')); b.classList.add('sel'); s = i; refresh();
+    });
+    return {
+        instr: extra.instr || 'Choose an answer, then press <b>Check</b>.',
+        ready: () => s !== null,
+        check() {
+            const b = els[s];
+            b.classList.remove('sel');
+            if (s === q.answer) { b.classList.add('right'); els.forEach(x => x.disabled = true); return { ok: true }; }
+            b.classList.add('wrong'); b.disabled = true;
+            const h = q.opts[s].hint; s = null; return { ok: false, hint: h };
+        },
+        done: extra.done
+    };
+}
+const L = 'ABCD';
+const norm = s => s.replace(/\s+/g, ' ').trim();
+const upIco = `<svg viewBox="0 0 24 24"><path d="M6 15l6-6 6 6"/></svg>`, downIco = `<svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>`, xIco = `<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>`;
+const navIco = `<svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg><svg viewBox="0 0 24 24"><path d="M19 12a7 7 0 1 1-2.1-5"/><path d="M19 4v5h-5"/></svg>`;
+
+const KINDS = {
+    /* ---------- label the modifier keys ---------- */
+    label(q, body) {
+        const kb = keyboard({ crop: 'deck', width: 700, blank: q.targets.map(t => t[0]) });
+        const kw = el('div', 'kwrap'); kw.appendChild(kb.svg);
+        const bg = kb.svg.querySelector('.badges');
+        q.targets.forEach(([c], i) => { const k = kb.keys[c]; bg.insertAdjacentHTML('beforeend', `<g><circle cx="${k.cx}" cy="${k.cy}" r="29" fill="${PK}"/><text class="bn" x="${k.cx}" y="${k.cy + 12}" text-anchor="middle">${i + 1}</text></g>`); });
+        const side = el('div'); side.style.cssText = 'display:flex;gap:16px;height:100%;align-items:center';
+        const col = el('div'); col.style.cssText = 'display:flex;flex-direction:column;gap:10px;width:226px';
+        const pool = el('div', 'pool col1'); pool.style.cssText = 'width:164px;align-self:stretch';
+        const zones = q.targets.map(([c, want], i) => {
+            const row = el('div', 'lrow', `<span class="num">${i + 1}</span>`), s = el('div', 'slot'); s.tabIndex = 0; row.appendChild(s); col.appendChild(row);
+            return { el: s, box: s, cap: 1, want, c, onPut: () => s.classList.add('filled'), onTake: () => s.classList.remove('filled') };
+        });
+        side.append(col, pool); body.append(kw, side);
+        const D = dnd({ el: pool, box: pool, cap: Infinity, pool: true }, zones, () => { zones.forEach(z => z.el.classList.remove('wrong')); refresh(); });
+        shuffle(q.targets.map(t => t[1])).forEach(t => { const tl = D.tile(t); tl.dataset.v = t; pool.appendChild(tl); });
+        return {
+            instr: 'Drag each name to a number (or tap a name, then a number), then press <b>Check</b>.',
+            ready: () => zones.every(z => z.box.querySelector('.tile')),
+            check() {
+                let bad = 0, hint = null;
+                zones.forEach(z => {
+                    const t = z.box.querySelector('.tile'); if (!t) return;
+                    t.classList.remove('wrong'); void t.offsetWidth;
+                    if (t.dataset.v === z.want) { t.classList.add('right'); z.locked = true; }
+                    else { bad++; t.classList.add('wrong'); z.el.classList.add('wrong'); if (!hint) hint = q.hints[t.dataset.v]; }
+                });
+                return bad ? { ok: false, hint: (bad > 1 ? `${bad} names need moving. ` : '') + hint } : { ok: true };
+            },
+            done() { bg.innerHTML = ''; q.targets.forEach(([c, w]) => kb.label(c, w)); }
+        };
+    },
+
+    /* ---------- select all, copy, paste between two boxes ---------- */
+    copypaste(q, body) {
+        body.classList.add('row3');
+        const S = steps([`${K('Ctrl', 'A')} Select all`, `${K('Ctrl', 'C')} Copy`, `Click here, then ${K('Ctrl', 'V')} Paste`]);
+        const Lp = el('div', 'panel', `<div class="ph">${q.from}</div>`), Rp = el('div', 'panel', `<div class="ph">${q.to}</div>`);
+        Lp.style.flex = Rp.style.flex = '1';
+        const src = el('div', 'tbox src', `<span class="tx">${q.text}</span>`); src.contentEditable = 'true'; src.spellcheck = false;
+        const dst = el('textarea', 'tbox'); dst.spellcheck = false; dst.placeholder = 'Paste here';
+        const sl = el('div', 'steps'); sl.append(S.items[0], S.items[1]);
+        const sr = el('div', 'steps'); sr.append(S.items[2]);
+        sr.style.minHeight = sl.style.minHeight = '82px';
+        Lp.append(src, sl); Rp.append(dst, sr);
+        const arrow = el('div', 'arr', `<svg viewBox="0 0 40 40" width="40" height="40"><path d="M6 20h26M22 10l10 10-10 10" fill="none" stroke="${PK}" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>`);
+        body.append(Lp, arrow, Rp);
+        let step = 0;
+        const api = { missed: false };
+        const full = () => { const s = getSelection(); return s.rangeCount > 0 && src.contains(s.anchorNode) && norm(s.toString()) === norm(q.text); };
+        const TURN = [`Click inside the left box, then press ${K('Ctrl', 'A')}.`, `Now press ${K('Ctrl', 'C')} to copy it.`, `Click inside the answer box, then press ${K('Ctrl', 'V')}.`];
+        const go = n => {
+            step = n; S.set(n); refresh();
+            if (n === 1) say(`<b>Nice.</b> Everything is selected. ${TURN[1]}`);
+            if (n === 2) say(`<b>Copied!</b> ${TURN[2]}`);
+            if (n === 3) { dst.classList.add('right'); autoCheck(); }
+        };
+        ['beforeinput', 'paste', 'cut', 'drop', 'dragstart', 'contextmenu'].forEach(ev => listen(src, ev, e => e.preventDefault()));
+        ['contextmenu', 'drop', 'dragstart'].forEach(ev => listen(dst, ev, e => e.preventDefault()));
+        listen(document, 'keydown', e => {
+            if (!e.ctrlKey || mode !== 'check' || step > 2 || demoOn) return;
+            const a = document.activeElement;
+            if (e.code === 'KeyA') {
+                if (a === src) setTimeout(() => { if (full() && step === 0) go(1); }, 0);
+                else if (a !== dst) { e.preventDefault(); say(`Click inside the left box first, then press ${K('Ctrl', 'A')}.`); }
+            } else if (e.code === 'KeyC' && a !== src && a !== dst) say(`Click inside the left box, press ${K('Ctrl', 'A')}, then ${K('Ctrl', 'C')}.`);
+            else if (e.code === 'KeyV' && a !== dst) { e.preventDefault(); if (step === 2) say(`Click inside the answer box first, then press ${K('Ctrl', 'V')}.`); }
+        });
+        listen(src, 'copy', () => {
+            if (step > 1) return;
+            if (!full()) { api.missed = true; say(`Only part of the message was selected. Press ${K('Ctrl', 'A')} first, then ${K('Ctrl', 'C')}.`); return; }
+            if (step === 0) { say(`Use ${K('Ctrl', 'A')} to select it first, then copy with ${K('Ctrl', 'C')}.`); return; }
+            go(2);
+        });
+        listen(dst, 'paste', () => setTimeout(() => {
+            if (step === 3) return;
+            if (step < 2) { api.missed = true; dst.value = ''; say(`Copy Ms Rossi\u2019s message first: ${K('Ctrl', 'A')}, then ${K('Ctrl', 'C')}.`); return; }
+            if (norm(dst.value) === norm(q.text)) go(3);
+            else { api.missed = true; say(`That doesn\u2019t match the message. Clear the box (${K('Ctrl', 'A')} then <kbd>Delete</kbd>) and paste again.`); }
+        }, 0));
+        S.set(0);
+        return Object.assign(api, {
+            instr: TURN[0], demo: DEMOS.copypaste, turn: () => TURN[Math.min(step, 2)],
+            ready: () => step === 3,
+            check: () => step === 3 ? { ok: true } : { ok: false, hint: 'Finish all three steps.' }
+        });
+    },
+
+    /* ---------- Ctrl + F in a long web page ---------- */
+    find(q, body) {
+        body.classList.add('top');
+        const left = el('div', 'panel'); left.style.flex = '1';
+        const bro = el('div', 'bro', `<div class="bbar"><div class="bnav">${navIco}</div><div class="burl">${q.url}</div></div><div class="bpage"><div class="doc">${q.doc}</div></div>`);
+        const page = bro.querySelector('.bpage'), doc = bro.querySelector('.doc'), orig = doc.innerHTML;
+        const fbar = el('div', 'fbar', `<input type="text" placeholder="Find on page" spellcheck="false" aria-label="Find on page"><span class="fc"></span><button data-d="-1" aria-label="Previous match">${upIco}</button><button data-d="1" aria-label="Next match">${downIco}</button><button data-x aria-label="Close">${xIco}</button>`);
+        fbar.hidden = true; bro.appendChild(fbar);
+        const S = steps([`${K('Ctrl', 'F')} Open find`, 'Type a key word', `<kbd>Enter</kbd> Next match`]);
+        const row = el('div', 'frow'), sr = el('div', 'steps row'); sr.append(...S.items);
+        const ans = el('label', 'ans', `<span>${q.ask}</span>`), ain = el('input', 'ain'); ain.type = 'text'; ain.placeholder = '?'; ain.spellcheck = false; ans.appendChild(ain);
+        row.append(sr, ans); left.append(bro, row); body.append(left);
+        const fin = fbar.querySelector('input'), fc = fbar.querySelector('.fc');
+        let hits = [], at = -1, opened = false, searched = false, jumped = false;
+        const api = { missed: false };
+        const st = () => S.set(!opened ? 0 : !searched ? 1 : !jumped ? 2 : 3);
+        const scrollTo = mk => { const from = page.scrollTop, to = Math.max(0, mk.offsetTop - page.clientHeight * .35); play(380, k => page.scrollTop = from + (to - from) * easeInOut(k)); };
+        const goHit = i => { if (!hits.length) return; at = (i + hits.length) % hits.length; hits.forEach((h, j) => h.classList.toggle('on', j === at)); fc.textContent = `${at + 1}/${hits.length}`; scrollTo(hits[at]); };
+        const run = term => {
+            hits = findHits(doc, orig, term); at = -1;
+            fc.textContent = term.trim().length < 2 ? '' : hits.length ? '' : '0/0';
+            if (hits.length) { goHit(0); if (!searched) { searched = true; st(); say(`${hits.length} match${hits.length > 1 ? 'es' : ''}. Press <kbd>Enter</kbd> to jump to the next one. Read each match, then type the time in the answer box.`); } }
+        };
+        const next = d => { goHit(at + d); if (hits.length && !jumped) { jumped = true; st(); } };
+        const open = () => { fbar.hidden = false; fin.focus(); fin.select(); if (!opened) { opened = true; st(); say('The find box is open. Type a key word from the question.'); } };
+        const close = () => { fbar.hidden = true; doc.innerHTML = orig; hits = []; };
+        listen(document, 'keydown', e => {
+            if (demoOn) return;
+            if (e.ctrlKey && e.code === 'KeyF') { e.preventDefault(); open(); }
+            else if (e.key === 'Escape' && !fbar.hidden) close();
+        });
+        fin.addEventListener('input', () => run(fin.value));
+        fin.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); next(e.shiftKey ? -1 : 1); } });
+        fbar.querySelectorAll('[data-d]').forEach(b => b.onclick = () => next(+b.dataset.d));
+        fbar.querySelector('[data-x]').onclick = close;
+        ain.addEventListener('input', () => { ain.classList.remove('wrong'); refresh(); });
+        enterSubmits(ain);
+        st();
+        return Object.assign(api, {
+            instr: `Press ${K('Ctrl', 'F')} and search for a word that will find the bus times.`, demo: DEMOS.find,
+            turn: () => opened ? 'Type a key word, then read the matches.' : `Press ${K('Ctrl', 'F')} and search for a word that will find the bus times.`,
+            ready: () => ain.value.trim() !== '',
+            check() {
+                if (!opened) { api.missed = true; return { ok: false, hint: `Use the shortcut this time. Press ${K('Ctrl', 'F')}, then search for a word like <b>bus</b>.` }; }
+                if (q.accept(ain.value)) { ain.classList.add('right'); ain.disabled = true; S.set(3); return { ok: true }; }
+                ain.classList.remove('wrong'); void ain.offsetWidth; ain.classList.add('wrong');
+                return { ok: false, hint: q.hint(ain.value) };
+            }
+        });
+    },
+
+    /* ---------- Alt + Tab away and back ---------- */
+    alttab(q, body) {
+        const card = (n, t, sub) => el('div', 'bigstep', `<div class="bn2">${n}</div><div class="bt">${t}</div><div class="bk">${K('Alt', 'Tab')}</div><div class="bs">${sub}</div>`);
+        const c1 = card(1, 'Switch to another window', 'Waiting\u2026'), c2 = card(2, 'Come back to this page', 'Waiting\u2026');
+        const wrap = el('div', 'bigwrap'); wrap.append(c1, c2);
+        const tip = el('div', 'tip', 'Tip: you need another window open first, like File Explorer or Word.');
+        const col = el('div', 'bigcol'); col.append(wrap, tip); body.append(col);
+        const set = n => { [c1, c2].forEach((c, i) => { c.classList.toggle('done', i < n); c.classList.toggle('now', i === n); c.querySelector('.bs').textContent = i < n ? 'Done!' : i === n ? 'Your turn' : 'Waiting\u2026'; }); };
+        let step = 0, altHeld = false, altAt = -1e9, ptrAt = -1e9, focusAt = 0;
+        const api = { missed: false };
+        listen(document, 'keydown', e => { if (e.key === 'Alt') { e.preventDefault(); if (demoOn) return; altHeld = true; altAt = performance.now(); } });
+        listen(document, 'keyup', e => { if (e.key === 'Alt') { e.preventDefault(); altHeld = false; } });
+        listen(document, 'pointerdown', () => { ptrAt = performance.now(); }, true);
+        listen(window, 'blur', () => {
+            const viaAlt = !demoOn && (altHeld || performance.now() - altAt < 1500);
+            altHeld = false;
+            if (step === 0 && viaAlt) { step = 1; set(1); say(`You switched away. Now use ${K('Alt', 'Tab')} to come back.`); }
+        });
+        listen(window, 'focus', () => {
+            if (step !== 1) return;
+            focusAt = performance.now();
+            const id = runId;
+            setTimeout(() => {
+                if (id !== runId || step !== 1) return;
+                if (Math.abs(ptrAt - focusAt) < 450) { api.missed = true; step = 0; set(0); say(`Welcome back! You clicked to return. This time, come back with ${K('Alt', 'Tab')} too.`); return; }
+                step = 2; set(2); refresh(); autoCheck();
+            }, 300);
+        });
+        set(0);
+        return Object.assign(api, {
+            instr: `Hold ${K('Alt')}, tap ${K('Tab')}, then let go. Then come back the same way.`, demo: DEMOS.alttab,
+            turn: () => `Hold ${K('Alt')}, tap ${K('Tab')}, then let go. Then come back the same way.`,
+            ready: () => step === 2,
+            check: () => ({ ok: step === 2, hint: 'Switch away and back again.' })
+        });
+    },
+
+    /* ---------- Win + Shift + S, then paste ---------- */
+    snip(q, body) {
+        body.classList.add('row3');
+        const S = steps([`${K('Win', 'Shift', 'S')} Snip the badge`, `Click the box, then ${K('Ctrl', 'V')}`]);
+        const Lp = el('div', 'panel', '<div class="ph">Snip this badge</div>'), Rp = el('div', 'panel', '<div class="ph">Paste your snip here</div>');
+        Lp.style.flex = Rp.style.flex = '1';
+        const card = el('div', 'snipcard', BADGE(250));
+        const pb = el('div', 'pbox', `<span>Click here, then press ${K('Ctrl', 'V')}</span>`); pb.tabIndex = 0;
+        const sl = el('div', 'steps'), sr = el('div', 'steps'); sl.append(S.items[0]); sr.append(S.items[1]); sl.style.minHeight = sr.style.minHeight = '44px';
+        Lp.append(card, sl); Rp.append(pb, sr);
+        const arrow = el('div', 'arr', `<svg viewBox="0 0 40 40" width="40" height="40"><path d="M6 20h26M22 10l10 10-10 10" fill="none" stroke="${PK}" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>`);
+        body.append(Lp, arrow, Rp);
+        let step = 0, metaAt = -1e9;
+        const api = { missed: false };
+        listen(document, 'keydown', e => { if (!demoOn && (e.key === 'Meta' || e.key === 'OS')) metaAt = performance.now(); });
+        listen(window, 'blur', () => { if (!demoOn && step === 0 && performance.now() - metaAt < 3000) { step = 1; S.set(1); } });
+        listen(window, 'focus', () => { if (step === 1) { pb.focus(); say(`<b>Snipped!</b> Now press ${K('Ctrl', 'V')} to paste it into the box.`); } });
+        listen(document, 'paste', e => {
+            if (mode !== 'check' || step === 2 || demoOn) return;
+            e.preventDefault();
+            const im = [...((e.clipboardData && e.clipboardData.items) || [])].find(i => i.type.indexOf('image/') === 0);
+            if (!im) { api.missed = true; say(`That paste was text, not a picture. Snip the badge with ${K('Win', 'Shift', 'S')} first.`); return; }
+            const f = im.getAsFile(); if (!f) return;
+            pb.innerHTML = `<img src="${URL.createObjectURL(f)}" alt="Your snip">`; pb.classList.add('right');
+            step = 2; S.set(2); refresh(); autoCheck();
+        });
+        S.set(0);
+        return Object.assign(api, {
+            instr: `Press ${K('Win', 'Shift', 'S')}, then drag a box around the badge.`, demo: DEMOS.snip,
+            turn: () => step === 0 ? `Press ${K('Win', 'Shift', 'S')}, then drag a box around the badge.` : `Click the paste box, then press ${K('Ctrl', 'V')}.`,
+            ready: () => step === 2,
+            check: () => ({ ok: step === 2, hint: 'Snip the badge, then paste it.' })
+        });
+    },
+
+    /* ---------- copy files in File Explorer ---------- */
+    files(q, body) {
+        const left = el('div', 'panel'); left.style.flex = '1';
+        const wrap = el('div', 'fxw');
+        const mk = (title, path, ico) => { const w = el('div', 'fx', `<div class="fxh">${ico}<span>${title}</span><svg class="wc" viewBox="0 0 64 14"><g stroke="#8b90a8" stroke-width="2.2" stroke-linecap="round" fill="none"><line x1="2" y1="7" x2="12" y2="7"/><rect x="26" y="2" width="10" height="10"/><path d="M52 2l10 10M62 2L52 12"/></g></svg></div><div class="fxp">${path}</div><div class="fxg"></div><div class="fxs"></div>`); w.tabIndex = 0; return w; };
+        const A = mk('Camp photos', 'This PC \u203a Downloads \u203a Camp photos', folderIco), B = mk('USB drive (E:)', 'This PC \u203a USB drive (E:)', usbIco);
+        wrap.append(A, B);
+        const S = steps([`${K('Ctrl', 'A')} Select all`, `${K('Ctrl', 'C')} Copy`, `Click the USB drive, then ${K('Ctrl', 'V')}`]);
+        const sr = el('div', 'steps row'); sr.append(...S.items);
+        left.append(wrap, sr); body.append(left);
+        const N = q.files.length, ga = A.querySelector('.fxg'), gb = B.querySelector('.fxg'), stA = A.querySelector('.fxs'), stB = B.querySelector('.fxs');
+        const chosen = new Set(), onB = new Set(); let clip = [], step = 0;
+        const api = { missed: false };
+        const fileEl = (i, isNew) => { const f = el('div', 'file' + (isNew ? ' new' : ''), `${photo(i)}<span>${q.files[i]}</span>`); f.dataset.i = i; return f; };
+        const items = q.files.map((_, i) => { const f = fileEl(i); ga.appendChild(f); return f; });
+        const paintA = () => { items.forEach((f, i) => f.classList.toggle('sel', chosen.has(i))); stA.textContent = `${N} items` + (chosen.size ? `   |   ${chosen.size} selected` : ''); };
+        const paintB = (fresh = []) => {
+            gb.innerHTML = '';
+            if (!onB.size) gb.innerHTML = '<div class="fxempty">This folder is empty.</div>';
+            [...onB].sort((a, b) => a - b).forEach(i => gb.appendChild(fileEl(i, fresh.includes(i))));
+            stB.textContent = `${onB.size} items`;
+        };
+        const TURN = [`Click inside the Camp photos window, then press ${K('Ctrl', 'A')}.`, `Press ${K('Ctrl', 'C')} to copy the photos.`, `Click inside the USB drive window, then press ${K('Ctrl', 'V')}.`];
+        const update = () => {
+            const n = onB.size === N ? 3 : clip.length === N ? 2 : chosen.size === N ? 1 : 0;
+            if (n === step) return;
+            step = n; S.set(n);
+            if (n === 3) { refresh(); autoCheck(); }
+        };
+        items.forEach((f, i) => f.addEventListener('pointerdown', e => {
+            if (e.ctrlKey) { chosen.has(i) ? chosen.delete(i) : chosen.add(i); } else { chosen.clear(); chosen.add(i); }
+            paintA(); update();
+        }));
+        ga.addEventListener('pointerdown', e => { if (e.target === ga) { chosen.clear(); paintA(); update(); } });
+        listen(document, 'keydown', e => {
+            if (!e.ctrlKey || !['KeyA', 'KeyC', 'KeyV'].includes(e.code) || mode !== 'check' || demoOn) return;
+            e.preventDefault();
+            const f = document.activeElement === A ? 'A' : document.activeElement === B ? 'B' : null;
+            if (!f) { say('Click inside one of the windows first.'); return; }
+            if (e.code === 'KeyA') {
+                if (f === 'A') { q.files.forEach((_, i) => chosen.add(i)); paintA(); say(`<b>Nice.</b> All ${N} photos are selected. ${TURN[1]}`); }
+                else say('The USB drive is empty, so there is nothing to select. Click the Camp photos window first.');
+            } else if (e.code === 'KeyC') {
+                if (f === 'B') { say('Copy from the Camp photos window. Click it first.'); return; }
+                if (!chosen.size) { say(`Nothing is selected yet. Press ${K('Ctrl', 'A')} to select every photo.`); return; }
+                clip = [...chosen]; stA.textContent = `${clip.length} item${clip.length > 1 ? 's' : ''} copied`;
+                say(clip.length === N ? `<b>Copied!</b> ${TURN[2]}` : `You copied ${clip.length} of ${N} photos. Press ${K('Ctrl', 'A')} to get them all.`);
+            } else {
+                if (f === 'A') { say('You\u2019re pasting into the same folder. Click the USB drive window first.'); return; }
+                if (!clip.length) { say(`Nothing is copied yet. Copy the photos first with ${K('Ctrl', 'C')}.`); return; }
+                const fresh = clip.filter(i => !onB.has(i)); clip.forEach(i => onB.add(i)); paintB(fresh);
+                if (onB.size < N) { api.missed = true; say(`Only ${onB.size} of ${N} photos are on the USB drive. Go back and use ${K('Ctrl', 'A')} to select them all.`); }
+            }
+            update();
+        });
+        paintA(); paintB(); S.set(0);
+        return Object.assign(api, {
+            instr: TURN[0], demo: DEMOS.files, turn: () => TURN[Math.min(step, 2)],
+            ready: () => onB.size === N,
+            check: () => ({ ok: onB.size === N, hint: 'Copy every photo onto the USB drive.' })
+        });
+    },
+
+    /* ---------- press the right shortcut for each task ---------- */
+    press(q, body) {
+        const rounds = shuffle(q.rounds), N = rounds.length;
+        const card = el('div', 'qf', `<div class="qfh"><span class="rn"></span><span class="rd">${rounds.map(() => '<span></span>').join('')}</span></div><div class="qfb"><div class="qft"></div><div class="qfa"></div></div>`);
+        const rn = card.querySelector('.rn'), dots = card.querySelectorAll('.rd span'), txt = card.querySelector('.qft'), art = card.querySelector('.qfa');
+        const D = dock({});
+        body.append(card, D.el);
+        const DOES = { all: 'selects everything', copy: 'copies', paste: 'pastes', find: 'finds words on the page', alttab: 'switches windows', snip: 'takes a screenshot',
+            KeyX: 'cuts', KeyZ: 'undoes', KeyY: 'redoes', KeyS: 'saves', KeyP: 'prints', KeyB: 'makes text bold', KeyI: 'makes text italic', KeyU: 'underlines text' };
+        const BYCODE = { KeyA: 'all', KeyC: 'copy', KeyV: 'paste', KeyF: 'find' };
+        let r = 0, lock = false, altAt = -1e9, metaAt = -1e9, away = null;
+        const api = { missed: false };
+        const show = () => {
+            const R = rounds[r];
+            rn.textContent = `Task ${r + 1} of ${N}`;
+            txt.classList.remove('in'); void txt.offsetWidth; txt.classList.add('in'); txt.textContent = R.t;
+            art.innerHTML = ARTS[R.art].svg;
+        };
+        const handle = (sc, label) => {
+            if (mode !== 'check' || lock || r >= N) return;
+            const R = rounds[r];
+            if (sc === R.want) {
+                lock = true; dots[r].classList.add('y');
+                say(`<b>Yes!</b> ${SHORT[sc].k} ${DOES[sc]}.`);
+                const id = runId;
+                ARTS[R.art].win(art.querySelector('svg')).then(() => wait(1500)).then(() => { if (id !== runId) return; r++; lock = false; if (r < N) { show(); say(cur.instr); } else { refresh(); autoCheck(); } });
+            } else {
+                api.missed = true;
+                card.classList.remove('wrong'); void card.offsetWidth; card.classList.add('wrong');
+                say(`<b class="no">Not quite.</b> ${label} ${DOES[sc] || 'isn\u2019t one of our shortcuts'}. ${R.hint}`);
+            }
+        };
+        listen(document, 'keydown', e => {
+            if (e.key === 'Alt') { e.preventDefault(); altAt = performance.now(); return; }
+            if (e.key === 'Meta' || e.key === 'OS') { metaAt = performance.now(); return; }
+            if (!e.ctrlKey || !/^Key[A-Z]$/.test(e.code) || mode !== 'check' || lock || r >= N) return;
+            e.preventDefault();
+            const letter = e.code.slice(3);
+            handle(BYCODE[e.code] || e.code, K('Ctrl', letter));
+        });
+        listen(document, 'keyup', e => { if (e.key === 'Alt') e.preventDefault(); });
+        listen(window, 'blur', () => { const t = performance.now(); away = t - altAt < 1500 ? 'alttab' : t - metaAt < 3000 ? 'snip' : null; });
+        listen(window, 'focus', () => { if (!away) return; const sc = away; away = null; setTimeout(() => handle(sc, SHORT[sc].k), 250); });
+        show();
+        return Object.assign(api, {
+            instr: 'Press the shortcut you need on your keyboard.',
+            ready: () => r >= N,
+            check: () => ({ ok: r >= N, hint: 'Finish every task.' })
+        });
+    },
+
+    /* ---------- read the pressed keys on a blank keyboard ---------- */
+    mchand(q, body) {
+        const D = dock({ width: 420, noLabels: true });
+        const codes = SHORT[q.short].codes;
+        (async () => { const id = runId; await wait(400); while (id === runId) { for (const c of codes) { D.kb.demoKey(c, true); await wait(600); } await wait(1300); codes.forEach(c => D.kb.demoKey(c, false)); await wait(1000); } })();
+        const g = el('div', 'opts col'); g.style.flex = '1'; g.style.fontSize = '30px';
+        const els = q.opts.map((o, i) => { const b = el('button', 'opt', `<span class="l">${L[i]}</span><span>${o.t}</span>`); g.appendChild(b); return b; });
+        body.append(D.el, g);
+        return mcCore(els, q, { instr: 'Try pressing keys on your own keyboard to compare, then choose and press <b>Check</b>.' });
+    },
+
+    mc(q, body) {
+        const g = el('div', 'opts g2');
+        const els = q.opts.map((o, i) => { const b = el('button', 'opt', `<span class="l">${L[i]}</span><span>${o.t}</span>`); g.appendChild(b); return b; });
+        body.appendChild(g);
+        return mcCore(els, q);
+    },
+
+    mcside(q, body) {
+        const side = el('div', 'scene');
+        side.innerHTML = `<svg viewBox="0 0 330 300" width="330" height="300">
+            <rect width="330" height="300" fill="${LT}"/><rect x="0" y="0" width="330" height="58" fill="${NV}"/>
+            <rect x="20" y="13" width="290" height="32" rx="16" fill="#fff" stroke="${PK}" stroke-width="3"/>
+            <text x="42" y="35" class="wl" style="font-size:17px;font-weight:600">volcano facts</text><line x1="160" y1="20" x2="160" y2="38" stroke="${PK}" stroke-width="2.5"/>
+            <rect x="20" y="76" width="170" height="16" rx="3" fill="${PK}"/><g fill="#c3c6d0"><rect x="20" y="104" width="290" height="8" rx="4"/><rect x="20" y="120" width="270" height="8" rx="4"/><rect x="20" y="136" width="284" height="8" rx="4"/><rect x="20" y="152" width="200" height="8" rx="4"/></g>
+            <rect x="20" y="178" width="130" height="100" rx="6" fill="${NV}"/><path d="M36 262 L72 206 L92 236 L106 220 L134 262Z" fill="${PK}"/>
+            <g fill="#c3c6d0"><rect x="166" y="182" width="144" height="8" rx="4"/><rect x="166" y="198" width="130" height="8" rx="4"/><rect x="166" y="214" width="140" height="8" rx="4"/><rect x="166" y="230" width="110" height="8" rx="4"/></g></svg>`;
+        const col = el('div', 'col'); col.style.flex = '1';
+        const g = el('div', 'opts');
+        const els = q.opts.map((o, i) => { const b = el('button', 'opt', `<span class="l">${L[i]}</span><span>${o.t}</span>`); g.appendChild(b); return b; });
+        col.appendChild(g); body.append(side, col);
+        return mcCore(els, q);
+    },
+
+    switcher(q, body) {
+        const bg = el('div', 'swbg'), g = el('div', 'pgrid');
+        const els = q.wins.map((w, i) => { const b = el('button', 'pcard', `<span class="l">${L[i]}</span>${thumb(w, 210)}<span class="cap">${WINNAME[w]}${i === 0 ? ' (open now)' : ''}</span>`); g.appendChild(b); return b; });
+        bg.appendChild(g); body.appendChild(bg);
+        return mcCore(els, q);
+    },
+
+    order(q, body) {
+        const sc = el('div', 'scene oscene', orderScene());
+        const col = el('div'); col.style.cssText = 'display:flex;flex-direction:column;gap:10px;width:330px';
+        const pool = el('div', 'pool col1'); pool.style.cssText = 'width:290px;align-self:stretch';
+        const zones = q.order.map((want, i) => {
+            const row = el('div', 'lrow', `<span class="num nv">${i + 1}</span>`), s = el('div', 'slot'); s.tabIndex = 0; row.appendChild(s); col.appendChild(row);
+            return { el: s, box: s, cap: 1, want, onPut: () => s.classList.add('filled'), onTake: () => s.classList.remove('filled') };
+        });
+        body.append(sc, col, pool);
+        const D = dnd({ el: pool, box: pool, cap: Infinity, pool: true }, zones, () => { zones.forEach(z => z.el.classList.remove('wrong')); refresh(); });
+        shuffle(q.tiles).forEach(([k, h]) => { const t = D.tile(h); t.classList.add('sm'); t.dataset.k = k; pool.appendChild(t); });
+        return {
+            instr: 'Drag the steps into order (or tap a step, then a number), then press <b>Check</b>.',
+            ready: () => zones.every(z => z.box.querySelector('.tile')),
+            check() {
+                let bad = 0, hint = null;
+                zones.forEach(z => {
+                    const t = z.box.querySelector('.tile'); if (!t) return;
+                    t.classList.remove('wrong'); void t.offsetWidth;
+                    if (t.dataset.k === z.want) { t.classList.add('right'); z.locked = true; }
+                    else { bad++; t.classList.add('wrong'); z.el.classList.add('wrong'); if (!hint) hint = q.hints[t.dataset.k]; }
+                });
+                return bad ? { ok: false, hint: (bad > 1 ? `${bad} steps need moving. ` : '') + hint } : { ok: true };
+            },
+            done() {
+                const b = el('button', 'wdemo', `${playIcon}<span>Watch it happen</span>`);
+                b.onclick = () => openDemo(DEMOS.order, null);
+                content.querySelector('.qhead').insertBefore(b, content.querySelector('.sctag'));
+                const id = runId; setTimeout(() => { if (id === runId) openDemo(DEMOS.order, null); }, 1800);
+            }
+        };
+    }
+};
+function thumbX(type, extra) { return `<svg viewBox="-4 -4 308 208" width="250" height="169">${winArt(type)}${extra}</svg>`; }
+
+/* ---------- drag and drop (drag, or tap a tile then tap a target) ---------- */
+function dnd(pool, zones, onChange) {
+    let sel = null;
+    const all = () => [pool, ...zones];
+    const zoneOf = t => all().find(z => z.box.contains(t));
+    const armAll = on => zones.forEach(z => z.el.classList.toggle('armed', on && !z.locked));
+    const deselect = () => { if (sel) sel.classList.remove('sel'); sel = null; armAll(false); };
+    function moveTo(t, z) {
+        const from = zoneOf(t);
+        t.style.transform = ''; t.classList.remove('wrong');
+        z.box.appendChild(t);
+        if (from && from !== z && from.onTake) from.onTake(t);
+        if (z.onPut) z.onPut(t);
+        deselect(); onChange();
+    }
+    function put(t, z) {
+        const from = zoneOf(t);
+        if (z.locked || from === z) { t.style.transform = ''; return; }
+        if (z.cap === 1) {
+            const ex = z.box.querySelector('.tile');
+            if (ex) { if (ex.classList.contains('right')) { t.style.transform = ''; return; } moveTo(ex, pool); }
+        }
+        moveTo(t, z);
+    }
+    const hit = (x, y) => all().find(z => { const r = z.el.getBoundingClientRect(); return x >= r.left && x <= r.right && y >= r.top && y <= r.bottom; });
+    all().forEach(z => {
+        const act = () => { if (sel && !z.locked) put(sel, z); };
+        z.el.addEventListener('click', act);
+        z.el.addEventListener('keydown', e => { if (e.target === z.el && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); act(); } });
+    });
+    function tile(text) {
+        const t = el('span', 'tile', text);
+        t.tabIndex = 0; t.setAttribute('role', 'button');
+        const tap = () => {
+            if (t.classList.contains('right')) return;
+            t.style.transform = '';
+            const z = zoneOf(t);
+            if (z !== pool) { put(t, pool); return; }
+            if (sel === t) { deselect(); return; }
+            deselect(); sel = t; t.classList.add('sel'); armAll(true);
+        };
+        t.addEventListener('click', e => e.stopPropagation());
+        t.addEventListener('pointerdown', e => {
+            if (t.classList.contains('right') || e.button > 0) return;
+            e.preventDefault(); e.stopPropagation(); t.setPointerCapture(e.pointerId);
+            const sx = e.clientX, sy = e.clientY; let moved = false;
+            const move = ev => {
+                const dx = ev.clientX - sx, dy = ev.clientY - sy;
+                if (!moved && Math.hypot(dx, dy) > 6) { moved = true; t.classList.add('drag'); }
+                if (!moved) return;
+                t.style.transform = `translate(${dx / scaleK}px, ${dy / scaleK}px)`;
+                const h = hit(ev.clientX, ev.clientY);
+                all().forEach(z => z.el.classList.toggle('hover', z === h));
+            };
+            const up = ev => {
+                t.removeEventListener('pointermove', move); t.removeEventListener('pointerup', up); t.removeEventListener('pointercancel', up);
+                t.classList.remove('drag'); all().forEach(z => z.el.classList.remove('hover'));
+                if (!moved) { tap(); return; }
+                const h = hit(ev.clientX, ev.clientY);
+                if (h) put(t, h); else t.style.transform = '';
+            };
+            t.addEventListener('pointermove', move); t.addEventListener('pointerup', up); t.addEventListener('pointercancel', up);
+        });
+        t.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); tap(); } });
+        return t;
+    }
+    return { tile };
+}
+
+/* ---------- scale to window ---------- */
+function fit() {
+    const st = $('#stage');
+    scaleK = Math.min(window.innerWidth / 1280, window.innerHeight / 720);
+    st.style.transform = `scale(${scaleK})`;
+    st.style.margin = `${(720 * scaleK - 720) / 2}px ${(1280 * scaleK - 1280) / 2}px`;
+}
+window.addEventListener('resize', fit);
+fit();
+(document.fonts ? document.fonts.ready : Promise.resolve()).then(() => {
+    fit(); refreshCount();
+    const pos = Buckles.getPos();
+    if (pos >= TOTAL) finish(); else { qi = Math.max(0, pos); render(); }
+});
+</script>
+</body>
+</html>
